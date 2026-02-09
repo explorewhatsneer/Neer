@@ -1,0 +1,60 @@
+name: neer
+description: A new Flutter project.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Dil Desteği (SDK'dan gelir)
+  flutter_localizations:
+    sdk: flutter
+
+  # Tema ve Dil Yönetimi
+  provider: ^6.1.1
+  shared_preferences: ^2.2.2
+  
+  # İkonlar
+  cupertino_icons: ^1.0.2
+
+  # Supabase
+  supabase_flutter: ^2.8.0
+
+  # 🔥 GÜNCELLENDİ: Hata veren kısım burasıydı.
+  # SDK 0.20.2 istiyor, biz de ^0.20.0 diyerek buna izin veriyoruz.
+  intl: ^0.20.0
+  
+  image_picker: ^1.2.1
+
+  # Harita ve Konum
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+  geolocator: ^10.1.0
+  faker: ^2.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  # assets kısmının hemen altında veya fonts bloğunda:
+  fonts:
+    - family: SFPro
+      fonts:
+        - asset: assets/fonts/SF-Pro-Display-Regular.otf
+          weight: 400
+        - asset: assets/fonts/SF-Pro-Display-Medium.otf
+          weight: 500
+        - asset: assets/fonts/SF-Pro-Display-Semibold.otf
+          weight: 600
+        - asset: assets/fonts/SF-Pro-Display-Bold.otf
+          weight: 700
+        - asset: assets/fonts/SF-Pro-Display-Heavy.otf
+          weight: 800

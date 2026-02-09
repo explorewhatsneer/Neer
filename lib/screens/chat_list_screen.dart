@@ -1,0 +1,469 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Haptic Feedback
+import 'package:supabase_flutter/supabase_flutter.dart';
+// import '../main.dart'; 
+import 'package:intl/intl.dart'; 
+
+// CORE IMPORTLARI
+import '../core/theme_styles.dart'; 
+import '../core/text_styles.dart';
+import '../core/app_strings.dart'; 
+
+import 'chat_screen.dart';
+import 'group_chat_screen.dart'; 
+
+class ChatListScreen extends StatefulWidget {
+  const ChatListScreen({super.key});
+
+  @override
+  State<ChatListScreen> createState() => _ChatListScreenState();
+}
+
+class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProviderStateMixin {
+  // 🔥 SUPABASE CLIENT
+  final _supabase = Supabase.instance.client;
+  
+  late TabController _tabController;
+  
+  // Arama Kontrolcüsü
+  final TextEditingController _searchController = TextEditingController();
+  String _searchText = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    // Supabase Auth ID
+    String myUid = _supabase.auth.currentUser?.id ?? "";
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      
+      appBar: AppBar(
+        backgroundColor: theme.scaffoldBackgroundColor, 
+        elevation: 0,
+        title: Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Text(
+            AppStrings.messagesTitle, 
+            style: AppTextStyles.h1.copyWith(fontSize: 32) 
+          ),
+        ),
+        centerTitle: false,
+        automaticallyImplyLeading: false,
+        toolbarHeight: 50,
+        
+        // --- HEADER (ARAMA + TAB BAR) ---
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(134), 
+          child: Column(
+            children: [
+              // 1. PREMIUM ARAMA BARI
+              Container(
+                margin: const EdgeInsets.fromLTRB(20, 10, 20, 15),
+                height: 50,
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  borderRadius: AppThemeStyles.radius16,
+                  boxShadow: isDark ? [] : AppThemeStyles.shadowLow, 
+                  border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  textAlignVertical: TextAlignVertical.center,
+                  onChanged: (val) => setState(() => _searchText = val.trim().toLowerCase()),
+                  style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+                  cursorColor: theme.primaryColor,
+                  decoration: InputDecoration(
+                    hintText: AppStrings.searchChatsHint, 
+                    hintStyle: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),
+                    border: InputBorder.none,
+                    prefixIcon: Icon(Icons.search_rounded, color: theme.primaryColor),
+                    suffixIcon: _searchText.isNotEmpty 
+                      ? IconButton(
+                          icon: Icon(Icons.cancel_rounded, color: theme.disabledColor), 
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _searchText = "");
+                            HapticFeedback.lightImpact();
+                          })
+                      : null,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+
+              // 2. SEGMENTED TAB BAR (iOS STYLE)
+              Container(
+                margin: const EdgeInsets.fromLTRB(20, 0, 20, 15),
+                height: 45,
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white10 : Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: TabBar(
+                  controller: _tabController,
+                  indicator: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 4, offset: const Offset(0, 2))]
+                  ),
+                  labelColor: theme.textTheme.bodyLarge?.color,
+                  unselectedLabelColor: theme.disabledColor,
+                  labelStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w800, fontSize: 13),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  dividerColor: Colors.transparent,
+                  overlayColor: MaterialStateProperty.all(Colors.transparent), 
+                  onTap: (index) => HapticFeedback.selectionClick(), 
+                  tabs: [
+                    Tab(text: AppStrings.chatsTab), 
+                    Tab(text: AppStrings.placesTab), 
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildPersonalChatsStream(myUid, theme),
+          _buildGroupChatsStream(myUid, theme),
+        ],
+      ),
+    );
+  }
+
+  // --- 1. BİREYSEL SOHBETLER ---
+  Widget _buildPersonalChatsStream(String myUid, ThemeData theme) {
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: _supabase
+          .from('messages')
+          .stream(primaryKey: ['id'])
+          .order('created_at', ascending: false)
+          .limit(50), 
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+        
+        final allMessages = snapshot.data!;
+        
+        Map<String, Map<String, dynamic>> lastMessagesMap = {};
+        
+        for (var msg in allMessages) {
+          String senderId = msg['sender_id'];
+          String receiverId = msg['receiver_id'] ?? "";
+
+          // Sadece bana gelen veya benim gönderdiğim mesajlar (Ve grup mesajı olmayanlar)
+          if ((senderId == myUid || receiverId == myUid) && msg['group_id'] == null) {
+             // Karşı tarafın ID'sini bul
+             String otherUserId = (senderId == myUid) ? receiverId : senderId;
+             
+             if (!lastMessagesMap.containsKey(otherUserId)) {
+               lastMessagesMap[otherUserId] = {
+                 'friendId': otherUserId,
+                 'friendName': (senderId == myUid) ? "Giden Mesaj" : (msg['sender_name'] ?? "Kişi"), 
+                 'friendAvatar': (senderId == myUid) ? "" : (msg['sender_image'] ?? ""),
+                 'lastMessage': msg['message'],
+                 'timestamp': msg['created_at'],
+                 'isRead': (senderId == myUid) ? true : (msg['is_read'] ?? false), 
+               };
+             }
+          }
+        }
+
+        var chats = lastMessagesMap.values.toList();
+
+        if (_searchText.isNotEmpty) {
+          chats = chats.where((data) {
+            String name = (data['friendName'] ?? "").toString().toLowerCase();
+            return name.contains(_searchText);
+          }).toList();
+        }
+
+        if (chats.isEmpty) {
+          return _buildEmptyState(
+            _searchText.isEmpty ? AppStrings.noMessages : AppStrings.noChatFound, 
+            Icons.chat_bubble_outline_rounded,
+            theme
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
+          physics: const BouncingScrollPhysics(),
+          itemCount: chats.length,
+          itemBuilder: (context, index) {
+            var chatData = chats[index];
+            return _buildChatCard(chatData, chatData['friendId'], isGroup: false, myUid: myUid, theme: theme); 
+          },
+        );
+      },
+    );
+  }
+
+  // --- 2. MEKAN (GRUP) SOHBETLERİ ---
+  Widget _buildGroupChatsStream(String myUid, ThemeData theme) {
+    // 🔥 DÜZELTME: .neq() hatası kaldırıldı. Filtreleme aşağıda yapılıyor.
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: _supabase
+          .from('messages')
+          .stream(primaryKey: ['id'])
+          .order('created_at', ascending: false)
+          .limit(50),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+        
+        // 🔥 Dart tarafında 'group_id' si null olmayanları alıyoruz
+        final allMessages = snapshot.data!.where((m) => m['group_id'] != null).toList();
+        
+        Map<String, Map<String, dynamic>> lastGroupMessages = {};
+
+        for (var msg in allMessages) {
+          String groupId = msg['group_id'];
+          
+          if (!lastGroupMessages.containsKey(groupId)) {
+            lastGroupMessages[groupId] = {
+              'groupId': groupId,
+              'groupName': "Mekan Sohbeti", // İsim için join gerekir
+              'groupImage': "", 
+              'lastMessage': msg['message'],
+              'lastMessageTime': msg['created_at'],
+            };
+          }
+        }
+
+        var groups = lastGroupMessages.values.toList();
+
+        if (_searchText.isNotEmpty) {
+          groups = groups.where((data) {
+            String name = (data['groupName'] ?? "").toString().toLowerCase();
+            return name.contains(_searchText);
+          }).toList();
+        }
+
+        if (groups.isEmpty) {
+          return _buildEmptyState(
+            _searchText.isEmpty ? AppStrings.noCheckins : AppStrings.noPlaceFound, 
+            Icons.store_mall_directory_rounded,
+            theme
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
+          physics: const BouncingScrollPhysics(),
+          itemCount: groups.length,
+          itemBuilder: (context, index) {
+            var groupData = groups[index];
+            return _buildChatCard(groupData, groupData['groupId'], isGroup: true, myUid: myUid, theme: theme); 
+          },
+        );
+      },
+    );
+  }
+
+  // --- PREMIUM CHAT CARD ---
+  Widget _buildChatCard(Map<String, dynamic> data, String docId, {required bool isGroup, required String myUid, required ThemeData theme}) {
+    String name = isGroup ? (data['groupName'] ?? "Mekan") : (data['friendName'] ?? "Kişi");
+    String image = isGroup ? (data['groupImage'] ?? "") : (data['friendAvatar'] ?? "");
+    bool hasValidImage = image.isNotEmpty && image.startsWith('http');
+    bool isDark = theme.brightness == Brightness.dark;
+
+    String lastMsg = data['lastMessage'] ?? "Sohbet başladı.";
+    dynamic timestamp = isGroup ? data['lastMessageTime'] : data['timestamp'];
+
+    String timeText = "";
+    if (timestamp != null) {
+      if (timestamp is String) {
+         try {
+           DateTime dt = DateTime.parse(timestamp);
+           timeText = DateFormat('HH:mm').format(dt);
+         } catch(e) {
+           timeText = "";
+         }
+      }
+    }
+
+    return Dismissible(
+      key: Key(docId),
+      direction: DismissDirection.endToStart, 
+      
+      // Arkadaki Kırmızı Alan
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 15),
+        padding: const EdgeInsets.only(right: 25),
+        alignment: Alignment.centerRight,
+        decoration: BoxDecoration(
+          color: const Color(0xFFFF3B30), // iOS System Red
+          borderRadius: AppThemeStyles.radius16,
+        ),
+        child: const Icon(Icons.delete_forever_rounded, color: Colors.white, size: 28),
+      ),
+      
+      // Onay Kutusu
+      confirmDismiss: (direction) async {
+        HapticFeedback.mediumImpact(); 
+        return await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: theme.cardColor,
+            shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius24),
+            title: Text(
+              isGroup ? AppStrings.leaveVenue : AppStrings.deleteChat, 
+              style: AppTextStyles.h3
+            ),
+            content: Text(
+              isGroup 
+                ? "$name ${AppStrings.leaveGroupConfirm}" 
+                : "$name ${AppStrings.deleteChatConfirm}",
+              style: AppTextStyles.bodySmall
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false), 
+                child: Text(AppStrings.cancel, style: AppTextStyles.button.copyWith(color: theme.disabledColor))
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(true), 
+                child: Text(AppStrings.delete, style: AppTextStyles.button.copyWith(color: Colors.redAccent))
+              ),
+            ],
+          ),
+        );
+      },
+      
+      // Silme İşlemi 
+      onDismissed: (direction) async {
+        // Silme işlemi
+      },
+
+      // --- KART GÖVDESİ ---
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          if (isGroup) {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => GroupChatScreen(groupId: docId, groupName: name, groupImage: image)));
+          } else {
+            String targetId = data['friendId'] ?? docId;
+            Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(userId: targetId, userName: name, userImage: image)));
+          }
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 15),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: AppThemeStyles.radius16,
+            boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+            border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
+          ),
+          child: Row(
+            children: [
+              // Avatar
+              Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle, 
+                      border: Border.all(color: theme.dividerColor, width: 1)
+                    ),
+                    child: CircleAvatar(
+                      radius: 28,
+                      backgroundColor: isGroup ? theme.primaryColor.withOpacity(0.1) : theme.scaffoldBackgroundColor,
+                      backgroundImage: hasValidImage ? NetworkImage(image) : null,
+                      child: !hasValidImage
+                          ? Icon(isGroup ? Icons.store : Icons.person, color: isGroup ? theme.primaryColor : theme.disabledColor)
+                          : null,
+                    ),
+                  ),
+                  if (!isGroup) 
+                    Positioned(
+                      bottom: 2, right: 2,
+                      child: Container(
+                        width: 14, height: 14, 
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF34C759), // Online Yeşili
+                          shape: BoxShape.circle, 
+                          border: Border.all(color: theme.cardColor, width: 2.5) 
+                        )
+                      ),
+                    )
+                ],
+              ),
+              const SizedBox(width: 16),
+              
+              // İsim ve Mesaj
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            name, 
+                            style: AppTextStyles.bodyLarge.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          timeText, 
+                          style: AppTextStyles.caption.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w600)
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      lastMsg,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                        height: 1.2
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // --- BOŞ DURUM ---
+  Widget _buildEmptyState(String text, IconData icon, ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 70, color: theme.disabledColor.withOpacity(0.3)),
+          const SizedBox(height: 20),
+          Text(
+            text, 
+            style: AppTextStyles.h3.copyWith(color: theme.disabledColor, fontSize: 18)
+          ),
+        ],
+      ),
+    );
+  }
+}

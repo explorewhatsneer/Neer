@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "431426837037",
+    "project_id": "neer-26a14",
+    "storage_bucket": "neer-26a14.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:431426837037:android:b21b20d1b8b3e9e80e76a4",
+        "android_client_info": {
+          "package_name": "com.example.neer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCncrD7fIIP-UO_zKRftLnsMNVU6rVoeDs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
