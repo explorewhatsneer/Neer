@@ -34,9 +34,14 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
   
   // 🔥 LİSTELER VE KONUM
   List<PlaceModel> _places = [];
-  List<Marker> _friendMarkers = []; 
+  
+  // 👥 İNSAN KÜMELEME DEĞİŞKENLERİ (YENİ)
+  List<Marker> _peopleMarkers = []; // Sen + Arkadaşlar bu listede olacak
+  List<Marker> _tempFriendMarkers = []; // Arkadaşları geçici tutmak için
+  final Map<Marker, String> _markerImageMap = {}; // Marker -> Resim URL Eşleşmesi
+
   LatLng? _myLocation; 
-  String? profileImage; // 👤 Kendi profil resmimiz için değişken
+  String? profileImage; // 👤 Kendi profil resmimiz
   
   bool _isLoading = false;
   Timer? _debounceTimer; 
@@ -59,7 +64,7 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
     // Açılış işlemleri
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateMyLocation(); 
-      _fetchMyProfileImage(); // 👤 Profil resmini çek
+      _fetchMyProfileImage(); 
       _fetchMutualFriends(); 
       _fetchNearbyPlaces(); 
     });
@@ -86,6 +91,7 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
         setState(() {
           _myLocation = LatLng(position.latitude, position.longitude);
         });
+        _rebuildPeopleMarkers(); // Konum değişince insan listesini güncelle
       }
 
       if (myId == null) return;
@@ -113,6 +119,7 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
         setState(() {
           profileImage = data['avatar_url'];
         });
+        _rebuildPeopleMarkers(); // Resim gelince listeyi güncelle
       }
     } catch (e) {
       debugPrint("Profil resmi çekme hatası: $e");
@@ -130,22 +137,56 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
 
       if (!mounted) return;
 
-      setState(() {
-        _friendMarkers = response.map((friend) {
-          double lat = _guvenliSayiAl(friend['latitude']) ?? 0.0;
-          double lng = _guvenliSayiAl(friend['longitude']) ?? 0.0;
+      List<Marker> newMarkers = [];
 
-          // Arkadaş markerlarını oluşturuyoruz
-          return Marker(
-            point: LatLng(lat, lng),
-            width: 60, height: 75,
-            child: _buildFriendAvatarMarker(friend),
-          );
-        }).toList();
-      });
+      for (var friend in response) {
+        double lat = _guvenliSayiAl(friend['latitude']) ?? 0.0;
+        double lng = _guvenliSayiAl(friend['longitude']) ?? 0.0;
+        String avatarUrl = friend['avatar_url'] ?? '';
+
+        // Arkadaş markerlarını oluşturuyoruz
+        Marker marker = Marker(
+          point: LatLng(lat, lng),
+          width: 60, height: 75,
+          child: _buildFriendAvatarMarker(friend),
+        );
+        
+        newMarkers.add(marker);
+        // Resmi Haritaya kaydet (Kümeleme balonu için)
+        _markerImageMap[marker] = avatarUrl;
+      }
+
+      _tempFriendMarkers = newMarkers;
+      _rebuildPeopleMarkers(); // Listeleri birleştir
+
     } catch (e) {
       debugPrint("Arkadaşları çekerken hata: $e");
     }
+  }
+
+  // ➕ YENİ: İnsanları (Ben + Arkadaşlar) Birleştir
+  void _rebuildPeopleMarkers() {
+    if (!mounted) return;
+    
+    List<Marker> combinedMarkers = [];
+    
+    // 1. Beni Ekle
+    if (_myLocation != null) {
+      Marker myMarker = Marker(
+        point: _myLocation!,
+        width: 60, height: 60,
+        child: _buildMyLocationMarker(),
+      );
+      combinedMarkers.add(myMarker);
+      _markerImageMap[myMarker] = profileImage ?? ''; // Benim resmim
+    }
+
+    // 2. Arkadaşları Ekle
+    combinedMarkers.addAll(_tempFriendMarkers);
+
+    setState(() {
+      _peopleMarkers = combinedMarkers;
+    });
   }
 
   // --- 📡 3. Mekanları Çek ---
@@ -187,7 +228,7 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
 
   // --- 🎨 MARKER TASARIMLARI ---
 
-  // 🔥 1. MEKAN: Mini Nokta (Orta Mesafe Zoom İçin)
+  // 🔥 1. MEKAN: Mini Nokta
   Widget _buildMiniDot(String category) {
     Color color = getCategoryColor(category);
     return Container(
@@ -202,7 +243,7 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
     );
   }
 
-  // 🔥 2. MEKAN: Premium Pin (Yakın Zoom İçin)
+  // 🔥 2. MEKAN: Premium Pin
   Widget _buildPremiumPin(PlaceModel place) {
     Color color = getCategoryColor(place.category);
     return GestureDetector(
@@ -221,11 +262,10 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
-          // Damla Şekli
           Container(
             width: 44, height: 44,
             decoration: BoxDecoration(
-              color: color, // Kategori rengi
+              color: color,
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white, width: 2.5),
               boxShadow: [
@@ -234,7 +274,6 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
             ),
             child: Icon(getCategoryIcon(place.category), color: Colors.white, size: 22),
           ),
-          // Altındaki Üçgen Uç
           Positioned(
             bottom: 12, 
             child: ClipPath(
@@ -251,8 +290,6 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
   Widget _buildFriendAvatarMarker(dynamic friend) {
     String avatarUrl = friend['avatar_url'] ?? '';
     String userId = friend['id'].toString();
-    
-    // 🟢 Arkadaş rengi: Yeşil
     const Color friendColor = Color(0xFF4CAF50); 
 
     return GestureDetector(
@@ -263,11 +300,10 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
-          // Çerçeve ve Avatar
           Container(
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
-              color: friendColor, // YEŞİL
+              color: friendColor,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))
@@ -279,12 +315,11 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
               backgroundImage: avatarUrl.isNotEmpty ? NetworkImage(avatarUrl) : null,
             ),
           ),
-          // Altındaki Üçgen
           Positioned(
-            bottom: 22, // Konum ayarı
+            bottom: 22,
             child: ClipPath(
               clipper: TriangleClipper(),
-              child: Container(color: friendColor, width: 10, height: 8), // YEŞİL OK
+              child: Container(color: friendColor, width: 10, height: 8),
             ),
           ),
         ],
@@ -292,15 +327,13 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
     );
   }
 
-  // 🔥 4. KENDİ KONUMUM (MAVİ ÇERÇEVE + FOTOĞRAF 🔵👤)
+  // 🔥 4. KENDİ KONUMUM (MAVİ ÇERÇEVE 🔵)
   Widget _buildMyLocationMarker() {
-    // 🔵 Benim rengim: Mavi
     const Color myColor = Colors.blue;
 
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Arka plandaki yanıp sönen hare (Pulse Effect)
         Container(
           width: 60, height: 60,
           decoration: BoxDecoration(
@@ -308,22 +341,20 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
             shape: BoxShape.circle,
           ),
         ),
-        // Ana Çerçeve
         Container(
           width: 50, height: 50,
           decoration: BoxDecoration(
             color: Colors.white, 
             shape: BoxShape.circle, 
-            border: Border.all(color: myColor, width: 3), // MAVİ ÇERÇEVE
+            border: Border.all(color: myColor, width: 3),
             boxShadow: [
               BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 6, offset: const Offset(0, 3))
             ]
           ),
           child: Padding(
-            padding: const EdgeInsets.all(0), // Beyaz boşluk
+            padding: const EdgeInsets.all(0),
             child: CircleAvatar(
               backgroundColor: Colors.grey[200],
-              // Fotoğraf varsa göster, yoksa ikon göster
               backgroundImage: profileImage != null ? NetworkImage(profileImage!) : null,
               child: profileImage == null 
                   ? const Icon(Icons.person, color: Colors.grey) 
@@ -371,7 +402,6 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
     }
     Position position = await Geolocator.getCurrentPosition();
     
-    // Hem haritayı odakla hem de konumu güncelle
     _mapController.move(LatLng(position.latitude, position.longitude), 16);
     _updateMyLocation(); 
     _fetchNearbyPlaces();
@@ -412,8 +442,7 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
     String? myUid = _supabase.auth.currentUser?.id;
     final topPadding = MediaQuery.of(context).padding.top;
 
-    // 🔥 MAP LOJİĞİ: ZOOM SEVİYESİNE GÖRE GÖSTERİM 🔥
-    // 12'den küçükse hiçbir mekan gösterme
+    // 🔥 ZOOM LOJİĞİ
     bool showDotsOnly = _currentZoom >= 14.0 && _currentZoom < 16.0;
     bool showClustersAndPins = _currentZoom >= 16.0;
 
@@ -430,12 +459,10 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
               initialZoom: 14.0,
               onTap: (_, __) { if (_isMenuOpen) _toggleMenu(); },
               
-              // 🔥 Zoom ve Konum Takibi
               onPositionChanged: (position, hasGesture) {
                 if (hasGesture) _fetchNearbyPlaces();
                 
                 if (position.zoom != null) {
-                   // Sadece tam sayı değiştiğinde setState yap (Performans)
                    if (position.zoom!.toInt() != _lastZoomInt) {
                      setState(() {
                        _currentZoom = position.zoom!;
@@ -456,8 +483,9 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
                 retinaMode: RetinaMode.isHighDensity(context),
               ),
 
-              // 🔥 KATMAN A: MEKANLAR (NOKTA MODU - Kümeleme YOK)
-              // Sadece 12 ile 14.5 zoom arasındayken çalışır.
+              // ------------------------------------------------
+              // 1. KATMAN: MEKANLAR (AŞAĞIDA)
+              // ------------------------------------------------
               if (showDotsOnly)
                 MarkerLayer(
                   markers: _places.map((place) => Marker(
@@ -467,8 +495,6 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
                   )).toList(),
                 ),
 
-              // 🔥 KATMAN B: MEKANLAR (PIN MODU - Kümeleme VAR)
-              // Sadece 14.5 zoom üzerindeyken çalışır.
               if (showClustersAndPins)
                 MarkerClusterLayerWidget(
                   options: MarkerClusterLayerOptions(
@@ -478,19 +504,16 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
                     padding: const EdgeInsets.all(50),
                     maxZoom: 17, 
                     
-                    // Sadece mekanları kümeye sokuyoruz
                     markers: _places.map((place) => Marker(
                         point: LatLng(place.latitude, place.longitude),
                         width: 50, height: 60,
                         child: _buildPremiumPin(place)
                     )).toList(),
 
-                    // Küme Tasarımı
                     builder: (context, markers) {
                       return PremiumCluster(count: markers.length, color: AppColors.primary);
                     },
                     
-                    // Örümcek Ağı
                     animationsOptions: const AnimationsOptions(
                       zoom: Duration(milliseconds: 300),
                       fitBound: Duration(milliseconds: 300),
@@ -500,21 +523,39 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
                   ),
                 ),
 
-              // 🔥 KATMAN C: ARKADAŞLAR (En Üstte - Bağımsız)
-              // Bu katman her zaman, her zoom seviyesinde görünür ve asla kümelenmez.
-              MarkerLayer(markers: _friendMarkers),
+              // ------------------------------------------------
+              // 2. KATMAN: İNSANLAR (SEN + ARKADAŞLAR) - YUKARIDA
+              // ------------------------------------------------
+              MarkerClusterLayerWidget(
+                options: MarkerClusterLayerOptions(
+                  maxClusterRadius: 60, // Yakınlarsa birleşsin
+                  size: const Size(60, 60),
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(50),
+                  maxZoom: 19, 
+                  
+                  // 🔥 Birleştirilmiş liste burada kullanılıyor
+                  markers: _peopleMarkers,
 
-              // 🔥 KATMAN D: KENDİ KONUMUM (Mavi Çerçeveli & Fotoğraflı)
-              if (_myLocation != null)
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: _myLocation!,
-                      width: 60, height: 60, // Biraz büyüttük (Eskisi 24'tü)
-                      child: _buildMyLocationMarker(),
-                    ),
-                  ],
+                  // 🔥 ÖZEL İNSAN KÜMESİ (Yüzen Şeffaf Balon)
+                  builder: (context, markers) {
+                    List<String> images = [];
+                    for (var m in markers) {
+                      if (_markerImageMap.containsKey(m)) {
+                        images.add(_markerImageMap[m]!);
+                      }
+                    }
+                    return _FloatingAvatarsCluster(imageUrls: images);
+                  },
+                  
+                  animationsOptions: const AnimationsOptions(
+                    zoom: Duration(milliseconds: 300),
+                    fitBound: Duration(milliseconds: 300),
+                  ),
+                  zoomToBoundsOnClick: true, 
+                  spiderfyCircleRadius: 80,
                 ),
+              ),
             ],
           ),
 
@@ -614,6 +655,66 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
               onSearchTap: _openSearchModal,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// ==========================================================
+// 🔥 YENİ: İNSAN KÜMESİ (Yüzen Mini PP'ler)
+// ==========================================================
+class _FloatingAvatarsCluster extends StatelessWidget {
+  final List<String> imageUrls;
+  const _FloatingAvatarsCluster({required this.imageUrls});
+
+  @override
+  Widget build(BuildContext context) {
+    int displayCount = imageUrls.length > 3 ? 3 : imageUrls.length;
+    int remaining = imageUrls.length - 3;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.4), // Şeffaf Mavi Balon
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2),
+        boxShadow: [BoxShadow(color: Colors.white.withOpacity(0.1), blurRadius: 10)],
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Rastgele pozisyonlarda mini avatarlar
+          ...List.generate(displayCount, (index) {
+            double alignX = 0; double alignY = 0;
+            // Basit rastgele dağılım
+            if (index == 0) { alignX = -0.5; alignY = -0.5; }
+            else if (index == 1) { alignX = 0.5; alignY = -0.2; }
+            else if (index == 2) { alignX = -0.1; alignY = 0.6; }
+
+            return Align(
+              alignment: Alignment(alignX, alignY),
+              child: Container(
+                padding: const EdgeInsets.all(1),
+                decoration: const BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
+                child: CircleAvatar(
+                  radius: 10, // Mini boy
+                  backgroundColor: Colors.grey[300],
+                  backgroundImage: imageUrls[index].isNotEmpty ? NetworkImage(imageUrls[index]) : null,
+                  child: imageUrls[index].isEmpty ? const Icon(Icons.person, size: 12, color: Colors.grey) : null,
+                ),
+              ),
+            );
+          }),
+          
+          if (remaining > 0)
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(color: Colors.black, shape: BoxShape.circle),
+                child: Text("+$remaining", style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+              ),
+            ),
         ],
       ),
     );
