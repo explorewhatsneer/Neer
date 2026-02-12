@@ -7,7 +7,7 @@ import '../../core/theme_styles.dart';
 import '../../core/text_styles.dart';
 import '../../core/app_strings.dart'; 
 
-import '../../widgets/common/check_in_button.dart'; // Yolu düzelttim (venue içinde)
+import '../../widgets/common/check_in_button.dart'; 
 import '../../screens/business_profile_screen.dart';
 
 class PlaceSheet {
@@ -16,9 +16,31 @@ class PlaceSheet {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Görsel URL
-    String safeIdForImage = placeId.isEmpty ? "default" : placeId;
-    final String placeImageUrl = "https://picsum.photos/800/400?sig=$safeIdForImage";
+    // 🔥 1. GERÇEK VERİLERİ AYIKLA
+    final String name = placeData['name'] ?? "Mekan İsmi";
+    final String category = placeData['category'] ?? "Genel";
+    
+    // Puan kontrolü (Supabase int veya double gönderebilir)
+    final double rating = (placeData['average_rating'] is num) 
+        ? (placeData['average_rating'] as num).toDouble() 
+        : 0.0;
+        
+    // Resim kontrolü (DB'de yoksa rastgele ata)
+    final String placeImageUrl = (placeData['image'] != null && placeData['image'].toString().isNotEmpty)
+        ? placeData['image']
+        : "https://picsum.photos/800/400?sig=$placeId";
+
+    // Puan durumuna göre etiket ve renk
+    String ratingLabel = "Mükemmel";
+    Color ratingColor = const Color(0xFF34C759); // Yeşil
+    if (rating < 4.0) {
+      ratingLabel = "İyi";
+      ratingColor = Colors.orange;
+    }
+    if (rating < 3.0) {
+      ratingLabel = "Ortalama";
+      ratingColor = Colors.grey;
+    }
 
     showModalBottomSheet(
       context: context,
@@ -50,17 +72,19 @@ class PlaceSheet {
                   // --- GÖRSEL KISIM (PARALLAX HEADER) ---
                   Stack(
                     children: [
+                      // 🔥 Gerçek Resim
                       Container(
                         height: 220,
                         width: double.infinity,
                         decoration: BoxDecoration(
+                          color: theme.cardColor,
                           image: DecorationImage(
                             image: NetworkImage(placeImageUrl), 
                             fit: BoxFit.cover,
                           ),
                         ),
                       ),
-                      // Gradient Overlay (Yazıların okunması için)
+                      // Gradient Overlay
                       Container(
                         height: 220,
                         decoration: BoxDecoration(
@@ -107,9 +131,11 @@ class PlaceSheet {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    // 🔥 Gerçek İsim
                                     Text(
-                                      placeData['name'] ?? 'Mekan İsmi', 
-                                      // 🔥 Core Style: H2 (ExtraBold)
+                                      name, 
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                       style: AppTextStyles.h2.copyWith(
                                         fontSize: 28, 
                                         fontWeight: FontWeight.w800,
@@ -123,8 +149,7 @@ class PlaceSheet {
                                         Icon(Icons.location_on_rounded, size: 16, color: theme.primaryColor),
                                         const SizedBox(width: 4),
                                         Text(
-                                          "Moda, Kadıköy • 120m", 
-                                          // 🔥 Core Style: BodyMedium (Semibold)
+                                          "İstanbul, Türkiye", // Şimdilik sabit, ilerde Geocoding ekleriz
                                           style: AppTextStyles.bodySmall.copyWith(
                                             color: theme.disabledColor, 
                                             fontWeight: FontWeight.w600
@@ -135,7 +160,7 @@ class PlaceSheet {
                                   ],
                                 ),
                               ),
-                              // Puan Kutusu
+                              // 🔥 Gerçek Puan Kutusu
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                                 decoration: BoxDecoration(
@@ -146,8 +171,14 @@ class PlaceSheet {
                                 ),
                                 child: Column(
                                   children: [
-                                    Text("4.8", style: TextStyle(color: const Color(0xFF34C759), fontWeight: FontWeight.w900, fontSize: 18)),
-                                    Text(AppStrings.wonderful, style: const TextStyle(color: Color(0xFF34C759), fontSize: 10, fontWeight: FontWeight.bold)),
+                                    Text(
+                                      rating.toString(), 
+                                      style: TextStyle(color: ratingColor, fontWeight: FontWeight.w900, fontSize: 18)
+                                    ),
+                                    Text(
+                                      ratingLabel, 
+                                      style: TextStyle(color: ratingColor, fontSize: 10, fontWeight: FontWeight.bold)
+                                    ),
                                   ],
                                 ),
                               )
@@ -163,7 +194,8 @@ class PlaceSheet {
                             children: [
                               _buildModernChip(Icons.access_time_filled_rounded, AppStrings.openNow, const Color(0xFF34C759), theme),
                               const SizedBox(width: 10),
-                              _buildModernChip(Icons.restaurant_menu_rounded, placeData['category'] ?? "Restoran", Colors.orange, theme),
+                              // 🔥 Gerçek Kategori
+                              _buildModernChip(Icons.restaurant_menu_rounded, category, Colors.orange, theme),
                               const SizedBox(width: 10),
                               _buildModernChip(Icons.wifi_rounded, AppStrings.freeWifi, Colors.blue, theme),
                             ],
@@ -174,7 +206,8 @@ class PlaceSheet {
                         Divider(height: 1, color: theme.dividerColor.withOpacity(0.2)),
                         const SizedBox(height: 25),
 
-                        // --- 1. ŞU AN BURADA OLANLAR ---
+                        // --- 1. ŞU AN BURADA OLANLAR (SİMÜLASYON) ---
+                        // Not: Burası canlı veri değil, atmosferi doldurmak için simüle edildi.
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -228,7 +261,7 @@ class PlaceSheet {
 
                         const SizedBox(height: 30),
 
-                        // --- 2. ZİYARET EDEN ARKADAŞLAR ---
+                        // --- 2. ZİYARET EDEN ARKADAŞLAR (SİMÜLASYON) ---
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -286,8 +319,8 @@ class PlaceSheet {
                               flex: 3,
                               child: CheckInButton(
                                 venueId: placeId,
-                                venueName: placeData['name'] ?? "Mekan",
-                                venueImage: placeImageUrl,
+                                venueName: name, // 🔥 Gerçek İsim
+                                venueImage: placeImageUrl, // 🔥 Gerçek Resim
                                 onCheckInSuccess: () {
                                   Navigator.pop(context); // Pencereyi kapat
                                 },
@@ -308,11 +341,11 @@ class PlaceSheet {
                                   onPressed: () {
                                     HapticFeedback.lightImpact();
                                     Navigator.pop(context); 
-                                    String detailId = placeId.isEmpty ? "unknown_venue_123" : placeId;
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => BusinessProfileScreen(venueId: detailId, venueName: placeData['name'] ?? "Mekan", imageUrl: placeImageUrl)));
+                                    // 🔥 Gerçek Detay Sayfasına Git
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => BusinessProfileScreen(venueId: placeId, venueName: name, imageUrl: placeImageUrl)));
                                   }, 
                                   child: Text(
-                                    AppStrings.details, // 🔥 Core String
+                                    AppStrings.details, 
                                     style: AppTextStyles.button.copyWith(color: theme.textTheme.bodyLarge?.color)
                                   ),
                                 ),

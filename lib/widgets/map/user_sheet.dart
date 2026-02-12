@@ -6,10 +6,13 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 import '../../core/theme_styles.dart'; 
 import '../../core/text_styles.dart';
 import '../../core/app_strings.dart'; 
+import '../../core/constants.dart'; // AppColors için
 
 import '../../screens/chat_screen.dart';
 import '../../screens/friend_profile_screen.dart';
 import '../../screens/business_profile_screen.dart';
+// 🔥 Servis Importu
+import '../../services/supabase_service.dart'; 
 
 class UserSheet {
   static void show(BuildContext context, Map<String, dynamic> userData, String targetUid) {
@@ -18,9 +21,17 @@ class UserSheet {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Güvenli Veri Çekimi
-    final String profileImage = userData['profile_image'] ?? "https://i.pravatar.cc/300?u=$targetUid";
+    // 🔥 VERİ GÜVENLİĞİ VE EŞLEŞTİRME
+    final String profileImage = userData['avatar_url'] ?? userData['profile_image'] ?? "https://i.pravatar.cc/300?u=$targetUid";
     final String coverImage = "https://picsum.photos/800/400?random=$targetUid"; 
+    
+    final String displayName = userData['full_name'] ?? userData['name'] ?? userData['username'] ?? "Kullanıcı";
+    final String username = userData['username'] ?? "user";
+    final String bio = userData['bio'] ?? "Merhaba, ben Neer kullanıyorum! 👋";
+    
+    final String trustScore = (userData['trust_score'] ?? 5.0).toString();
+    final String followers = (userData['followers_count'] ?? 126).toString();
+    final bool isOnline = userData['is_online'] ?? false;
 
     showModalBottomSheet(
       context: context,
@@ -37,7 +48,7 @@ class UserSheet {
             child: Container(
               decoration: BoxDecoration(
                 // Dinamik Glass Rengi
-                color: isDark ? Colors.black.withOpacity(0.8) : Colors.white.withOpacity(0.9),
+                color: isDark ? Colors.black.withOpacity(0.85) : Colors.white.withOpacity(0.95),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
                 boxShadow: [
                   BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 40, offset: const Offset(0, 10))
@@ -68,7 +79,7 @@ class UserSheet {
                           ),
                         ),
 
-                        // 2. Gradient Overlay (Yumuşak Geçiş)
+                        // 2. Gradient Overlay
                         Container(
                           height: 200,
                           decoration: BoxDecoration(
@@ -77,14 +88,14 @@ class UserSheet {
                               end: Alignment.bottomCenter,
                               colors: [
                                 Colors.transparent,
-                                isDark ? Colors.black.withOpacity(0.8) : Colors.white.withOpacity(0.9), 
+                                isDark ? Colors.black.withOpacity(0.85) : Colors.white.withOpacity(0.95), 
                               ],
                               stops: const [0.4, 1.0],
                             ),
                           ),
                         ),
                         
-                        // Tutamaç (Grab Bar)
+                        // Tutamaç
                         Positioned(
                           top: 12,
                           child: Container(
@@ -96,13 +107,12 @@ class UserSheet {
                           ),
                         ),
 
-                        // 3. Profil Bilgileri (Avatar + İsim)
+                        // 3. Profil Bilgileri
                         Positioned(
-                          top: 130, // Kapak resminin altından başlar
+                          top: 130, 
                           left: 0, right: 0,
                           child: Column(
                             children: [
-                              // Avatar
                               Stack(
                                 children: [
                                   Container(
@@ -110,7 +120,7 @@ class UserSheet {
                                     decoration: BoxDecoration(
                                       color: isDark ? Colors.black45 : Colors.white.withOpacity(0.5), 
                                       shape: BoxShape.circle,
-                                      border: Border.all(color: theme.primaryColor.withOpacity(0.3), width: 1),
+                                      border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 1),
                                     ),
                                     child: CircleAvatar(
                                       radius: 55,
@@ -118,27 +128,25 @@ class UserSheet {
                                       backgroundImage: NetworkImage(profileImage),
                                     ),
                                   ),
-                                  // Online Noktası
-                                  Positioned(
-                                    bottom: 8, right: 8,
-                                    child: Container(
-                                      width: 22, height: 22,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF34C759), // Online Yeşili
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: isDark ? Colors.black : Colors.white, width: 3.5),
+                                  if (isOnline)
+                                    Positioned(
+                                      bottom: 8, right: 8,
+                                      child: Container(
+                                        width: 22, height: 22,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF34C759),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(color: isDark ? Colors.black : Colors.white, width: 3.5),
+                                        ),
                                       ),
                                     ),
-                                  ),
                                 ],
                               ),
                               
                               const SizedBox(height: 12),
                               
-                              // İsim
                               Text(
-                                userData['name'] ?? AppStrings.nameless, 
-                                // 🔥 Core Style: H2 (ExtraBold)
+                                displayName, 
                                 style: AppTextStyles.h2.copyWith(
                                   fontWeight: FontWeight.w800, 
                                   color: theme.textTheme.displayLarge?.color,
@@ -147,14 +155,13 @@ class UserSheet {
                               
                               const SizedBox(height: 6),
                               
-                              // Konum ve Kullanıcı Adı
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.location_on_rounded, size: 16, color: theme.primaryColor),
+                                  Icon(Icons.location_on_rounded, size: 16, color: AppColors.primary),
                                   const SizedBox(width: 4),
                                   Text(
-                                    "Kadıköy, İstanbul", 
+                                    "Yakınlarda", 
                                     style: AppTextStyles.bodySmall.copyWith(
                                       color: theme.disabledColor, 
                                       fontWeight: FontWeight.w600
@@ -162,7 +169,7 @@ class UserSheet {
                                   ),
                                   Container(margin: const EdgeInsets.symmetric(horizontal: 8), width: 1, height: 12, color: theme.dividerColor),
                                   Text(
-                                    "@${userData['username'] ?? 'kullanici'}", 
+                                    "@$username", 
                                     style: AppTextStyles.bodySmall.copyWith(
                                       color: theme.disabledColor,
                                       fontWeight: FontWeight.bold
@@ -187,24 +194,21 @@ class UserSheet {
                         // İstatistikler
                         Row(
                           children: [
-                            _buildCompactGlassStat("85%", AppStrings.trustScore, Icons.shield_rounded, const Color(0xFF34C759), theme),
+                            _buildStatCard(trustScore, "Güven Skoru", Icons.shield_rounded, const Color(0xFF34C759), theme),
                             const SizedBox(width: 10),
-                            _buildCompactGlassStat("126", AppStrings.friends, Icons.group_rounded, Colors.orange, theme),
+                            _buildStatCard(followers, "Takipçi", Icons.group_rounded, AppColors.accent, theme),
                             const SizedBox(width: 10),
-                            _buildCompactGlassStat("5. Lv", AppStrings.level, Icons.star_rounded, Colors.blue, theme),
+                            _buildStatCard("5. Lv", "Seviye", Icons.star_rounded, Colors.blue, theme),
                           ],
                         ),
 
                         const SizedBox(height: 30),
 
                         // Hakkında
-                        Text(
-                          AppStrings.about, 
-                          style: AppTextStyles.h3.copyWith(fontSize: 18)
-                        ),
+                        Text("Hakkında", style: AppTextStyles.h3.copyWith(fontSize: 18)),
                         const SizedBox(height: 8),
                         Text(
-                          userData['bio'] ?? AppStrings.defaultBio,
+                          bio,
                           style: AppTextStyles.bodyLarge.copyWith(
                             height: 1.5,
                             color: theme.textTheme.bodyMedium?.color
@@ -213,11 +217,8 @@ class UserSheet {
 
                         const SizedBox(height: 30),
 
-                        // Ortak Bağlantılar (Mini Avatarlar)
-                        Text(
-                          AppStrings.mutualConnections, 
-                          style: AppTextStyles.h3.copyWith(fontSize: 18)
-                        ),
+                        // Ortak Bağlantılar
+                        Text("Ortak Bağlantılar", style: AppTextStyles.h3.copyWith(fontSize: 18)),
                         const SizedBox(height: 12),
                         Row(
                           children: [
@@ -238,11 +239,9 @@ class UserSheet {
                                 text: TextSpan(
                                   style: AppTextStyles.caption.copyWith(color: theme.disabledColor),
                                   children: [
-                                    const TextSpan(text: "Sen, "),
-                                    TextSpan(text: "Ahmet", style: TextStyle(fontWeight: FontWeight.bold, color: theme.textTheme.bodyLarge?.color)),
-                                    const TextSpan(text: " ve "),
-                                    TextSpan(text: "4 diğer kişi", style: TextStyle(fontWeight: FontWeight.bold, color: theme.textTheme.bodyLarge?.color)),
-                                    const TextSpan(text: " tanıyor."),
+                                    const TextSpan(text: "Sen ve "),
+                                    TextSpan(text: "3 ortak arkadaşınız", style: TextStyle(fontWeight: FontWeight.bold, color: theme.textTheme.bodyLarge?.color)),
+                                    const TextSpan(text: " var."),
                                   ],
                                 ),
                               ),
@@ -252,34 +251,90 @@ class UserSheet {
 
                         const SizedBox(height: 30),
 
-                        // Son Gittiği Yerler
+                        // 🔥 SON GİTTİĞİ YERLER (Başlık FutureBuilder'ın DIŞINA alındı)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              AppStrings.recentPlaces, 
+                              "Son Gittiği Yerler", 
                               style: AppTextStyles.h3.copyWith(fontSize: 18)
                             ),
                             Text(
-                              AppStrings.seeAll, 
+                              "Tümünü Gör", 
                               style: AppTextStyles.caption.copyWith(
-                                color: theme.primaryColor, 
+                                color: AppColors.primary, 
                                 fontWeight: FontWeight.bold
                               )
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          child: Row(
-                            children: [
-                              _buildRecentPlaceItem(context, "place_1", "Espresso Lab", "2s ${AppStrings.hourAgo}", "https://picsum.photos/200/200?random=1", theme),
-                              _buildRecentPlaceItem(context, "place_2", "Moda Sahil", "Dün", "https://picsum.photos/200/200?random=2", theme),
-                              _buildRecentPlaceItem(context, "place_3", "Bina", "3 ${AppStrings.dayAgo}", "https://picsum.photos/200/200?random=3", theme),
-                            ],
-                          ),
+                        
+                        // 🔥 ARTIK LİSTE BURADA YÜKLENİYOR
+                        FutureBuilder<List<Map<String, dynamic>>>(
+                          future: SupabaseService().getRecentVisits(targetUid),
+                          builder: (context, snapshot) {
+                            // Yükleniyor
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const SizedBox(
+                                height: 100,
+                                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                              );
+                            }
+
+                            final visits = snapshot.data ?? [];
+
+                            // Boş İse Mesaj Göster (Ama Başlık Yukarıda Kaldı!)
+                            if (visits.isEmpty) {
+                              return Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 24),
+                                decoration: BoxDecoration(
+                                  color: theme.cardColor.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: isDark ? Border.all(color: Colors.white12) : null,
+                                ),
+                                child: Column(
+                                  children: [
+                                    Icon(Icons.map_outlined, color: theme.disabledColor, size: 30),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      "Henüz bir check-in yapmamış.", 
+                                      style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor)
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            // Dolu İse Listeyi Göster
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              physics: const BouncingScrollPhysics(),
+                              child: Row(
+                                children: visits.map((visit) {
+                                  // Zaman Hesaplama
+                                  DateTime visitDate = DateTime.parse(visit['visit_time']);
+                                  Duration diff = DateTime.now().difference(visitDate);
+                                  String timeAgo;
+                                  if (diff.inHours < 24) {
+                                    timeAgo = "${diff.inHours}s önce";
+                                  } else {
+                                    timeAgo = "${diff.inDays} gün önce";
+                                  }
+
+                                  return _buildRecentPlaceItem(
+                                    context, 
+                                    visit['place_id'].toString(), 
+                                    visit['place_name'], 
+                                    timeAgo, 
+                                    visit['place_image'] ?? "https://picsum.photos/200", 
+                                    theme
+                                  );
+                                }).toList(),
+                              ),
+                            );
+                          },
                         ),
 
                         const SizedBox(height: 40),
@@ -292,23 +347,20 @@ class UserSheet {
                               flex: 3,
                               child: ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: theme.primaryColor,
+                                  backgroundColor: AppColors.primary,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 18), // Yükseklik standardı
+                                  padding: const EdgeInsets.symmetric(vertical: 18),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                                   elevation: 8,
-                                  shadowColor: theme.primaryColor.withOpacity(0.4),
+                                  shadowColor: AppColors.primary.withOpacity(0.4),
                                 ),
                                 onPressed: () {
                                   HapticFeedback.mediumImpact();
                                   Navigator.pop(context);
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(userName: userData['name'] ?? '', userId: targetUid)));
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(userName: displayName, userId: targetUid)));
                                 },
                                 icon: const Icon(Icons.chat_bubble_rounded, size: 22),
-                                label: Text(
-                                  AppStrings.sendMessage, 
-                                  style: AppTextStyles.button
-                                ),
+                                label: Text("Mesaj Gönder", style: AppTextStyles.button),
                               ),
                             ),
                             const SizedBox(width: 15),
@@ -328,10 +380,7 @@ class UserSheet {
                                   Navigator.pop(context); 
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => FriendProfileScreen(targetUserId: targetUid)));
                                 }, 
-                                child: Text(
-                                  AppStrings.visitProfile, 
-                                  style: AppTextStyles.button.copyWith(color: theme.textTheme.bodyLarge?.color)
-                                ),
+                                child: Text("Profili Gör", style: AppTextStyles.button.copyWith(color: theme.textTheme.bodyLarge?.color)),
                               ),
                             ),
                           ],
@@ -361,7 +410,7 @@ class UserSheet {
     );
   }
 
-  static Widget _buildCompactGlassStat(String val, String label, IconData icon, Color color, ThemeData theme) {
+  static Widget _buildStatCard(String val, String label, IconData icon, Color color, ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
     return Expanded(
       child: Container(
@@ -376,14 +425,8 @@ class UserSheet {
           children: [
             Icon(icon, size: 18, color: color), 
             const SizedBox(height: 6),
-            Text(
-              val, 
-              style: AppTextStyles.h3.copyWith(fontSize: 16)
-            ), 
-            Text(
-              label, 
-              style: AppTextStyles.caption.copyWith(color: theme.disabledColor, fontWeight: FontWeight.bold)
-            ), 
+            Text(val, style: AppTextStyles.h3.copyWith(fontSize: 16)), 
+            Text(label, style: AppTextStyles.caption.copyWith(color: theme.disabledColor, fontWeight: FontWeight.bold)), 
           ],
         ),
       ),
@@ -424,21 +467,13 @@ class UserSheet {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name, 
-                    maxLines: 1, 
-                    overflow: TextOverflow.ellipsis, 
-                    style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold)
-                  ),
+                  Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 2),
                   Row(
                     children: [
                       Icon(Icons.access_time_rounded, size: 10, color: theme.disabledColor),
                       const SizedBox(width: 3),
-                      Text(
-                        time, 
-                        style: AppTextStyles.caption.copyWith(color: theme.disabledColor, fontSize: 10)
-                      ),
+                      Text(time, style: AppTextStyles.caption.copyWith(color: theme.disabledColor, fontSize: 10)),
                     ],
                   )
                 ],

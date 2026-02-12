@@ -10,7 +10,7 @@ import '../../core/app_strings.dart';
 import '../../screens/notifications_screen.dart';
 import '../../screens/settings_screen.dart';
 import '../../screens/polls_screen.dart'; 
-import '../common/anonymous_popup.dart'; 
+import '../dialogs/anonymous_popup.dart'; 
 
 class BalloonMenu extends StatelessWidget {
   final bool isOpen;

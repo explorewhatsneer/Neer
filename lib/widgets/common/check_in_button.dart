@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Haptic Feedback
+import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 
-// CORE IMPORTLARI
+// 🔥 CORE IMPORTLAR
+import '../../core/constants.dart';
 import '../../core/text_styles.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
+import '../../core/theme_styles.dart'; 
 
-import '../../services/firestore_service.dart';
-import '../../screens/group_chat_screen.dart';
+import '../../widgets/dialogs/check_in_dialog.dart'; 
 
 class CheckInButton extends StatefulWidget {
   final String venueId;
   final String venueName;
   final String venueImage;
-  final VoidCallback? onCheckInSuccess; // İşlem bitince yapılacak ek işler
+  final VoidCallback? onCheckInSuccess;
 
   const CheckInButton({
     super.key,
@@ -29,135 +32,126 @@ class CheckInButton extends StatefulWidget {
 
 class _CheckInButtonState extends State<CheckInButton> {
   bool _isLoading = false;
-  final FirestoreService _firestoreService = FirestoreService();
+  final _supabase = Supabase.instance.client;
 
-  void _handleCheckIn() async {
-    // 1. Fiziksel Geri Bildirim
+  Future<void> _handleCheckIn() async {
     HapticFeedback.heavyImpact();
-    
     setState(() => _isLoading = true);
 
-    final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final theme = Theme.of(context);
-    
     try {
-      // Supabase ID'si alınıyor
-      final String? myUid = Supabase.instance.client.auth.currentUser?.id;
+      final String? myUid = _supabase.auth.currentUser?.id;
+      if (myUid == null) throw Exception("Oturum açık değil.");
 
-      if (myUid == null) {
-        throw Exception("Kullanıcı oturumu bulunamadı.");
+      // --- 1. İzinler ve Servis ---
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) throw 'GPS Kapalı.';
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) throw 'Konum izni reddedildi.';
       }
-      
-      // 2. Servisi çağır (Safe ID döner)
-      // 🔥 DÜZELTME: Parametreler sırasıyla (userId, placeId, placeName) gönderiliyor.
-      String safeId = await _firestoreService.sendCheckIn(
-        myUid,            // 1. Parametre: User ID
-        widget.venueId,   // 2. Parametre: Mekan ID
-        widget.venueName, // 3. Parametre: Mekan İsmi
+
+      // --- 2. Konum Alma ---
+      Position userPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best,
       );
-      
-      // 3. Başarılı mesajı (Premium SnackBar)
-      if (mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.rocket_launch_rounded, color: Colors.white, size: 20),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    AppStrings.checkInSuccess, 
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: Colors.white, 
-                      fontWeight: FontWeight.w600
-                    )
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: const Color(0xFF34C759), // Başarı Yeşili
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            duration: const Duration(milliseconds: 1500),
-          ),
-        );
+
+      final placeData = await _supabase
+          .from('places')
+          .select('latitude, longitude')
+          .eq('id', widget.venueId)
+          .single();
+
+      final Distance distance = const Distance();
+      final double meterDist = distance.as(
+        LengthUnit.Meter,
+        LatLng(userPosition.latitude, userPosition.longitude),
+        LatLng(placeData['latitude'], placeData['longitude']),
+      );
+
+      debugPrint("📏 Mesafe: $meterDist metre");
+
+      // --- 3. Mesafe Kontrolü ---
+      if (meterDist > 125) {
+        throw 'Mekana çok uzaksın (${meterDist.toInt()}m).';
       }
 
-      // 4. Ekstra callback (Varsa çalıştır)
-      if (widget.onCheckInSuccess != null) {
-        widget.onCheckInSuccess!();
-      }
+      // --- 4. Veritabanı Kayıt ---
+      await _supabase.from('visits').insert({
+        'user_id': myUid,
+        'place_id': widget.venueId,
+      });
 
-      // 5. Hafif gecikme ile yönlendirme
-      await Future.delayed(const Duration(milliseconds: 300));
-
+      // --- 5. BAŞARILI ---
       if (mounted) {
-        navigator.push(
-          MaterialPageRoute(
-            builder: (context) => GroupChatScreen(
-              groupId: safeId,
-              groupName: widget.venueName,
-              groupImage: widget.venueImage,
-            ),
-          ),
+        setState(() => _isLoading = false);
+        HapticFeedback.mediumImpact();
+        
+        if (widget.onCheckInSuccess != null) widget.onCheckInSuccess!();
+
+        // 🔥 ARTIK SADECE VERİYİ YOLLUYORUZ
+        // Navigasyon işini Dialog'un kendisine bıraktık.
+        // Böylece buton unmount olsa bile Dialog hayatta olduğu için çalışacak.
+        CheckInDialog.show(
+          context,
+          isSuccess: true,
+          title: "İçeridesin! 🎉",
+          message: "${widget.venueName} mekanına girişin onaylandı. Sohbet seni bekliyor.",
+          // Verileri Dialog'a emanet et:
+          venueId: widget.venueId,
+          venueName: widget.venueName,
+          venueImage: widget.venueImage,
         );
       }
       
     } catch (e) {
       if (mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              "${AppStrings.error}: $e", 
-              style: AppTextStyles.bodySmall.copyWith(color: Colors.white)
-            ),
-            backgroundColor: theme.colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-          )
-        );
-      }
-    } finally {
-      if (mounted) {
         setState(() => _isLoading = false);
+        HapticFeedback.vibrate();
+        
+        CheckInDialog.show(
+          context,
+          isSuccess: false,
+          title: "Giriş Yapılamadı",
+          message: e.toString().replaceAll("Exception: ", ""),
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return SizedBox(
+    return Container(
       width: double.infinity,
-      height: 56, // Standart Premium Yükseklik
+      height: 56,
+      decoration: BoxDecoration(
+        boxShadow: _isLoading ? [] : AppThemeStyles.shadowHigh, 
+        borderRadius: AppThemeStyles.radius24,
+      ),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: theme.primaryColor, 
+          backgroundColor: AppColors.primary, 
           foregroundColor: Colors.white,
-          elevation: _isLoading ? 0 : 8,
-          shadowColor: theme.primaryColor.withOpacity(0.5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius24),
           padding: EdgeInsets.zero,
         ),
         onPressed: _isLoading ? null : _handleCheckIn,
         child: _isLoading
             ? const SizedBox(
-                height: 24, 
-                width: 24, 
-                child: CircularProgressIndicator(
-                  color: Colors.white, 
-                  strokeWidth: 2.5
-                )
+                height: 24, width: 24, 
+                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5)
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.location_on_rounded, size: 20),
+                  const Icon(Icons.location_on_rounded, size: 22),
                   const SizedBox(width: 8),
                   Text(
                     AppStrings.checkIn, 
-                    style: AppTextStyles.button, 
+                    style: AppTextStyles.button.copyWith(fontSize: 17, letterSpacing: -0.3),
                   ),
                 ],
               ),

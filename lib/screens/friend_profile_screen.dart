@@ -405,7 +405,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                           
                           return StackedCardCarousel(
                             itemCount: snapshot.data!.length,
-                            height: 140, // Yatay kart olduğu için kısa
+                            height: 240, // Yatay kart olduğu için kısa
                             itemBuilder: (context, index) {
                               var rev = snapshot.data![index];
                               return DetailedReviewCard(
@@ -417,7 +417,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                             },
                           );
                       }),
-
+                    
                   ] else ...[const SizedBox(height: 50), const FriendPrivateView()]
                 ],
               ),

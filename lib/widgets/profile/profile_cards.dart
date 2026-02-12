@@ -256,7 +256,7 @@ class _DetailedReviewCardState extends State<DetailedReviewCard> {
                           ),
                         ),
                         
-                        const SizedBox(width: 18),
+                        const SizedBox(width: 14),
 
                         // 2. Başlık ve Bilgiler
                         Expanded(
@@ -295,7 +295,7 @@ class _DetailedReviewCardState extends State<DetailedReviewCard> {
                               color: theme.scaffoldBackgroundColor,
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: theme.disabledColor),
+                            child: Icon(Icons.arrow_forward_ios_rounded, size: 10, color: theme.disabledColor),
                           ),
                         ),
                       ],
@@ -381,9 +381,9 @@ class _DetailedReviewCardState extends State<DetailedReviewCard> {
               // Arka plan barı
               Container(
                 height: 6, 
-                width: double.infinity, 
+                width: 100, 
                 decoration: BoxDecoration(
-                  color: theme.dividerColor.withOpacity(0.08), 
+                  color: theme.dividerColor.withOpacity(0.8), 
                   borderRadius: BorderRadius.circular(3)
                 )
               ),
@@ -392,7 +392,7 @@ class _DetailedReviewCardState extends State<DetailedReviewCard> {
                 duration: const Duration(milliseconds: 800),
                 curve: Curves.easeOutExpo,
                 height: 6,
-                width: 120 * (val / 5.0), // Container genişliğine oranla (yaklaşık)
+                width: 100 * (val / 5.5), // Container genişliğine oranla (yaklaşık)
                 decoration: BoxDecoration(
                   color: color, 
                   borderRadius: BorderRadius.circular(3),

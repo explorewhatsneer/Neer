@@ -12,7 +12,7 @@ import '../../main.dart';
 
 // WIDGETLAR
 import '../widgets/settings/settings_widgets.dart'; 
-import '../widgets/common/anonymous_popup.dart'; 
+import '../widgets/dialogs/anonymous_popup.dart'; 
 
 // DİĞER EKRANLAR
 import 'login_screen.dart';

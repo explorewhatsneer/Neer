@@ -11,7 +11,7 @@ import '../core/app_strings.dart';
 // MODELLER & SERVİSLER
 import '../models/user_model.dart';
 import '../models/post_model.dart';
-import '../services/firestore_service.dart';
+import '../services/supabase_service.dart';
 
 // WIDGETLAR
 // 🔥 YENİ TASARIM COMPONENTLERİ (StackedCardCarousel, RankingPodium vb.)
@@ -36,7 +36,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
-  final FirestoreService _firestoreService = FirestoreService();
+  final SupabaseService _supabaseService = SupabaseService();
   final String _uid = supabase.auth.currentUser!.id;
 
   late TabController _mainTabController;
@@ -61,18 +61,18 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     _mainTabController = TabController(length: 3, vsync: this);
     
     _fetchUserData();
-    _favoritesStream = _firestoreService.getUserFavorites(_uid);
-    _notesStream = _firestoreService.getUserNotes(_uid);
-    _photosStream = _firestoreService.getUserPhotos(_uid);
-    _activityStream = _firestoreService.getUserActivityFeed(_uid);
+    _favoritesStream = _supabaseService.getUserFavorites(_uid);
+    _notesStream = _supabaseService.getUserNotes(_uid);
+    _photosStream = _supabaseService.getUserPhotos(_uid);
+    _activityStream = _supabaseService.getUserActivityFeed(_uid);
     
-    _questsFuture = _firestoreService.getUserQuests(_uid);
-    _frequentPlacesFuture = _firestoreService.getFrequentPlaces(_uid);
-    _surveyHistoryFuture = _firestoreService.getSurveyHistory(_uid);
+    _questsFuture = _supabaseService.getUserQuests(_uid);
+    _frequentPlacesFuture = _supabaseService.getFrequentPlaces(_uid);
+    _surveyHistoryFuture = _supabaseService.getSurveyHistory(_uid);
   }
 
   Future<void> _fetchUserData() async {
-    UserModel? user = await _firestoreService.getUser(_uid);
+    UserModel? user = await _supabaseService.getUser(_uid);
     if (mounted) {
       setState(() {
         _user = user;
@@ -182,13 +182,13 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                           if (context.mounted) {
                              _fetchUserData(); 
                              setState(() {
-                               _favoritesStream = _firestoreService.getUserFavorites(_uid);
-                               _notesStream = _firestoreService.getUserNotes(_uid);
-                               _photosStream = _firestoreService.getUserPhotos(_uid);
-                               _activityStream = _firestoreService.getUserActivityFeed(_uid);
-                               _questsFuture = _firestoreService.getUserQuests(_uid);
-                               _frequentPlacesFuture = _firestoreService.getFrequentPlaces(_uid);
-                               _surveyHistoryFuture = _firestoreService.getSurveyHistory(_uid);
+                               _favoritesStream = _supabaseService.getUserFavorites(_uid);
+                               _notesStream = _supabaseService.getUserNotes(_uid);
+                               _photosStream = _supabaseService.getUserPhotos(_uid);
+                               _activityStream = _supabaseService.getUserActivityFeed(_uid);
+                               _questsFuture = _supabaseService.getUserQuests(_uid);
+                               _frequentPlacesFuture = _supabaseService.getFrequentPlaces(_uid);
+                               _surveyHistoryFuture = _supabaseService.getSurveyHistory(_uid);
                              }); 
                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Fake Data Eklendi! ✅")));
                           }

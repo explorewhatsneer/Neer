@@ -17,8 +17,9 @@ class UserModel {
   final double trustScore;
   final int followersCount;   // Takipçi Sayısı (SQL: followers_count)
   final int followingCount;   // Takip Edilen Sayısı (SQL: following_count)
-
-  // ❌ 'friends' listesi KALDIRILDI (Artık followers tablosu var)
+  final double? latitude;
+  final double? longitude;
+  final DateTime? lastLocationUpdate;
 
   UserModel({
     required this.uid,
@@ -38,6 +39,9 @@ class UserModel {
     this.trustScore = 5.0, 
     this.followersCount = 0,
     this.followingCount = 0,
+    this.latitude,
+    this.longitude,
+    this.lastLocationUpdate,
   });
 
   // Veritabanına yazarken (Supabase snake_case kullanır)
@@ -58,9 +62,9 @@ class UserModel {
       'check_in_count': checkInCount,
       'photo_count': photoCount,
       'trust_score': trustScore,
-      // Not: Sayaçlar genellikle trigger ile güncellenir, buradan yazmaya gerek olmayabilir ama
-      // profil güncellerken üzerine yazılmaması için buraya eklemiyoruz veya mevcut değeri gönderiyoruz.
-      // Genellikle followers_count ve following_count manuel update edilmez.
+      'latitude': latitude,
+      'longitude': longitude,
+      'last_location_update': lastLocationUpdate?.toIso8601String(),
     };
   }
 
@@ -94,6 +98,12 @@ class UserModel {
       // 🔥 'map' hatası burada çözüldü:
       followersCount: map['followers_count'] ?? 0, 
       followingCount: map['following_count'] ?? 0,
+      // 🔥 KONUM VERİLERİNİ ÇEKİYORUZ
+      latitude: map['latitude'] != null ? (map['latitude'] as num).toDouble() : null,
+      longitude: map['longitude'] != null ? (map['longitude'] as num).toDouble() : null,
+      lastLocationUpdate: map['last_location_update'] != null 
+          ? DateTime.tryParse(map['last_location_update'].toString()) 
+          : null,
     );
   }
 

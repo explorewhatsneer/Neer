@@ -2,7 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
 import '../models/post_model.dart';
 
-class FirestoreService {
+class SupabaseService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
   // --- 1. KULLANICI BİLGİSİ ---
@@ -124,6 +124,16 @@ class FirestoreService {
     } catch (e) {
       print("Check-in Hatası: $e");
       return ""; // Hata durumunda boş string
+    }
+  }
+  // Kullanıcının son ziyaretlerini getir
+  Future<List<Map<String, dynamic>>> getRecentVisits(String uid) async {
+    try {
+      final response = await _supabase.rpc('get_user_recent_visits', params: {'target_uid': uid});
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      print("Ziyaretler çekilirken hata: $e");
+      return [];
     }
   }
 }
