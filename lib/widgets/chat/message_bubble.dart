@@ -39,7 +39,7 @@ class MessageBubble extends StatelessWidget {
         : theme.textTheme.bodyLarge?.color; 
 
     final timeColor = isMe 
-        ? Colors.white.withOpacity(0.7)
+        ? Colors.white.withValues(alpha: 0.7)
         : theme.disabledColor;
 
     return Align(
@@ -60,7 +60,7 @@ class MessageBubble extends StatelessWidget {
           border: (!isMe && isDark) ? Border.all(color: Colors.white12, width: 0.5) : null,
           boxShadow: isDark ? [] : [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05), 
+              color: Colors.black.withValues(alpha: 0.05), 
               blurRadius: 4, 
               offset: const Offset(0, 2)
             )
@@ -99,7 +99,7 @@ class MessageBubble extends StatelessWidget {
                   Icon(
                     Icons.done_all_rounded, 
                     size: 15, 
-                    color: Colors.white.withOpacity(0.9)
+                    color: Colors.white.withValues(alpha: 0.9)
                   )
                 ]
               ],

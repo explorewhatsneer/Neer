@@ -97,9 +97,9 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
               padding: const EdgeInsets.all(20),
               margin: const EdgeInsets.only(bottom: 30),
               decoration: BoxDecoration(
-                color: theme.primaryColor.withOpacity(isDark ? 0.2 : 0.08),
+                color: theme.primaryColor.withValues(alpha: isDark ? 0.2 : 0.08),
                 borderRadius: AppThemeStyles.radius24,
-                border: Border.all(color: theme.primaryColor.withOpacity(0.3)),
+                border: Border.all(color: theme.primaryColor.withValues(alpha: 0.3)),
               ),
               child: Column(
                 children: [
@@ -188,7 +188,7 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.15),
+            color: color.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: color, size: 24),
@@ -208,7 +208,7 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
             ? Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF34C759).withOpacity(0.15), // Green bg
+                  color: const Color(0xFF34C759).withValues(alpha: 0.15), // Green bg
                   borderRadius: BorderRadius.circular(20)
                 ),
                 child: Text(

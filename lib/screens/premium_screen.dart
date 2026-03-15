@@ -76,24 +76,24 @@ class _PremiumScreenState extends State<PremiumScreen> {
           // Altın Işık (Sağ Üst)
           Positioned(
             top: -100, right: -50, 
-            child: _buildLightBlob(const Color(0xFFFFD700).withOpacity(0.3))
+            child: _buildLightBlob(const Color(0xFFFFD700).withValues(alpha: 0.3))
           ),
           // Bordo Işık (Sol Alt - Marka Rengi)
           Positioned(
             bottom: -50, left: -50, 
-            child: _buildLightBlob(const Color(0xFF8C003A).withOpacity(0.4))
+            child: _buildLightBlob(const Color(0xFF8C003A).withValues(alpha: 0.4))
           ),
           // Mavi Işık (Orta - Derinlik)
           Positioned(
             top: 200, left: -80, 
-            child: _buildLightBlob(Colors.blueAccent.withOpacity(0.2), size: 200)
+            child: _buildLightBlob(Colors.blueAccent.withValues(alpha: 0.2), size: 200)
           ),
           
           // Blur Efekti (Tüm ışıkları yumuşatır)
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
-              child: Container(color: Colors.white.withOpacity(0.2)),
+              child: Container(color: Colors.white.withValues(alpha: 0.2)),
             ),
           ),
 
@@ -117,7 +117,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withValues(alpha: 0.1),
                               shape: BoxShape.circle
                             ),
                             child: const Icon(Icons.close_rounded, color: Colors.white, size: 24),
@@ -127,9 +127,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFD700).withOpacity(0.2), 
+                            color: const Color(0xFFFFD700).withValues(alpha: 0.2), 
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: const Color(0xFFFFD700).withOpacity(0.5))
+                            border: Border.all(color: const Color(0xFFFFD700).withValues(alpha: 0.5))
                           ),
                           child: const Text(
                             "GOLD MEMBER", 
@@ -150,13 +150,13 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: LinearGradient(
-                          colors: [Colors.white.withOpacity(0.1), Colors.white.withOpacity(0.02)],
+                          colors: [Colors.white.withValues(alpha: 0.1), Colors.white.withValues(alpha: 0.02)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight
                         ),
-                        border: Border.all(color: Colors.white.withOpacity(0.2)),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                         boxShadow: [
-                          BoxShadow(color: const Color(0xFFFFD700).withOpacity(0.2), blurRadius: 40, spreadRadius: 5)
+                          BoxShadow(color: const Color(0xFFFFD700).withValues(alpha: 0.2), blurRadius: 40, spreadRadius: 5)
                         ]
                       ),
                       child: const Icon(Icons.diamond_rounded, size: 60, color: Color(0xFFFFD700)),
@@ -181,7 +181,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     child: Text(
                       AppStrings.premiumSlogan,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 15, height: 1.5),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 15, height: 1.5),
                     ),
                   ),
 
@@ -255,7 +255,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                           end: Alignment.centerRight,
                         ),
                         boxShadow: [
-                          BoxShadow(color: const Color(0xFFFFD700).withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 8))
+                          BoxShadow(color: const Color(0xFFFFD700).withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 8))
                         ]
                       ),
                       child: ElevatedButton(
@@ -289,7 +289,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     child: Text(
                       AppStrings.legalText,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11, height: 1.4),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11, height: 1.4),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -328,7 +328,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3), 
+            color: Colors.black.withValues(alpha: 0.3), 
             blurRadius: 20, 
             offset: const Offset(0, 10)
           )
@@ -340,7 +340,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: item['color'].withOpacity(0.1),
+              color: item['color'].withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(item['icon'], size: 40, color: item['color']),
@@ -396,7 +396,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.white.withOpacity(0.05),
+          color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isSelected ? const Color(0xFFFFD700) : Colors.white12, 
@@ -423,7 +423,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       margin: const EdgeInsets.only(bottom: 6),
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFFFFD700) : const Color(0xFFFFD700).withOpacity(0.2), 
+                        color: isSelected ? const Color(0xFFFFD700) : const Color(0xFFFFD700).withValues(alpha: 0.2), 
                         borderRadius: BorderRadius.circular(6)
                       ),
                       child: Text(

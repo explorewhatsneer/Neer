@@ -52,7 +52,7 @@ class ReviewCard extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 5)],
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 5)],
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
@@ -86,7 +86,7 @@ class ReviewCard extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFFB400).withOpacity(0.15), // Amber Rengi
+                              color: const Color(0xFFFFB400).withValues(alpha: 0.15), // Amber Rengi
                               borderRadius: BorderRadius.circular(8)
                             ),
                             child: Row(
@@ -150,7 +150,7 @@ class ReviewCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: theme.scaffoldBackgroundColor, 
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
+                border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
               ),
               child: Row(
                 children: [
@@ -178,7 +178,7 @@ class ReviewCard extends StatelessWidget {
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 5,
-                  shadowColor: theme.primaryColor.withOpacity(0.4),
+                  shadowColor: theme.primaryColor.withValues(alpha: 0.4),
                 ),
                 onPressed: () {
                   HapticFeedback.mediumImpact(); // Titreşim

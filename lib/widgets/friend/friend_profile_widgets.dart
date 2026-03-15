@@ -84,7 +84,7 @@ class HistoryItemCard extends StatelessWidget {
             Container(
               width: 48, height: 48,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(icon, size: 24, color: color),
@@ -116,7 +116,7 @@ class HistoryItemCard extends StatelessWidget {
                     maxLines: 2, 
                     overflow: TextOverflow.ellipsis, 
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8)
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.8)
                     )
                   ),
                 ],
@@ -178,7 +178,7 @@ class FriendEmptyCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: theme.dividerColor.withOpacity(0.05),
+                  color: theme.dividerColor.withValues(alpha: 0.05),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, size: 32, color: theme.disabledColor),
@@ -188,7 +188,7 @@ class FriendEmptyCard extends StatelessWidget {
                 title, 
                 style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: theme.textTheme.bodyLarge?.color?.withOpacity(0.8)
+                  color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.8)
                 ),
                 textAlign: TextAlign.center,
               ),

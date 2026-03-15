@@ -23,7 +23,7 @@ class SectionHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: theme.primaryColor.withOpacity(0.1), 
+              color: theme.primaryColor.withValues(alpha: 0.1), 
               borderRadius: BorderRadius.circular(8)
             ),
             child: Icon(icon, size: 18, color: theme.primaryColor),
@@ -75,7 +75,7 @@ class PlaceStatsRow extends StatelessWidget {
     );
   }
 
-  Widget _divider(ThemeData theme) => Container(width: 1, height: 30, color: theme.dividerColor.withOpacity(0.5));
+  Widget _divider(ThemeData theme) => Container(width: 1, height: 30, color: theme.dividerColor.withValues(alpha: 0.5));
 
   Widget _buildItem(String value, String label, IconData icon, Color color, ThemeData theme) {
     return Column(
@@ -208,7 +208,7 @@ class InteractionStatsGrid extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: AppThemeStyles.radius16,
-        boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)],
+        boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5)],
         border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
       ),
       child: Column(
@@ -242,9 +242,9 @@ class VenueLeaderboard extends StatelessWidget {
       child: Column(
         children: [
           _buildUserRow(1, "zeynepkamil", "42 Ziyaret", "https://i.pravatar.cc/150?u=1", theme),
-          Divider(color: theme.dividerColor.withOpacity(0.5)),
+          Divider(color: theme.dividerColor.withValues(alpha: 0.5)),
           _buildUserRow(2, "canbertkorkmaz", "38 Ziyaret", "https://i.pravatar.cc/150?u=2", theme),
-          Divider(color: theme.dividerColor.withOpacity(0.5)),
+          Divider(color: theme.dividerColor.withValues(alpha: 0.5)),
           _buildUserRow(3, "ingebogan", "21 Ziyaret", "https://i.pravatar.cc/150?u=3", theme),
         ],
       ),
@@ -302,7 +302,7 @@ class FriendNoteBubble extends StatelessWidget {
               bottomLeft: Radius.circular(20), 
               bottomRight: Radius.circular(20)
             ),
-            boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+            boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
             border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
           ),
           child: Column(
@@ -389,7 +389,7 @@ class DetailedRatingBars extends StatelessWidget {
           borderRadius: BorderRadius.circular(3),
           child: LinearProgressIndicator(
             value: percent, 
-            backgroundColor: theme.dividerColor.withOpacity(0.2), 
+            backgroundColor: theme.dividerColor.withValues(alpha: 0.2), 
             color: theme.primaryColor, 
             minHeight: 6
           ),
@@ -415,7 +415,7 @@ class LocationQrRow extends StatelessWidget {
           child: Container(
             height: 120,
             decoration: BoxDecoration(
-              color: theme.dividerColor.withOpacity(0.1),
+              color: theme.dividerColor.withValues(alpha: 0.1),
               borderRadius: AppThemeStyles.radius16,
               image: const DecorationImage(
                 image: NetworkImage("https://maps.googleapis.com/maps/api/staticmap?center=41.0082,28.9784&zoom=14&size=400x200&sensor=false"), 
@@ -436,7 +436,7 @@ class LocationQrRow extends StatelessWidget {
             decoration: BoxDecoration(
               color: theme.cardColor,
               borderRadius: AppThemeStyles.radius16,
-              border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
+              border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

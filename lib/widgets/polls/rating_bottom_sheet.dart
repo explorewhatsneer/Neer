@@ -54,7 +54,7 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
 
   // Tekil Puan Rengi
   Color _getColorForScore(int score) {
-    if (score == 0) return Colors.grey.withOpacity(0.5);
+    if (score == 0) return Colors.grey.withValues(alpha: 0.5);
     if (score <= 2) return const Color(0xFFFF3B30);
     if (score == 3) return const Color(0xFFFF9500);
     if (score == 4) return const Color(0xFF34C759);
@@ -84,9 +84,9 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
           height: MediaQuery.of(context).size.height * 0.9,
           decoration: BoxDecoration(
             // Dinamik Glass Rengi
-            color: isDark ? Colors.black.withOpacity(0.85) : Colors.white.withOpacity(0.92),
+            color: isDark ? Colors.black.withValues(alpha: 0.85) : Colors.white.withValues(alpha: 0.92),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
-            border: Border(top: BorderSide(color: Colors.white.withOpacity(0.2), width: 1)),
+            border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1)),
           ),
           child: Column(
             children: [
@@ -95,7 +95,7 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
               Container(
                 width: 40, height: 5, 
                 decoration: BoxDecoration(
-                  color: theme.dividerColor.withOpacity(0.5), 
+                  color: theme.dividerColor.withValues(alpha: 0.5), 
                   borderRadius: BorderRadius.circular(10)
                 )
               ),
@@ -182,7 +182,7 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                             elevation: 8,
-                            shadowColor: theme.primaryColor.withOpacity(0.4),
+                            shadowColor: theme.primaryColor.withValues(alpha: 0.4),
                           ),
                           onPressed: () {
                             HapticFeedback.heavyImpact();
@@ -229,7 +229,7 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
               child: CircularProgressIndicator(
                 value: 1.0, 
                 strokeWidth: 8, 
-                valueColor: AlwaysStoppedAnimation<Color>(theme.dividerColor.withOpacity(0.2)), 
+                valueColor: AlwaysStoppedAnimation<Color>(theme.dividerColor.withValues(alpha: 0.2)), 
                 strokeCap: StrokeCap.round
               )
             ),
@@ -290,10 +290,10 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: isRated ? slotColor.withOpacity(0.1) : theme.cardColor,
+        color: isRated ? slotColor.withValues(alpha: 0.1) : theme.cardColor,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isRated ? slotColor.withOpacity(0.4) : theme.dividerColor.withOpacity(0.5), 
+          color: isRated ? slotColor.withValues(alpha: 0.4) : theme.dividerColor.withValues(alpha: 0.5), 
           width: 1.5
         ),
       ),
@@ -302,10 +302,10 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: isRated ? theme.cardColor : theme.dividerColor.withOpacity(0.1),
+              color: isRated ? theme.cardColor : theme.dividerColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
               boxShadow: isRated 
-                ? [BoxShadow(color: slotColor.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 2))]
+                ? [BoxShadow(color: slotColor.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 2))]
                 : []
             ),
             child: Icon(
@@ -343,7 +343,7 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
                     duration: const Duration(milliseconds: 200),
                     child: Icon(
                       isSelected ? Icons.star_rounded : Icons.star_outline_rounded,
-                      color: isSelected ? slotColor : theme.disabledColor.withOpacity(0.3),
+                      color: isSelected ? slotColor : theme.disabledColor.withValues(alpha: 0.3),
                       size: 30, 
                     ),
                   ),
@@ -375,7 +375,7 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
             width: 1
           ), 
           boxShadow: isSelected 
-            ? [BoxShadow(color: theme.primaryColor.withOpacity(0.4), blurRadius: 8, offset: const Offset(0, 4))] 
+            ? [BoxShadow(color: theme.primaryColor.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 4))] 
             : []
         ), 
         child: Text(

@@ -121,7 +121,7 @@ class _RankAvatar extends StatelessWidget {
                   border: Border.all(color: color, width: 4), // Kalın, belirgin çerçeve
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 15,
                       offset: const Offset(0, 8),
                     )
@@ -142,7 +142,7 @@ class _RankAvatar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 3),
                     boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))
+                      BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4, offset: const Offset(0, 2))
                     ],
                   ),
                   child: Text(
@@ -202,7 +202,7 @@ class SimpleRankRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor, 
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 5, offset: const Offset(0, 2))]
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 5, offset: const Offset(0, 2))]
       ),
       child: ListTile(
         onTap: onTap,
@@ -212,7 +212,7 @@ class SimpleRankRow extends StatelessWidget {
         // Sıra No
         leading: SizedBox(
           width: 30,
-          child: Text("#$rank", style: AppTextStyles.h3.copyWith(fontSize: 16, color: Theme.of(context).disabledColor.withOpacity(0.5))),
+          child: Text("#$rank", style: AppTextStyles.h3.copyWith(fontSize: 16, color: Theme.of(context).disabledColor.withValues(alpha: 0.5))),
         ),
         
         // İsim ve Ziyaret

@@ -48,12 +48,12 @@ class UserSheet {
             child: Container(
               decoration: BoxDecoration(
                 // Dinamik Glass Rengi
-                color: isDark ? Colors.black.withOpacity(0.85) : Colors.white.withOpacity(0.95),
+                color: isDark ? Colors.black.withValues(alpha: 0.85) : Colors.white.withValues(alpha: 0.95),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 40, offset: const Offset(0, 10))
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 40, offset: const Offset(0, 10))
                 ],
-                border: Border(top: BorderSide(color: Colors.white.withOpacity(0.2), width: 1)),
+                border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1)),
               ),
               child: ListView(
                 controller: controller,
@@ -88,7 +88,7 @@ class UserSheet {
                               end: Alignment.bottomCenter,
                               colors: [
                                 Colors.transparent,
-                                isDark ? Colors.black.withOpacity(0.85) : Colors.white.withOpacity(0.95), 
+                                isDark ? Colors.black.withValues(alpha: 0.85) : Colors.white.withValues(alpha: 0.95), 
                               ],
                               stops: const [0.4, 1.0],
                             ),
@@ -101,7 +101,7 @@ class UserSheet {
                           child: Container(
                             width: 40, height: 4, 
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.7), 
+                              color: Colors.white.withValues(alpha: 0.7), 
                               borderRadius: BorderRadius.circular(10)
                             )
                           ),
@@ -118,9 +118,9 @@ class UserSheet {
                                   Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
-                                      color: isDark ? Colors.black45 : Colors.white.withOpacity(0.5), 
+                                      color: isDark ? Colors.black45 : Colors.white.withValues(alpha: 0.5), 
                                       shape: BoxShape.circle,
-                                      border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 1),
+                                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1),
                                     ),
                                     child: CircleAvatar(
                                       radius: 55,
@@ -290,7 +290,7 @@ class UserSheet {
                                 width: double.infinity,
                                 padding: const EdgeInsets.symmetric(vertical: 24),
                                 decoration: BoxDecoration(
-                                  color: theme.cardColor.withOpacity(0.5),
+                                  color: theme.cardColor.withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(16),
                                   border: isDark ? Border.all(color: Colors.white12) : null,
                                 ),
@@ -352,7 +352,7 @@ class UserSheet {
                                   padding: const EdgeInsets.symmetric(vertical: 18),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                                   elevation: 8,
-                                  shadowColor: AppColors.primary.withOpacity(0.4),
+                                  shadowColor: AppColors.primary.withValues(alpha: 0.4),
                                 ),
                                 onPressed: () {
                                   HapticFeedback.mediumImpact();
@@ -372,7 +372,7 @@ class UserSheet {
                                   side: BorderSide(color: theme.dividerColor, width: 1.5),
                                   padding: const EdgeInsets.symmetric(vertical: 18),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-                                  backgroundColor: theme.cardColor.withOpacity(0.5),
+                                  backgroundColor: theme.cardColor.withValues(alpha: 0.5),
                                   foregroundColor: theme.textTheme.bodyLarge?.color,
                                 ),
                                 onPressed: () {
@@ -404,7 +404,7 @@ class UserSheet {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: theme.cardColor, width: 2),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)]
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4)]
       ),
       child: CircleAvatar(radius: 16, backgroundImage: NetworkImage(url)),
     );

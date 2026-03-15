@@ -55,7 +55,7 @@ class NeerTextField extends StatelessWidget {
             color: theme.disabledColor, 
             fontWeight: FontWeight.bold
           ),
-          icon: Icon(icon, color: theme.primaryColor.withOpacity(0.8)),
+          icon: Icon(icon, color: theme.primaryColor.withValues(alpha: 0.8)),
           contentPadding: const EdgeInsets.symmetric(vertical: 10),
         ),
       ),
@@ -125,7 +125,7 @@ class EditAvatarArea extends StatelessWidget {
         BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
           child: Container(
-            color: isDark ? Colors.black.withOpacity(0.6) : Colors.black.withOpacity(0.3),
+            color: isDark ? Colors.black.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.3),
           ),
         ),
         
@@ -141,9 +141,9 @@ class EditAvatarArea extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2), 
+                      color: Colors.white.withValues(alpha: 0.2), 
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white.withOpacity(0.3), width: 1)
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1)
                     ),
                     child: CircleAvatar(
                       radius: 60,
@@ -167,7 +167,7 @@ class EditAvatarArea extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(color: theme.scaffoldBackgroundColor, width: 3),
                           boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))
+                            BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))
                           ]
                         ),
                         child: const Icon(Icons.edit_rounded, color: Colors.white, size: 20),
@@ -187,7 +187,7 @@ class EditAvatarArea extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.4),
+                    color: Colors.black.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(20)
                   ),
                   child: Text(

@@ -41,7 +41,7 @@ class CheckInDialog extends StatefulWidget {
       context: context,
       barrierDismissible: true,
       barrierLabel: "Kapat",
-      barrierColor: Colors.black.withOpacity(0.4),
+      barrierColor: Colors.black.withValues(alpha: 0.4),
       transitionDuration: const Duration(milliseconds: 400),
       pageBuilder: (_, __, ___) => const SizedBox(),
       transitionBuilder: (context, animation, secondaryAnimation, child) {
@@ -103,8 +103,8 @@ class _CheckInDialogState extends State<CheckInDialog> {
     final isDark = theme.brightness == Brightness.dark;
 
     final Color iconBgColor = widget.isSuccess 
-        ? AppColors.accent.withOpacity(0.15) 
-        : theme.colorScheme.error.withOpacity(0.1);
+        ? AppColors.accent.withValues(alpha: 0.15) 
+        : theme.colorScheme.error.withValues(alpha: 0.1);
     
     final Color iconColor = widget.isSuccess 
         ? AppColors.accent 
@@ -126,7 +126,7 @@ class _CheckInDialogState extends State<CheckInDialog> {
             borderRadius: AppThemeStyles.radius32,
             boxShadow: AppThemeStyles.shadowMedium,
             border: Border.all(
-              color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+              color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
               width: 1,
             ),
           ),

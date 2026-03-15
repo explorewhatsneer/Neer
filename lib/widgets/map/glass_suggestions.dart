@@ -39,21 +39,21 @@ class GlassSuggestions extends StatelessWidget {
           decoration: BoxDecoration(
             // Dinamik Cam Rengi (Koyu/Açık)
             color: isDark 
-                ? Colors.black.withOpacity(0.6) 
-                : Colors.white.withOpacity(0.85),
+                ? Colors.black.withValues(alpha: 0.6) 
+                : Colors.white.withValues(alpha: 0.85),
             
             borderRadius: BorderRadius.circular(24),
             
             // Premium Çerçeve
             border: Border.all(
-              color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), 
+              color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), 
               width: 1.0
             ),
             
             // Premium Gölge
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.15), 
+                color: Colors.black.withValues(alpha: 0.15), 
                 blurRadius: 20, 
                 offset: const Offset(0, 8), 
                 spreadRadius: 2
@@ -105,7 +105,7 @@ class GlassSuggestions extends StatelessWidget {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Divider(height: 1, color: theme.dividerColor.withOpacity(0.3)),
+                  child: Divider(height: 1, color: theme.dividerColor.withValues(alpha: 0.3)),
                 ),
               ),
 
@@ -191,7 +191,7 @@ class GlassSuggestions extends StatelessWidget {
           // Seçilen veriyi geri döndür
           onItemSelected(data, id, type);
         },
-        overlayColor: MaterialStateProperty.all(theme.primaryColor.withOpacity(0.1)),
+        overlayColor: MaterialStateProperty.all(theme.primaryColor.withValues(alpha: 0.1)),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
@@ -200,7 +200,7 @@ class GlassSuggestions extends StatelessWidget {
               Container(
                 width: 40, height: 40,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
+                  color: color.withValues(alpha: 0.15),
                   borderRadius: type == 'user' ? null : BorderRadius.circular(10), // User ise daire
                   shape: type == 'user' ? BoxShape.circle : BoxShape.rectangle,
                 ),
@@ -238,7 +238,7 @@ class GlassSuggestions extends StatelessWidget {
               ),
               
               // Yönlendirme Oku
-              Icon(Icons.north_west_rounded, size: 18, color: theme.disabledColor.withOpacity(0.5)),
+              Icon(Icons.north_west_rounded, size: 18, color: theme.disabledColor.withValues(alpha: 0.5)),
             ],
           ),
         ),

@@ -230,7 +230,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     backgroundColor: theme.primaryColor,
                     foregroundColor: Colors.white,
                     elevation: _isLoading ? 0 : 8,
-                    shadowColor: theme.primaryColor.withOpacity(0.4),
+                    shadowColor: theme.primaryColor.withValues(alpha: 0.4),
                     shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
                   ),
                   child: _isLoading 
@@ -306,8 +306,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         cursorColor: theme.primaryColor,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor.withOpacity(0.7)),
-          icon: Icon(icon, color: theme.primaryColor.withOpacity(0.8)),
+          hintStyle: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor.withValues(alpha: 0.7)),
+          icon: Icon(icon, color: theme.primaryColor.withValues(alpha: 0.8)),
           border: InputBorder.none,
           suffixIcon: isPassword 
             ? IconButton(

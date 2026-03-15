@@ -19,7 +19,7 @@ class FriendPrivateView extends StatelessWidget {
           Icon(
             Icons.lock_rounded, 
             size: 80, 
-            color: theme.disabledColor.withOpacity(0.3)
+            color: theme.disabledColor.withValues(alpha: 0.3)
           ),
           
           const SizedBox(height: 20),

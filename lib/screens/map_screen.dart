@@ -237,7 +237,7 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 1.5),
         boxShadow: [
-          BoxShadow(color: color.withOpacity(0.5), blurRadius: 4, offset: const Offset(0, 1))
+          BoxShadow(color: color.withValues(alpha: 0.5), blurRadius: 4, offset: const Offset(0, 1))
         ]
       ),
     );
@@ -269,7 +269,7 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white, width: 2.5),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4))
+                BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 4))
               ],
             ),
             child: Icon(getCategoryIcon(place.category), color: Colors.white, size: 22),
@@ -306,7 +306,7 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
               color: friendColor,
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))
+                BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))
               ],
             ),
             child: CircleAvatar(
@@ -337,7 +337,7 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
         Container(
           width: 60, height: 60,
           decoration: BoxDecoration(
-            color: myColor.withOpacity(0.25), 
+            color: myColor.withValues(alpha: 0.25), 
             shape: BoxShape.circle,
           ),
         ),
@@ -348,7 +348,7 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
             shape: BoxShape.circle, 
             border: Border.all(color: myColor, width: 3),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 6, offset: const Offset(0, 3))
+              BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 6, offset: const Offset(0, 3))
             ]
           ),
           child: Padding(
@@ -610,9 +610,9 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
                             child: Container(
                               width: 50, height: 50,
                               decoration: BoxDecoration(
-                                color: isDark ? Colors.black.withOpacity(0.4) : Colors.white.withOpacity(0.7),
+                                color: isDark ? Colors.black.withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.7),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
                                 boxShadow: AppThemeStyles.shadowLow,
                               ),
                               child: Icon(
@@ -675,10 +675,10 @@ class _FloatingAvatarsCluster extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.4), // Şeffaf Mavi Balon
+        color: Colors.grey.withValues(alpha: 0.4), // Şeffaf Mavi Balon
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 2),
-        boxShadow: [BoxShadow(color: Colors.white.withOpacity(0.1), blurRadius: 10)],
+        boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.1), blurRadius: 10)],
       ),
       child: Stack(
         alignment: Alignment.center,

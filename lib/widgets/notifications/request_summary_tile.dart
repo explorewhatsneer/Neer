@@ -159,7 +159,7 @@ class RequestSummaryTile extends StatelessWidget {
                     // --- OK İŞARETİ ---
                     Icon(
                       Icons.chevron_right_rounded, 
-                      color: theme.disabledColor.withOpacity(0.5),
+                      color: theme.disabledColor.withValues(alpha: 0.5),
                       size: 24,
                     ),
                   ],

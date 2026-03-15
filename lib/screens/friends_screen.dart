@@ -346,7 +346,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: theme.primaryColor.withOpacity(0.1),
+                      color: theme.primaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(Icons.chat_bubble_outline_rounded, color: theme.primaryColor, size: 22),
@@ -366,7 +366,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.group_off_rounded, size: 80, color: theme.disabledColor.withOpacity(0.3)),
+          Icon(Icons.group_off_rounded, size: 80, color: theme.disabledColor.withValues(alpha: 0.3)),
           const SizedBox(height: 24),
           Text(
             AppStrings.noFriendsYet, 

@@ -54,7 +54,7 @@ class SettingsGroup extends StatelessWidget {
                     thickness: 0.5,
                     indent: 56, // İkon hizasından başlasın
                     endIndent: 16,
-                    color: theme.dividerColor.withOpacity(0.3),
+                    color: theme.dividerColor.withValues(alpha: 0.3),
                   ),
               ],
             ],
@@ -102,7 +102,7 @@ class SettingsItem extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: color, size: 20),
@@ -125,7 +125,7 @@ class SettingsItem extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               margin: const EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.15),
+                color: Colors.orange.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Text("PRO", style: TextStyle(color: Colors.orange, fontSize: 10, fontWeight: FontWeight.w900)),
@@ -171,7 +171,7 @@ class SettingsSwitch extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: color, size: 20),
@@ -191,7 +191,7 @@ class SettingsSwitch extends StatelessWidget {
           },
           activeColor: theme.primaryColor,
           inactiveThumbColor: theme.disabledColor,
-          inactiveTrackColor: theme.dividerColor.withOpacity(0.3),
+          inactiveTrackColor: theme.dividerColor.withValues(alpha: 0.3),
         ),
       ),
     );

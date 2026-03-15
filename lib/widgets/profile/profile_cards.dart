@@ -23,7 +23,7 @@ class PremiumCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: color ?? theme.cardColor,
           borderRadius: BorderRadius.circular(borderRadius),
-          boxShadow: shadows ?? [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 6))],
+          boxShadow: shadows ?? [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 12, offset: const Offset(0, 6))],
         ),
         child: child,
       ),
@@ -49,8 +49,8 @@ class VerticalPlaceCard extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               ClipRRect(borderRadius: BorderRadius.circular(24), child: Image.network(imgUrl, fit: BoxFit.cover)),
-              Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(24), gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withOpacity(0.8)], stops: const [0.6, 1.0]))),
-              Positioned(bottom: 20, left: 16, right: 16, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(8)), child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.star_rounded, color: Colors.amber, size: 14), const SizedBox(width: 4), Text(rating, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))])), const SizedBox(height: 6), Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 20, height: 1.1), maxLines: 2, overflow: TextOverflow.ellipsis)])),
+              Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(24), gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withValues(alpha: 0.8)], stops: const [0.6, 1.0]))),
+              Positioned(bottom: 20, left: 16, right: 16, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)), child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.star_rounded, color: Colors.amber, size: 14), const SizedBox(width: 4), Text(rating, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))])), const SizedBox(height: 6), Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 20, height: 1.1), maxLines: 2, overflow: TextOverflow.ellipsis)])),
             ],
           ),
         ),
@@ -85,7 +85,7 @@ class VerticalNoteCard extends StatelessWidget {
           color: bgColor, // Kağıt rengi
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
           // Hafif kağıt gölgesi
-          shadows: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 5, offset: const Offset(2, 4))],
+          shadows: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 5, offset: const Offset(2, 4))],
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -94,7 +94,7 @@ class VerticalNoteCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(date, style: AppTextStyles.caption.copyWith(color: theme.disabledColor, fontSize: 10)),
-                  Icon(Icons.push_pin_rounded, size: 16, color: theme.primaryColor.withOpacity(0.5)),
+                  Icon(Icons.push_pin_rounded, size: 16, color: theme.primaryColor.withValues(alpha: 0.5)),
                 ],
               ),
               const SizedBox(height: 12),
@@ -199,19 +199,19 @@ class _DetailedReviewCardState extends State<DetailedReviewCard> {
               color: theme.cardColor,
               borderRadius: BorderRadius.circular(28), // Daha modern geniş köşe
               border: Border.all(
-                color: theme.dividerColor.withOpacity(0.05),
+                color: theme.dividerColor.withValues(alpha: 0.05),
                 width: 1,
               ),
               boxShadow: [
                 // Çok yumuşak, yaygın gölge (iOS Style)
                 BoxShadow(
-                  color: scoreColor.withOpacity(_isExpanded ? 0.12 : 0.05),
+                  color: scoreColor.withValues(alpha: _isExpanded ? 0.12 : 0.05),
                   blurRadius: 30,
                   offset: const Offset(0, 15),
                   spreadRadius: -5,
                 ),
                 BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+                  color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -236,11 +236,11 @@ class _DetailedReviewCardState extends State<DetailedReviewCard> {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topLeft, end: Alignment.bottomRight,
-                              colors: [scoreColor, scoreColor.withOpacity(0.75)],
+                              colors: [scoreColor, scoreColor.withValues(alpha: 0.75)],
                             ),
                             borderRadius: BorderRadius.circular(20), // Squircle formu
                             boxShadow: [
-                              BoxShadow(color: scoreColor.withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 6))
+                              BoxShadow(color: scoreColor.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 6))
                             ],
                           ),
                           child: Column(
@@ -315,11 +315,11 @@ class _DetailedReviewCardState extends State<DetailedReviewCard> {
                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                         decoration: BoxDecoration(
                           // Hafif bir zemin rengi ayrımı (Opsiyonel, temizlik için şeffaf bıraktım)
-                          // color: theme.scaffoldBackgroundColor.withOpacity(0.3),
+                          // color: theme.scaffoldBackgroundColor.withValues(alpha: 0.3),
                         ),
                         child: Column(
                           children: [
-                            Divider(height: 1, color: theme.dividerColor.withOpacity(0.08)),
+                            Divider(height: 1, color: theme.dividerColor.withValues(alpha: 0.08)),
                             const SizedBox(height: 20),
                             
                             // İstatistikler (Daha temiz Grid)
@@ -361,11 +361,11 @@ class _DetailedReviewCardState extends State<DetailedReviewCard> {
         children: [
           Row(
             children: [
-              Icon(icon, size: 14, color: theme.disabledColor.withOpacity(0.5)),
+              Icon(icon, size: 14, color: theme.disabledColor.withValues(alpha: 0.5)),
               const SizedBox(width: 6),
               Text(
                 label, 
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6))
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6))
               ),
               const Spacer(),
               Text(
@@ -383,7 +383,7 @@ class _DetailedReviewCardState extends State<DetailedReviewCard> {
                 height: 6, 
                 width: 100, 
                 decoration: BoxDecoration(
-                  color: theme.dividerColor.withOpacity(0.8), 
+                  color: theme.dividerColor.withValues(alpha: 0.8), 
                   borderRadius: BorderRadius.circular(3)
                 )
               ),
@@ -397,7 +397,7 @@ class _DetailedReviewCardState extends State<DetailedReviewCard> {
                   color: color, 
                   borderRadius: BorderRadius.circular(3),
                   boxShadow: [
-                    BoxShadow(color: color.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))
+                    BoxShadow(color: color.withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(0, 2))
                   ]
                 ),
               ),
@@ -436,8 +436,8 @@ class DynamicQuestCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(100), // Hap (Capsule) şekli
-        border: Border.all(color: isCompleted ? const Color(0xFFFFD700) : theme.dividerColor.withOpacity(0.2), width: isCompleted ? 2 : 1),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 2))],
+        border: Border.all(color: isCompleted ? const Color(0xFFFFD700) : theme.dividerColor.withValues(alpha: 0.2), width: isCompleted ? 2 : 1),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5, offset: const Offset(0, 2))],
       ),
       padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
       child: Row(
@@ -448,13 +448,13 @@ class DynamicQuestCard extends StatelessWidget {
             children: [
               CircularProgressIndicator(
                 value: progress / 100,
-                backgroundColor: theme.dividerColor.withOpacity(0.2),
+                backgroundColor: theme.dividerColor.withValues(alpha: 0.2),
                 valueColor: AlwaysStoppedAnimation<Color>(isCompleted ? const Color(0xFFFFD700) : theme.primaryColor),
                 strokeWidth: 3,
               ),
               CircleAvatar(
                 radius: 18,
-                backgroundColor: (isCompleted ? const Color(0xFFFFD700) : theme.primaryColor).withOpacity(0.1),
+                backgroundColor: (isCompleted ? const Color(0xFFFFD700) : theme.primaryColor).withValues(alpha: 0.1),
                 child: Icon(
                   isCompleted ? Icons.emoji_events : Icons.flag,
                   size: 18,

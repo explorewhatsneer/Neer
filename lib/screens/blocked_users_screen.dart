@@ -246,7 +246,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(Icons.lock_open_rounded, color: Colors.redAccent, size: 20),
@@ -265,7 +265,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.shield_moon_rounded, size: 80, color: theme.disabledColor.withOpacity(0.3)),
+          Icon(Icons.shield_moon_rounded, size: 80, color: theme.disabledColor.withValues(alpha: 0.3)),
           const SizedBox(height: 24),
           Text(
             AppStrings.noBlockedUsers, 

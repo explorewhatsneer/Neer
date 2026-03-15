@@ -37,7 +37,7 @@ class NotificationTile extends StatelessWidget {
     final String safeId = id.toString(); 
 
     final unreadColor = isDark 
-        ? theme.primaryColor.withOpacity(0.1) 
+        ? theme.primaryColor.withValues(alpha: 0.1) 
         : const Color(0xFFE0F7FA);
 
     return Dismissible(
@@ -66,7 +66,7 @@ class NotificationTile extends StatelessWidget {
           boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
           border: isRead 
               ? (isDark ? Border.all(color: Colors.white12) : null)
-              : Border.all(color: theme.primaryColor.withOpacity(0.3), width: 1),
+              : Border.all(color: theme.primaryColor.withValues(alpha: 0.3), width: 1),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +115,7 @@ class NotificationTile extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: theme.dividerColor.withOpacity(0.1), 
+          color: theme.dividerColor.withValues(alpha: 0.1), 
           shape: BoxShape.circle
         ),
         child: Icon(Icons.notifications_active_rounded, color: theme.primaryColor, size: 24),
@@ -128,7 +128,7 @@ class NotificationTile extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: theme.dividerColor.withOpacity(0.2)),
+            border: Border.all(color: theme.dividerColor.withValues(alpha: 0.2)),
           ),
           child: CircleAvatar(
             radius: 24,
@@ -144,7 +144,7 @@ class NotificationTile extends StatelessWidget {
             decoration: BoxDecoration(
               color: theme.cardColor, 
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)]
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4)]
             ),
             child: Icon(
               type == AppStrings.friendRequest ? Icons.person_add_rounded : Icons.location_on_rounded,

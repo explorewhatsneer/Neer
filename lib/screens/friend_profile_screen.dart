@@ -2,7 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
+import '../widgets/common/glass_button.dart';
 
 // CORE 
 import '../core/theme_styles.dart'; 
@@ -228,28 +229,12 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
     final theme = Theme.of(context);
     final color = isDestructive ? Colors.redAccent : theme.textTheme.bodyLarge?.color;
     return ListTile(
-      leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: (isDestructive ? Colors.red : theme.primaryColor).withOpacity(0.1), shape: BoxShape.circle), child: Icon(icon, color: isDestructive ? Colors.red : theme.primaryColor, size: 20)),
+      leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: (isDestructive ? Colors.red : theme.primaryColor).withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(icon, color: isDestructive ? Colors.red : theme.primaryColor, size: 20)),
       title: Text(text, style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600, color: color)),
       onTap: () { Navigator.pop(context); onTap(); },
     );
   }
 
-  Widget _buildGlassButton({required IconData icon, required VoidCallback onTap}) { 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14), 
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), 
-        child: InkWell(
-          onTap: onTap, 
-          child: Container(
-            width: 30, height: 30, 
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.1), border: Border.all(color: Colors.white.withOpacity(0.25)), borderRadius: BorderRadius.circular(14)), 
-            child: Icon(icon, color: Colors.white, size: 22)
-          )
-        )
-      )
-    ); 
-  }
 
   void _genericBottomSheet(BuildContext context, String title, Widget content) { 
     showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => DraggableScrollableSheet(initialChildSize: 0.6, builder: (_, c) => Container(decoration: BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor, borderRadius: const BorderRadius.vertical(top: Radius.circular(24))), child: Column(children: [const SizedBox(height: 10), Padding(padding: const EdgeInsets.all(20), child: Text(title, style: AppTextStyles.h3)), Expanded(child: content)])))); 
@@ -489,7 +474,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                       child: Image.network(
                         photos[index], 
                         fit: BoxFit.cover,
-                        loadingBuilder: (c, child, p) => p == null ? child : Container(color: theme.dividerColor.withOpacity(0.1)),
+                        loadingBuilder: (c, child, p) => p == null ? child : Container(color: theme.dividerColor.withValues(alpha: 0.1)),
                         errorBuilder: (c, e, s) => Container(color: theme.dividerColor, child: const Icon(Icons.error_outline)),
                       ),
                     );
@@ -538,8 +523,8 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                       backgroundColor: theme.scaffoldBackgroundColor,
                       automaticallyImplyLeading: false, 
                       
-                      leading: Center(child: _buildGlassButton(icon: Icons.arrow_back, onTap: () => Navigator.pop(context))),
-                      actions: [Center(child: Padding(padding: const EdgeInsets.only(right: 16.0), child: _buildGlassButton(icon: Icons.more_horiz_rounded, onTap: () => _showProfileOptions(context))))],
+                      leading: Center(child: GlassButton.appBar(icon: Icons.arrow_back, onTap: () => Navigator.pop(context))),
+                      actions: [Center(child: Padding(padding: const EdgeInsets.only(right: 16.0), child: GlassButton.appBar(icon: Icons.more_horiz_rounded, onTap: () => _showProfileOptions(context))))],
 
                       flexibleSpace: FlexibleSpaceBar(
                         background: FriendProfileHeader(
@@ -569,7 +554,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                             decoration: BoxDecoration(color: theme.cardColor, borderRadius: BorderRadius.circular(30)),
                             child: TabBar(
                               controller: _mainTabController, 
-                              indicator: BoxDecoration(borderRadius: BorderRadius.circular(30), color: theme.primaryColor, boxShadow: [BoxShadow(color: theme.primaryColor.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 2))]),
+                              indicator: BoxDecoration(borderRadius: BorderRadius.circular(30), color: theme.primaryColor, boxShadow: [BoxShadow(color: theme.primaryColor.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))]),
                               indicatorSize: TabBarIndicatorSize.tab, 
                               dividerColor: Colors.transparent, 
                               labelColor: Colors.white, 
@@ -607,7 +592,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                   filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                   child: Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: isDark ? Colors.black.withOpacity(0.8) : Colors.white.withOpacity(0.9), border: Border.all(color: isDark ? Colors.white12 : Colors.black.withOpacity(0.05)), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 20, offset: const Offset(0, 5))]),
+                    decoration: BoxDecoration(color: isDark ? Colors.black.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.9), border: Border.all(color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.05)), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, 5))]),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -616,7 +601,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                         Row(children: [
                             Expanded(child: SizedBox(height: 40, child: ElevatedButton(onPressed: () => _handleIncomingRequest(true), style: ElevatedButton.styleFrom(backgroundColor: theme.primaryColor, foregroundColor: Colors.white, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text(AppStrings.accept, style: const TextStyle(fontWeight: FontWeight.bold))))),
                             const SizedBox(width: 12),
-                            Expanded(child: SizedBox(height: 40, child: OutlinedButton(onPressed: () => _handleIncomingRequest(false), style: OutlinedButton.styleFrom(foregroundColor: theme.colorScheme.error, side: BorderSide(color: theme.colorScheme.error.withOpacity(0.3)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text(AppStrings.decline, style: const TextStyle(fontWeight: FontWeight.bold))))),
+                            Expanded(child: SizedBox(height: 40, child: OutlinedButton(onPressed: () => _handleIncomingRequest(false), style: OutlinedButton.styleFrom(foregroundColor: theme.colorScheme.error, side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.3)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text(AppStrings.decline, style: const TextStyle(fontWeight: FontWeight.bold))))),
                         ]),
                       ],
                     ),

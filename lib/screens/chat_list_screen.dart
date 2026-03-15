@@ -120,7 +120,7 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
                   indicator: BoxDecoration(
                     color: theme.cardColor,
                     borderRadius: BorderRadius.circular(25),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 4, offset: const Offset(0, 2))]
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 4, offset: const Offset(0, 2))]
                   ),
                   labelColor: theme.textTheme.bodyLarge?.color,
                   unselectedLabelColor: theme.disabledColor,
@@ -385,7 +385,7 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
                     ),
                     child: CircleAvatar(
                       radius: 28,
-                      backgroundColor: isGroup ? theme.primaryColor.withOpacity(0.1) : theme.scaffoldBackgroundColor,
+                      backgroundColor: isGroup ? theme.primaryColor.withValues(alpha: 0.1) : theme.scaffoldBackgroundColor,
                       backgroundImage: hasValidImage ? NetworkImage(image) : null,
                       child: !hasValidImage
                           ? Icon(isGroup ? Icons.store : Icons.person, color: isGroup ? theme.primaryColor : theme.disabledColor)
@@ -435,7 +435,7 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                         height: 1.2
                       ),
                     ),
@@ -455,7 +455,7 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 70, color: theme.disabledColor.withOpacity(0.3)),
+          Icon(icon, size: 70, color: theme.disabledColor.withValues(alpha: 0.3)),
           const SizedBox(height: 20),
           Text(
             text, 

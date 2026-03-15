@@ -225,7 +225,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
       // --- APP BAR ---
       appBar: AppBar(
-        backgroundColor: theme.cardColor.withOpacity(0.8),
+        backgroundColor: theme.cardColor.withValues(alpha: 0.8),
         elevation: 0,
         scrolledUnderElevation: 0,
         flexibleSpace: ClipRect(
@@ -233,7 +233,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Container(
               decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: theme.dividerColor.withOpacity(0.1))),
+                border: Border(bottom: BorderSide(color: theme.dividerColor.withValues(alpha: 0.1))),
               ),
             ),
           ),
@@ -349,7 +349,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: Colors.orange.withOpacity(0.1),
+              color: Colors.orange.withValues(alpha: 0.1),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

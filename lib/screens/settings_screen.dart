@@ -139,7 +139,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isSelected ? theme.primaryColor.withOpacity(0.1) : Colors.transparent,
+          color: isSelected ? theme.primaryColor.withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, color: isSelected ? theme.primaryColor : theme.disabledColor),
@@ -353,7 +353,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               borderRadius: AppThemeStyles.radius24,
               boxShadow: [
                 BoxShadow(
-                  color: theme.primaryColor.withOpacity(0.4), 
+                  color: theme.primaryColor.withValues(alpha: 0.4), 
                   blurRadius: 20, 
                   offset: const Offset(0, 10)
                 )
@@ -384,9 +384,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5)
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 0.5)
                         ),
                         child: const Text("Free Üyelik", style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
                       ),
@@ -396,7 +396,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 // QR Code Button
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
+                    color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12)
                   ),
                   child: IconButton(
@@ -439,13 +439,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFD700), // Altın Rengi
                     borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)), 
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, -2))],
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, -2))],
                   ),
                   child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.black.withOpacity(0.1), shape: BoxShape.circle),
+                        decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.1), shape: BoxShape.circle),
                         child: const Icon(Icons.workspace_premium_rounded, color: Colors.black87, size: 24),
                       ),
                       const SizedBox(width: 15),

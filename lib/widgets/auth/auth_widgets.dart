@@ -97,8 +97,8 @@ class NeerAuthInput extends StatelessWidget {
         cursorColor: theme.primaryColor,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: theme.disabledColor.withOpacity(0.7)),
-          icon: Icon(icon, color: theme.primaryColor.withOpacity(0.8)),
+          hintStyle: TextStyle(color: theme.disabledColor.withValues(alpha: 0.7)),
+          icon: Icon(icon, color: theme.primaryColor.withValues(alpha: 0.8)),
           border: InputBorder.none,
           // Şifre alanı ise göz ikonunu göster
           suffixIcon: isPassword 
@@ -141,7 +141,7 @@ class AuthButton extends StatelessWidget {
           backgroundColor: theme.primaryColor,
           foregroundColor: Colors.white,
           elevation: isLoading ? 0 : 8,
-          shadowColor: theme.primaryColor.withOpacity(0.4),
+          shadowColor: theme.primaryColor.withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
         ),
         onPressed: isLoading ? null : onTap,

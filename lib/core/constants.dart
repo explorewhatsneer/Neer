@@ -23,6 +23,6 @@ class AppColors {
   static const Color darkDivider = Color(0xFF38383A);
 
   // --- EFEKTLER (Global) ---
-  static final Color shadow = Colors.black.withOpacity(0.08);
-  static final Color glassBorder = Colors.white.withOpacity(0.2);
+  static final Color shadow = Colors.black.withValues(alpha: 0.08);
+  static final Color glassBorder = Colors.white.withValues(alpha: 0.2);
 }

@@ -37,7 +37,7 @@ class FriendProfileHeader extends StatelessWidget {
 
     // Yazı gölgeleri (Shadows)
     final List<Shadow> textShadows = [
-      Shadow(color: Colors.black.withOpacity(0.5), blurRadius: 4, offset: const Offset(0, 1)),
+      Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 4, offset: const Offset(0, 1)),
     ];
 
     // Bileşen Boyutu (Avatar ve Güven Halkası için)
@@ -63,8 +63,8 @@ class FriendProfileHeader extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.1),
-                    Colors.black.withOpacity(0.3),
+                    Colors.black.withValues(alpha: 0.1),
+                    Colors.black.withValues(alpha: 0.3),
                     theme.scaffoldBackgroundColor, // Sayfayla birleşir
                   ],
                   stops: const [0.0, 0.6, 1.0],
@@ -98,7 +98,7 @@ class FriendProfileHeader extends StatelessWidget {
                         Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
                           ),
                         ),
                         // İç Avatar
@@ -110,7 +110,7 @@ class FriendProfileHeader extends StatelessWidget {
                               image: NetworkImage(imageUrl.isNotEmpty ? imageUrl : "https://i.pravatar.cc/300"),
                               fit: BoxFit.cover,
                             ),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 5)],
+                            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 5)],
                           ),
                         ),
                         if (isOnline)
@@ -152,7 +152,7 @@ class FriendProfileHeader extends StatelessWidget {
                           width: componentSize, height: componentSize,
                           child: CircularProgressIndicator(
                             value: 1.0, strokeWidth: 3,
-                            valueColor: AlwaysStoppedAnimation(Colors.white.withOpacity(0.1)),
+                            valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.1)),
                           ),
                         ),
                         // Ön Halka (Değer)
@@ -192,9 +192,9 @@ class FriendProfileHeader extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.08), 
+                      color: Colors.white.withValues(alpha: 0.08), 
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,7 +214,7 @@ class FriendProfileHeader extends StatelessWidget {
                               const SizedBox(height: 2),
                               Text(
                                 "@$username",
-                                style: AppTextStyles.bodySmall.copyWith(color: Colors.white.withOpacity(0.6), fontSize: 13, fontWeight: FontWeight.w500),
+                                style: AppTextStyles.bodySmall.copyWith(color: Colors.white.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.w500),
                               ),
                             ],
                           ),
@@ -223,7 +223,7 @@ class FriendProfileHeader extends StatelessWidget {
                         // AYRAÇ
                         Container(
                           width: 1, height: 35,
-                          color: Colors.white.withOpacity(0.15),
+                          color: Colors.white.withValues(alpha: 0.15),
                           margin: const EdgeInsets.symmetric(horizontal: 16),
                         ),
 
@@ -235,7 +235,7 @@ class FriendProfileHeader extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.caption.copyWith(
-                              color: Colors.white.withOpacity(0.85),
+                              color: Colors.white.withValues(alpha: 0.85),
                               fontSize: 13, 
                               height: 1.4,
                             ),
@@ -267,7 +267,7 @@ class FriendProfileHeader extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11, fontWeight: FontWeight.w500),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11, fontWeight: FontWeight.w500),
         ),
       ],
     );

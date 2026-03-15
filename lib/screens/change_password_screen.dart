@@ -142,9 +142,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 padding: const EdgeInsets.all(16),
                 margin: const EdgeInsets.only(bottom: 30),
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withOpacity(isDark ? 0.2 : 0.08),
+                  color: theme.primaryColor.withValues(alpha: isDark ? 0.2 : 0.08),
                   borderRadius: AppThemeStyles.radius16,
-                  border: Border.all(color: theme.primaryColor.withOpacity(0.3)),
+                  border: Border.all(color: theme.primaryColor.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
@@ -212,7 +212,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     backgroundColor: theme.primaryColor,
                     foregroundColor: Colors.white,
                     elevation: _isLoading ? 0 : 8,
-                    shadowColor: theme.primaryColor.withOpacity(0.4),
+                    shadowColor: theme.primaryColor.withValues(alpha: 0.4),
                     shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
                   ),
                   child: _isLoading 
@@ -260,7 +260,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           labelText: label,
           labelStyle: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),
           floatingLabelStyle: TextStyle(color: theme.primaryColor, fontWeight: FontWeight.w600),
-          prefixIcon: Icon(Icons.lock_outline_rounded, color: theme.colorScheme.primary.withOpacity(0.7)),
+          prefixIcon: Icon(Icons.lock_outline_rounded, color: theme.colorScheme.primary.withValues(alpha: 0.7)),
           suffixIcon: IconButton(
             icon: Icon(
               isObscure ? Icons.visibility_off_rounded : Icons.visibility_rounded,

@@ -18,11 +18,11 @@ class PremiumCluster extends StatelessWidget {
         filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Container(
           decoration: BoxDecoration(
-            color: color.withOpacity(0.85),
+            color: color.withValues(alpha: 0.85),
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withOpacity(0.5), width: 1),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1),
             boxShadow: [
-              BoxShadow(color: color.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 5))
+              BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 5))
             ],
           ),
           child: Center(

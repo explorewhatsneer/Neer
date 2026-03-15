@@ -95,7 +95,7 @@ class _PollsScreenState extends State<PollsScreen> with SingleTickerProviderStat
             decoration: BoxDecoration(
               color: theme.cardColor, 
               shape: BoxShape.circle,
-              border: Border.all(color: theme.dividerColor.withOpacity(0.5))
+              border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5))
             ),
             child: IconButton(
               padding: EdgeInsets.zero,
@@ -121,7 +121,7 @@ class _PollsScreenState extends State<PollsScreen> with SingleTickerProviderStat
               indicator: BoxDecoration(
                 color: theme.cardColor, 
                 borderRadius: BorderRadius.circular(25), 
-                boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))]
+                boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))]
               ),
               labelColor: theme.textTheme.bodyLarge?.color,
               unselectedLabelColor: theme.disabledColor,
@@ -158,7 +158,7 @@ class _PollsScreenState extends State<PollsScreen> with SingleTickerProviderStat
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle_outline_rounded, size: 80, color: theme.disabledColor.withOpacity(0.3)),
+            Icon(Icons.check_circle_outline_rounded, size: 80, color: theme.disabledColor.withValues(alpha: 0.3)),
             const SizedBox(height: 16),
             Text(
               AppStrings.listEmpty, // 🔥 Core String

@@ -230,7 +230,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     child: Container(
                       width: 40, height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.3), 
+                        color: Colors.black.withValues(alpha: 0.3), 
                         shape: BoxShape.circle
                       ),
                       child: IconButton(
@@ -308,7 +308,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 backgroundColor: theme.primaryColor,
                                 foregroundColor: Colors.white,
                                 elevation: 8,
-                                shadowColor: theme.primaryColor.withOpacity(0.4),
+                                shadowColor: theme.primaryColor.withValues(alpha: 0.4),
                                 shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius24),
                               ),
                               onPressed: _isLoading ? null : _saveProfile,

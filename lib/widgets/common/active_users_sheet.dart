@@ -75,10 +75,10 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
           child: Container(
             decoration: BoxDecoration(
               // Dinamik Glass Rengi
-              color: isDark ? Colors.black.withOpacity(0.7) : Colors.white.withOpacity(0.8),
+              color: isDark ? Colors.black.withValues(alpha: 0.7) : Colors.white.withValues(alpha: 0.8),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
               boxShadow: AppThemeStyles.shadowHigh, 
-              border: Border(top: BorderSide(color: Colors.white.withOpacity(0.1), width: 1)),
+              border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1)),
             ),
             child: Column(
               children: [
@@ -183,9 +183,9 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: theme.cardColor.withOpacity(0.5), 
+          color: theme.cardColor.withValues(alpha: 0.5), 
           borderRadius: AppThemeStyles.radius16,
-          border: isDark ? Border.all(color: Colors.white.withOpacity(0.05), width: 0.5) : null,
+          border: isDark ? Border.all(color: Colors.white.withValues(alpha: 0.05), width: 0.5) : null,
           boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
         ),
         child: Row(
@@ -196,7 +196,7 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: theme.dividerColor.withOpacity(0.3)),
+                    border: Border.all(color: theme.dividerColor.withValues(alpha: 0.3)),
                   ),
                   child: CircleAvatar(
                     radius: 24,
@@ -251,7 +251,7 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
             if (!isMe)
               Icon(
                 Icons.chevron_right_rounded, 
-                color: theme.disabledColor.withOpacity(0.5),
+                color: theme.disabledColor.withValues(alpha: 0.5),
                 size: 24,
               )
           ],
@@ -266,7 +266,7 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.group_off_rounded, size: 60, color: theme.disabledColor.withOpacity(0.3)),
+          Icon(Icons.group_off_rounded, size: 60, color: theme.disabledColor.withValues(alpha: 0.3)),
           const SizedBox(height: 10),
           Text(
             AppStrings.noMembers, 

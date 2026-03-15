@@ -57,12 +57,12 @@ class PlaceSheet {
             child: Container(
               decoration: BoxDecoration(
                 // Dinamik Arka Plan Rengi (Glass)
-                color: isDark ? Colors.black.withOpacity(0.8) : Colors.white.withOpacity(0.9),
+                color: isDark ? Colors.black.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.9),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 40, offset: const Offset(0, 10))
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 40, offset: const Offset(0, 10))
                 ],
-                border: Border(top: BorderSide(color: Colors.white.withOpacity(0.2), width: 1)),
+                border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1)),
               ),
               child: ListView(
                 controller: controller,
@@ -93,7 +93,7 @@ class PlaceSheet {
                             end: Alignment.bottomCenter,
                             colors: [
                               Colors.transparent,
-                              isDark ? Colors.black.withOpacity(0.9) : Colors.white.withOpacity(0.9)
+                              isDark ? Colors.black.withValues(alpha: 0.9) : Colors.white.withValues(alpha: 0.9)
                             ],
                             stops: const [0.5, 1.0]
                           ),
@@ -106,9 +106,9 @@ class PlaceSheet {
                           child: Container(
                             width: 50, height: 5, 
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.8), 
+                              color: Colors.white.withValues(alpha: 0.8), 
                               borderRadius: BorderRadius.circular(10),
-                              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4)]
+                              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4)]
                             )
                           ),
                         ),
@@ -203,7 +203,7 @@ class PlaceSheet {
                         ),
                         
                         const SizedBox(height: 25),
-                        Divider(height: 1, color: theme.dividerColor.withOpacity(0.2)),
+                        Divider(height: 1, color: theme.dividerColor.withValues(alpha: 0.2)),
                         const SizedBox(height: 25),
 
                         // --- 1. ŞU AN BURADA OLANLAR (SİMÜLASYON) ---
@@ -218,7 +218,7 @@ class PlaceSheet {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
-                                color: theme.primaryColor.withOpacity(0.1), 
+                                color: theme.primaryColor.withValues(alpha: 0.1), 
                                 borderRadius: BorderRadius.circular(20)
                               ),
                               child: Row(
@@ -246,7 +246,7 @@ class PlaceSheet {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(color: theme.scaffoldBackgroundColor, width: 2.5),
-                                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 5)]
+                                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 5)]
                                   ),
                                   child: CircleAvatar(
                                     radius: 22,
@@ -271,7 +271,7 @@ class PlaceSheet {
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                              decoration: BoxDecoration(color: Colors.orange.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
                               child: Row(
                                 children: [
                                   const Icon(Icons.history_rounded, size: 14, color: Colors.orange),
@@ -297,7 +297,7 @@ class PlaceSheet {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(color: theme.scaffoldBackgroundColor, width: 2.5),
-                                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 5)]
+                                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 5)]
                                   ),
                                   child: CircleAvatar(
                                     radius: 22,
@@ -335,7 +335,7 @@ class PlaceSheet {
                                   style: OutlinedButton.styleFrom(
                                     side: BorderSide(color: theme.dividerColor, width: 1.5),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                    backgroundColor: theme.cardColor.withOpacity(0.5),
+                                    backgroundColor: theme.cardColor.withValues(alpha: 0.5),
                                     foregroundColor: theme.textTheme.bodyLarge?.color,
                                   ),
                                   onPressed: () {
@@ -370,9 +370,9 @@ class PlaceSheet {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1), 
+        color: color.withValues(alpha: 0.1), 
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2))
+        border: Border.all(color: color.withValues(alpha: 0.2))
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

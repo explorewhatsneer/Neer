@@ -33,10 +33,10 @@ class ModernSearchBar extends StatelessWidget {
             height: 52,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: isDark ? Colors.black.withOpacity(0.5) : Colors.white.withOpacity(0.85),
+              color: isDark ? Colors.black.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), width: 1),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+              border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1),
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
             ),
             child: Row(
               children: [
@@ -108,7 +108,7 @@ class PersonResultCard extends StatelessWidget {
                   padding: const EdgeInsets.all(2),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle, 
-                    border: Border.all(color: theme.dividerColor.withOpacity(0.2), width: 1),
+                    border: Border.all(color: theme.dividerColor.withValues(alpha: 0.2), width: 1),
                   ),
                   child: CircleAvatar(
                     radius: 24, // Biraz küçültüldü
@@ -153,7 +153,7 @@ class PersonResultCard extends StatelessWidget {
                       CircularProgressIndicator(
                         value: 1.0, // Tam daire
                         strokeWidth: 4,
-                        valueColor: AlwaysStoppedAnimation(scoreColor.withOpacity(0.15)),
+                        valueColor: AlwaysStoppedAnimation(scoreColor.withValues(alpha: 0.15)),
                       ),
                       // Ön Plan Halkası (Puan kadar dolu)
                       CircularProgressIndicator(
@@ -240,9 +240,9 @@ class PlaceResultCard extends StatelessWidget {
                 Container(
                   width: 52, height: 52,
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.15),
+                    color: Colors.orange.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.orange.withOpacity(0.2), width: 1),
+                    border: Border.all(color: Colors.orange.withValues(alpha: 0.2), width: 1),
                   ),
                   child: const Icon(Icons.storefront_rounded, color: Colors.orange, size: 26),
                 ),
@@ -270,7 +270,7 @@ class PlaceResultCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios_rounded, size: 16, color: theme.disabledColor.withOpacity(0.5)),
+                Icon(Icons.arrow_forward_ios_rounded, size: 16, color: theme.disabledColor.withValues(alpha: 0.5)),
               ],
             ),
           ),

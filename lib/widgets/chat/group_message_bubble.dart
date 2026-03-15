@@ -88,7 +88,7 @@ class GroupMessageBubble extends StatelessWidget {
                 ),
                 boxShadow: isDark ? [] : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05), 
+                    color: Colors.black.withValues(alpha: 0.05), 
                     blurRadius: 5, 
                     offset: const Offset(0, 2)
                   )
@@ -142,7 +142,7 @@ class GroupMessageBubble extends StatelessWidget {
                         Icon(
                           Icons.done_all_rounded, 
                           size: 14, 
-                          color: Colors.white.withOpacity(0.9)
+                          color: Colors.white.withValues(alpha: 0.9)
                         )
                       ]
                     ],

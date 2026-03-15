@@ -108,12 +108,12 @@ class _SearchModalContentState extends State<SearchModalContent> with SingleTick
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Container(
               decoration: BoxDecoration(
-                color: isDark ? Colors.black.withOpacity(0.8) : Colors.white.withOpacity(0.9),
+                color: isDark ? Colors.black.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.9),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 40, offset: const Offset(0, -10))
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 40, offset: const Offset(0, -10))
                 ],
-                border: Border(top: BorderSide(color: Colors.white.withOpacity(0.2), width: 1)),
+                border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1)),
               ),
               child: Column(
                 children: [
@@ -124,7 +124,7 @@ class _SearchModalContentState extends State<SearchModalContent> with SingleTick
                       child: Container(
                         width: 40, height: 4,
                         decoration: BoxDecoration(
-                          color: theme.dividerColor.withOpacity(0.5),
+                          color: theme.dividerColor.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -171,7 +171,7 @@ class _SearchModalContentState extends State<SearchModalContent> with SingleTick
                     height: 45,
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: theme.dividerColor.withOpacity(0.1), 
+                      color: theme.dividerColor.withValues(alpha: 0.1), 
                       borderRadius: BorderRadius.circular(25),
                     ),
                     child: TabBar(
@@ -179,7 +179,7 @@ class _SearchModalContentState extends State<SearchModalContent> with SingleTick
                       indicator: BoxDecoration(
                         color: theme.cardColor,
                         borderRadius: BorderRadius.circular(22),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))],
                       ),
                       labelColor: theme.textTheme.bodyLarge?.color, 
                       unselectedLabelColor: theme.disabledColor, 
@@ -295,7 +295,7 @@ class _SearchModalContentState extends State<SearchModalContent> with SingleTick
         children: [
           Container(
             padding: const EdgeInsets.all(20), 
-            decoration: BoxDecoration(color: theme.dividerColor.withOpacity(0.1), shape: BoxShape.circle), 
+            decoration: BoxDecoration(color: theme.dividerColor.withValues(alpha: 0.1), shape: BoxShape.circle), 
             child: Icon(icon, size: 40, color: theme.disabledColor)
           ), 
           const SizedBox(height: 15), 

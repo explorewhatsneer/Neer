@@ -1,4 +1,3 @@
-import 'dart:ui'; // ImageFilter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:image_picker/image_picker.dart';
@@ -6,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 // CORE IMPORTLARI
 import '../../core/text_styles.dart';
 import '../../core/app_strings.dart';
+import '../common/glass_button.dart';
 
 class MapFloatingButtons extends StatelessWidget {
   final VoidCallback onLocationTap;
@@ -71,86 +71,41 @@ class MapFloatingButtons extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 🔍 ARAMA BUTONU
-        _buildGlassFab(
-          context: context,
+        // ARAMA BUTONU
+        GlassButton.fab(
           icon: Icons.search_rounded,
-          onTap: onSearchTap,
-          color: theme.primaryColor,
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            onSearchTap();
+          },
+          iconColor: theme.primaryColor,
         ),
 
         const SizedBox(height: 15),
 
-        // 📸 KAMERA BUTONU
-        _buildGlassFab(
-          context: context,
+        // KAMERA BUTONU
+        GlassButton.fab(
           icon: Icons.camera_alt_rounded,
-          onTap: () => _openCamera(context),
-          color: theme.primaryColor, // Veya Colors.orangeAccent
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            _openCamera(context);
+          },
+          iconColor: theme.primaryColor,
         ),
-        
+
         const SizedBox(height: 15),
 
-        // 📍 KONUM BUTONU
-        _buildGlassFab(
-          context: context,
+        // KONUM BUTONU
+        GlassButton.fab(
           icon: Icons.my_location_rounded,
-          onTap: onLocationTap,
-          color: Colors.blueAccent,
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            onLocationTap();
+          },
+          iconColor: Colors.blueAccent,
         ),
       ],
     );
   }
 
-  // --- REUSABLE GLASS FAB ---
-  Widget _buildGlassFab({
-    required BuildContext context,
-    required IconData icon,
-    required VoidCallback onTap,
-    required Color color,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return SizedBox(
-      width: 50, 
-      height: 50,
-      child: GestureDetector(
-        onTap: () {
-          HapticFeedback.mediumImpact(); // Titreşim
-          onTap();
-        },
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(25), // Tam yuvarlak
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Blur
-            child: Container(
-              decoration: BoxDecoration(
-                // Dinamik Arka Plan
-                color: isDark ? Colors.black.withOpacity(0.5) : Colors.white.withOpacity(0.85),
-                shape: BoxShape.circle,
-                // İnce Çerçeve
-                border: Border.all(
-                  color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.5), 
-                  width: 1
-                ),
-                // Gölge
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15), 
-                    blurRadius: 10, 
-                    offset: const Offset(0, 4)
-                  )
-                ],
-              ),
-              child: Icon(
-                icon, 
-                color: isDark ? Colors.white : color, 
-                size: 26
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

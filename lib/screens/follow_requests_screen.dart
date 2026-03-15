@@ -94,7 +94,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: theme.dividerColor.withOpacity(0.1), height: 1.0), 
+          child: Container(color: theme.dividerColor.withValues(alpha: 0.1), height: 1.0), 
         ),
       ),
 
@@ -202,7 +202,7 @@ class _RequestCard extends StatelessWidget {
               color: theme.cardColor,
               borderRadius: BorderRadius.circular(16),
               boxShadow: AppThemeStyles.shadowLow,
-              border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
+              border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
             ),
             child: Row(
               children: [
@@ -234,7 +234,7 @@ class _RequestCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(30),
                       child: Container(
                         width: 36, height: 36,
-                        decoration: BoxDecoration(color: theme.primaryColor, shape: BoxShape.circle, boxShadow: [BoxShadow(color: theme.primaryColor.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))]),
+                        decoration: BoxDecoration(color: theme.primaryColor, shape: BoxShape.circle, boxShadow: [BoxShadow(color: theme.primaryColor.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 3))]),
                         child: const Icon(Icons.check_rounded, size: 20, color: Colors.white),
                       ),
                     ),

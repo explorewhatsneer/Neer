@@ -121,7 +121,7 @@ class _ChatScreenState extends State<ChatScreen> {
       
       // --- APP BAR ---
       appBar: AppBar(
-        backgroundColor: theme.cardColor.withOpacity(0.75), // Yarısaydam
+        backgroundColor: theme.cardColor.withValues(alpha: 0.75), // Yarısaydam
         elevation: 0,
         scrolledUnderElevation: 0,
         flexibleSpace: ClipRect(
@@ -129,7 +129,7 @@ class _ChatScreenState extends State<ChatScreen> {
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Container(
               decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: theme.dividerColor.withOpacity(0.1)))
+                border: Border(bottom: BorderSide(color: theme.dividerColor.withValues(alpha: 0.1)))
               ),
             ),
           ),
@@ -239,7 +239,7 @@ class _ChatScreenState extends State<ChatScreen> {
               border: Border(top: BorderSide(color: theme.dividerColor, width: 0.5)), 
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.05), 
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05), 
                   blurRadius: 10,
                   offset: const Offset(0, -2),
                 )

@@ -69,7 +69,7 @@ class StoryItem extends StatelessWidget {
                         begin: Alignment.bottomLeft,
                         end: Alignment.topRight,
                       ),
-                  border: isMe ? Border.all(color: theme.dividerColor.withOpacity(0.2), width: 1.5) : null,
+                  border: isMe ? Border.all(color: theme.dividerColor.withValues(alpha: 0.2), width: 1.5) : null,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(2.5), 
@@ -338,7 +338,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
             ),
           ),
 
-        Divider(height: 1, thickness: 0.5, color: theme.dividerColor.withOpacity(0.2)),
+        Divider(height: 1, thickness: 0.5, color: theme.dividerColor.withValues(alpha: 0.2)),
       ],
     );
   }
@@ -409,7 +409,7 @@ class _FeedReviewCardState extends State<FeedReviewCard> {
                 Row(
                   children: List.generate(5, (index) => Icon(
                     Icons.star_rounded, 
-                    color: index < rating ? const Color(0xFFFFB400) : theme.disabledColor.withOpacity(0.3), 
+                    color: index < rating ? const Color(0xFFFFB400) : theme.disabledColor.withValues(alpha: 0.3), 
                     size: 22
                   )),
                 ),
@@ -430,7 +430,7 @@ class _FeedReviewCardState extends State<FeedReviewCard> {
           onAction: _onAction
         ),
 
-        Divider(height: 1, thickness: 0.5, color: theme.dividerColor.withOpacity(0.2)),
+        Divider(height: 1, thickness: 0.5, color: theme.dividerColor.withValues(alpha: 0.2)),
       ],
     );
   }

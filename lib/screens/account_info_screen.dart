@@ -183,9 +183,9 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(isDark ? 0.2 : 0.08), 
+                color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.2 : 0.08), 
                 borderRadius: AppThemeStyles.radius16,
-                border: Border.all(color: theme.colorScheme.primary.withOpacity(0.3), width: 1),
+                border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3), width: 1),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,7 +217,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                   backgroundColor: theme.primaryColor,
                   foregroundColor: Colors.white,
                   elevation: _isLoading ? 0 : 8,
-                  shadowColor: theme.primaryColor.withOpacity(0.4),
+                  shadowColor: theme.primaryColor.withValues(alpha: 0.4),
                   shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
                 ),
                 child: _isLoading 
@@ -260,7 +260,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
         style: AppTextStyles.bodyLarge.copyWith(color: theme.textTheme.bodyLarge?.color), 
         cursorColor: theme.primaryColor,
         decoration: InputDecoration(
-          icon: Icon(icon, color: theme.colorScheme.primary.withOpacity(0.8)),
+          icon: Icon(icon, color: theme.colorScheme.primary.withValues(alpha: 0.8)),
           border: InputBorder.none,
           labelText: label,
           labelStyle: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),

@@ -1,6 +1,5 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
+import 'package:flutter/services.dart';
 import '../main.dart'; // supabase nesnesi için
 
 // CORE 
@@ -17,7 +16,8 @@ import '../services/supabase_service.dart';
 // 🔥 YENİ TASARIM COMPONENTLERİ (StackedCardCarousel, RankingPodium vb.)
 import '../widgets/profile/profile_components.dart'; 
 import '../widgets/profile/profile_header.dart'; 
-import '../widgets/feed/feed_widgets.dart'; 
+import '../widgets/feed/feed_widgets.dart';
+import '../widgets/common/glass_button.dart';
 
 // Import Çakışmasını Önleme
 import '../widgets/friend/friend_profile_widgets.dart' show FriendEmptyCard;
@@ -98,27 +98,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     return "";
   }
 
-  Widget _buildGlassButton({required IconData icon, required VoidCallback onTap}) { 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14), 
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), 
-        child: InkWell(
-          onTap: onTap, 
-          child: Container(
-            width: 30, height: 30, 
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.10), 
-              border: Border.all(color: Colors.white.withOpacity(0.25)), 
-              borderRadius: BorderRadius.circular(14)
-            ), 
-            child: Icon(icon, color: Colors.white, size: 20)
-          )
-        )
-      )
-    ); 
-  }
-
   // --- POPUP FONKSİYONLARI ---
   void _showAllQuests(BuildContext context) { /* Gerekirse detay sayfası */ }
   void _showAllFavorites(BuildContext context) { /* Gerekirse detay sayfası */ }
@@ -156,7 +135,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 
                 actions: [
                   Center(
-                    child: _buildGlassButton(
+                    child: GlassButton.appBar(
                       icon: Icons.edit_rounded,
                       onTap: () async {
                         HapticFeedback.lightImpact();
@@ -166,12 +145,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     ),
                   ),
                   const SizedBox(width: 8),
-                  
+
                   // AYARLAR BUTONU
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.only(right: 16.0),
-                      child: _buildGlassButton(
+                      child: GlassButton.appBar(
                         icon: Icons.settings_rounded,
                         onTap: () {
                           HapticFeedback.lightImpact();
@@ -219,7 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                         indicator: BoxDecoration(
                           borderRadius: BorderRadius.circular(30),
                           color: theme.primaryColor, 
-                          boxShadow: [BoxShadow(color: theme.primaryColor.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 2))],
+                          boxShadow: [BoxShadow(color: theme.primaryColor.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))],
                         ),
                         indicatorSize: TabBarIndicatorSize.tab, 
                         dividerColor: Colors.transparent, 
@@ -508,7 +487,7 @@ Widget _buildProfileTab(ThemeData theme) {
                       child: Image.network(
                         photos[index], 
                         fit: BoxFit.cover,
-                        loadingBuilder: (c, child, p) => p == null ? child : Container(color: theme.dividerColor.withOpacity(0.1)),
+                        loadingBuilder: (c, child, p) => p == null ? child : Container(color: theme.dividerColor.withValues(alpha: 0.1)),
                         errorBuilder: (c, e, s) => Container(color: theme.dividerColor, child: const Icon(Icons.error_outline)),
                       ),
                     );

@@ -168,7 +168,7 @@ class _FeedScreenState extends State<FeedScreen> {
         // Sağ taraftaki butonu kaldırdık (actions: [])
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: theme.dividerColor.withOpacity(0.1), height: 1.0), 
+          child: Container(color: theme.dividerColor.withValues(alpha: 0.1), height: 1.0), 
         ),
       ),
 
@@ -195,7 +195,7 @@ class _FeedScreenState extends State<FeedScreen> {
                   Icon(
                     _selectedFilter == 'friends' ? Icons.star_border_rounded : Icons.diversity_1_rounded, 
                     size: 80, 
-                    color: theme.disabledColor.withOpacity(0.3)
+                    color: theme.disabledColor.withValues(alpha: 0.3)
                   ),
                   const SizedBox(height: 16),
                   
@@ -234,7 +234,7 @@ class _FeedScreenState extends State<FeedScreen> {
                   return Column(
                     children: [
                       _buildStoryArea(theme),
-                      Divider(height: 1, thickness: 0.5, color: theme.dividerColor.withOpacity(0.1)),
+                      Divider(height: 1, thickness: 0.5, color: theme.dividerColor.withValues(alpha: 0.1)),
                     ],
                   );
                 }

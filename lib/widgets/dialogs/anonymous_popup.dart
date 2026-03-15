@@ -22,7 +22,7 @@ void showAnonymousDialog(BuildContext context) {
     context: context,
     barrierDismissible: true,
     barrierLabel: AppStrings.close, 
-    barrierColor: Colors.black.withOpacity(0.6),
+    barrierColor: Colors.black.withValues(alpha: 0.6),
     transitionDuration: const Duration(milliseconds: 400),
     pageBuilder: (_, __, ___) => const SizedBox(),
     transitionBuilder: (context, anim1, anim2, child) {
@@ -117,11 +117,11 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 30),
               decoration: BoxDecoration(
                 // Dinamik Glass Rengi
-                color: isDark ? Colors.black.withOpacity(0.6) : Colors.white.withOpacity(0.85),
+                color: isDark ? Colors.black.withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.85),
                 borderRadius: AppThemeStyles.radius32,
-                border: Border.all(color: Colors.white.withOpacity(isDark ? 0.1 : 0.6), width: 1.5),
+                border: Border.all(color: Colors.white.withValues(alpha: isDark ? 0.1 : 0.6), width: 1.5),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 40, spreadRadius: 10, offset: const Offset(0, 10)),
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 40, spreadRadius: 10, offset: const Offset(0, 10)),
                 ],
               ),
               child: Column(
@@ -132,9 +132,9 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: mainColor.withOpacity(0.15),
+                      color: mainColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: mainColor.withOpacity(0.3)),
+                      border: Border.all(color: mainColor.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -144,7 +144,7 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
                           decoration: BoxDecoration(
                             color: mainColor, 
                             shape: BoxShape.circle, 
-                            boxShadow: [BoxShadow(color: mainColor.withOpacity(0.5), blurRadius: 6)]
+                            boxShadow: [BoxShadow(color: mainColor.withValues(alpha: 0.5), blurRadius: 6)]
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -174,7 +174,7 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
                           color: mainColor,
                           boxShadow: [
                             BoxShadow(
-                              color: mainColor.withOpacity(0.5), 
+                              color: mainColor.withValues(alpha: 0.5), 
                               blurRadius: _pulseAnimation.value, 
                               spreadRadius: 5
                             ),
@@ -246,7 +246,7 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
                         padding: const EdgeInsets.symmetric(vertical: 16), 
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         elevation: 5,
-                        shadowColor: Colors.black.withOpacity(0.3),
+                        shadowColor: Colors.black.withValues(alpha: 0.3),
                       ),
                       child: Text(
                         widget.isAnonymous ? AppStrings.goVisible : AppStrings.goHidden,
@@ -272,7 +272,7 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
             child: Container(
               width: 36, height: 36,
               decoration: BoxDecoration(
-                color: theme.dividerColor.withOpacity(0.2),
+                color: theme.dividerColor.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.close_rounded, size: 20, color: theme.iconTheme.color),

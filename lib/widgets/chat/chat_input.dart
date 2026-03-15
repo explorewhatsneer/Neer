@@ -68,7 +68,7 @@ class ChatInput extends StatelessWidget {
                   border: isDark ? Border.all(color: Colors.white12) : null,
                   boxShadow: isDark
                       ? []
-                      : [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 2))],
+                      : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5, offset: const Offset(0, 2))],
                 ),
                 child: Material(
                   color: Colors.transparent,
@@ -105,14 +105,14 @@ class ChatInput extends StatelessWidget {
                     minLines: 1,
                     maxLines: 5,
                     style: AppTextStyles.bodyLarge.copyWith(
-                      color: isDark ? Colors.white.withOpacity(0.9) : Colors.black87,
+                      color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87,
                     ),
                     cursorColor: theme.primaryColor,
                     textInputAction: TextInputAction.send,
                     onSubmitted: enabled ? (_) => onSendPressed() : null,
                     decoration: InputDecoration(
                       hintText: enabled ? AppStrings.typeMessage : "Bekle...",
-                      hintStyle: AppTextStyles.bodyLarge.copyWith(color: theme.disabledColor.withOpacity(0.6)),
+                      hintStyle: AppTextStyles.bodyLarge.copyWith(color: theme.disabledColor.withValues(alpha: 0.6)),
                       border: InputBorder.none,
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -128,7 +128,7 @@ class ChatInput extends StatelessWidget {
                   color: enabled ? AppColors.primary : theme.disabledColor,
                   shape: BoxShape.circle,
                   boxShadow: enabled
-                      ? [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))]
+                      ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 3))]
                       : [],
                 ),
                 child: Material(

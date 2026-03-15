@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,6 +10,7 @@ import '../core/app_strings.dart';
 import '../widgets/business/business_widgets.dart'; // venue klasörüne taşınmıştı
 import '../widgets/common/active_users_sheet.dart'; // venue klasörüne taşınmıştı (Check et) veya common
 import '../widgets/common/check_in_button.dart'; // venue klasörüne taşınmıştı
+import '../widgets/common/glass_button.dart';
 
 class BusinessProfileScreen extends StatefulWidget {
   final String venueId;
@@ -66,7 +66,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
           color: theme.cardColor,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.3 : 0.05), 
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05), 
               blurRadius: 20, 
               offset: const Offset(0, -5)
             )
@@ -118,37 +118,37 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
               
               // Geri Butonu (Glass)
               leading: Center(
-                child: _buildGlassButton(
+                child: GlassButton.medium(
                   icon: Icons.arrow_back_ios_new_rounded,
                   onTap: () => Navigator.pop(context),
                 ),
               ),
-              
+
               // Sağ Aksiyonlar (Glass)
               actions: [
-                _buildGlassButton(
+                GlassButton.medium(
                   icon: Icons.groups_rounded,
-                  color: theme.primaryColor,
+                  iconColor: theme.primaryColor,
                   onTap: () {
                     HapticFeedback.lightImpact();
                     showModalBottomSheet(
                       context: context,
-                      isScrollControlled: true, // İçeriğin boyuna göre esnemesi için
-                      backgroundColor: Colors.transparent, // Köşelerin yuvarlak görünmesi için şeffaf yapıyoruz
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
                       builder: (context) => ActiveUsersSheet(
-                        chatId: widget.venueId, // Mevcut grubun ID'sini gönderiyoruz
+                        chatId: widget.venueId,
                       ),
                     );
                   },
                 ),
                 const SizedBox(width: 8),
-                _buildGlassButton(
+                GlassButton.medium(
                   icon: isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                   onTap: () {
                     HapticFeedback.selectionClick();
                     setState(() => isFavorite = !isFavorite);
                   },
-                  color: isFavorite ? Colors.redAccent : null,
+                  iconColor: isFavorite ? Colors.redAccent : null,
                 ),
                 const SizedBox(width: 16),
               ],
@@ -166,10 +166,10 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.black.withOpacity(0.1),
+                            Colors.black.withValues(alpha: 0.1),
                             Colors.transparent,
-                            Colors.black.withOpacity(0.6),
-                            Colors.black.withOpacity(0.9),
+                            Colors.black.withValues(alpha: 0.6),
+                            Colors.black.withValues(alpha: 0.9),
                           ],
                           stops: const [0.0, 0.4, 0.7, 1.0],
                         ),
@@ -268,27 +268,6 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
     );
   }
 
-  // --- REUSABLE GLASS BUTTON ---
-  Widget _buildGlassButton({required IconData icon, required VoidCallback onTap, Color? color}) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: InkWell(
-          onTap: onTap,
-          child: Container(
-            width: 40, height: 40,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1), // Hafif transparan beyaz
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: color ?? Colors.white, size: 20),
-          ),
-        ),
-      ),
-    );
-  }
 
   // --- TAB 1: GENEL BAKIŞ ---
   Widget _buildGeneralTab(ThemeData theme) {
@@ -349,7 +328,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
             indicator: BoxDecoration(
               color: theme.cardColor, // Kart rengi (Beyaz/Siyah)
               borderRadius: BorderRadius.circular(25),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))]
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4, offset: const Offset(0, 2))]
             ),
             labelColor: theme.textTheme.bodyLarge?.color,
             unselectedLabelColor: theme.disabledColor,

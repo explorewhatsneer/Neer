@@ -42,7 +42,7 @@ class CustomNavBar extends StatelessWidget {
                   selectedIndex: value, 
                   itemsCount: 5,
                   color: theme.cardColor, // Dinamik Renk (Siyah/Beyaz)
-                  shadowColor: isDark ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.05),
+                  shadowColor: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.05),
                 ),
               );
             },
@@ -63,14 +63,14 @@ class CustomNavBar extends StatelessWidget {
               width: 60, height: 60,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [theme.primaryColor, theme.primaryColor.withOpacity(0.7)],
+                  colors: [theme.primaryColor, theme.primaryColor.withValues(alpha: 0.7)],
                   begin: Alignment.topLeft, 
                   end: Alignment.bottomRight,
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: theme.primaryColor.withOpacity(0.4), 
+                    color: theme.primaryColor.withValues(alpha: 0.4), 
                     blurRadius: 18, 
                     offset: const Offset(0, 8),
                   )

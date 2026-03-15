@@ -132,7 +132,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: theme.cardColor.withOpacity(0.8),
+        backgroundColor: theme.cardColor.withValues(alpha: 0.8),
         elevation: 0,
         scrolledUnderElevation: 0,
         flexibleSpace: ClipRect(
@@ -140,7 +140,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Container(
               decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: theme.dividerColor.withOpacity(0.1))),
+                border: Border(bottom: BorderSide(color: theme.dividerColor.withValues(alpha: 0.1))),
               ),
             ),
           ),
@@ -179,7 +179,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.notifications_off_rounded, size: 64, color: theme.disabledColor.withOpacity(0.4)),
+                  Icon(Icons.notifications_off_rounded, size: 64, color: theme.disabledColor.withValues(alpha: 0.4)),
                   const SizedBox(height: 16),
                   Text(
                     'Henüz bildirim yok',
@@ -213,7 +213,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 background: Container(
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: 24),
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withValues(alpha: 0.1),
                   child: const Icon(Icons.delete_outline_rounded, color: Colors.red),
                 ),
                 onDismissed: (_) {
@@ -227,9 +227,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     decoration: BoxDecoration(
                       color: isRead
                           ? Colors.transparent
-                          : (isDark ? Colors.white.withOpacity(0.03) : theme.primaryColor.withOpacity(0.03)),
+                          : (isDark ? Colors.white.withValues(alpha: 0.03) : theme.primaryColor.withValues(alpha: 0.03)),
                       border: Border(
-                        bottom: BorderSide(color: theme.dividerColor.withOpacity(0.08)),
+                        bottom: BorderSide(color: theme.dividerColor.withValues(alpha: 0.08)),
                       ),
                     ),
                     child: Row(
@@ -240,7 +240,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: style.color.withOpacity(0.12),
+                            color: style.color.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: Icon(style.icon, color: style.color, size: 22),
