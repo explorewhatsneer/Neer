@@ -21,11 +21,26 @@ final supabase = Supabase.instance.client;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: ".env");
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint('dotenv load failed: $e');
+  }
+
+  final supabaseUrl = dotenv.env['SUPABASE_URL'] ??
+      const String.fromEnvironment('SUPABASE_URL');
+  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ??
+      const String.fromEnvironment('SUPABASE_ANON_KEY');
+
+  if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
+    debugPrint('ERROR: Supabase credentials not found. '
+        'Ensure .env file exists with SUPABASE_URL and SUPABASE_ANON_KEY.');
+    return;
+  }
 
   await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
   );
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
