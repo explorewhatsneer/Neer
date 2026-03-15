@@ -1,16 +1,17 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
+import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart'; 
+import '../core/constants.dart';
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
+import '../core/theme_styles.dart';
+import '../core/app_strings.dart';
 
-// WIDGETLAR
-import '../widgets/notifications/notification_tile.dart';
-import '../widgets/notifications/request_summary_tile.dart';
-import 'follow_requests_screen.dart';
+import '../services/supabase_service.dart';
+import '../screens/friend_profile_screen.dart';
+import '../screens/business_profile_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -20,207 +21,308 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
+  final _supabaseService = SupabaseService();
   final _supabase = Supabase.instance.client;
-  late String _currentUserId;
-
-  // --- MOCK DATA (Sistem ve Check-in Bildirimleri İçin) ---
-  final List<Map<String, dynamic>> _otherNotifications = [
-    {
-      "id": "2",
-      "type": "checkin",
-      "title": "Yakınında Hareket Var",
-      "body": "Zeynep ve 2 arkadaşın şu an Thru Coffee'de! ☕",
-      "time": "15 dk önce",
-      "image": "https://i.pravatar.cc/150?img=5",
-      "isRead": true,
-    },
-    {
-      "id": "3",
-      "type": "system",
-      "title": "Anket Sonuçlandı",
-      "body": "'Kadıköy'de en iyi kahve' anketin sonuçlandı. Sonuçları gör.",
-      "time": "1 saat önce",
-      "image": "", 
-      "isRead": true,
-    },
-  ];
+  late String _uid;
 
   @override
   void initState() {
     super.initState();
-    _currentUserId = _supabase.auth.currentUser?.id ?? '';
+    _uid = _supabase.auth.currentUser?.id ?? '';
+    // Ekran açıldığında tüm bildirimleri okundu yap
+    Future.delayed(const Duration(seconds: 2), () {
+      _supabaseService.markAllNotificationsRead(_uid);
+    });
   }
 
-  // Bildirim Silme
-  void _removeNotification(String id) {
+  // ════════════════════════════════════════════
+  // BİLDİRİM TİPİNE GÖRE İKON VE RENK
+  // ════════════════════════════════════════════
+  _NotifStyle _getStyle(String type) {
+    switch (type) {
+      case 'follow_request':
+        return _NotifStyle(Icons.person_add_rounded, const Color(0xFF5856D6), 'Takip İsteği');
+      case 'follow_accept':
+        return _NotifStyle(Icons.how_to_reg_rounded, const Color(0xFF34C759), 'Kabul Edildi');
+      case 'checkin':
+        return _NotifStyle(Icons.location_on_rounded, const Color(0xFFFF9500), 'Check-in');
+      case 'message':
+        return _NotifStyle(Icons.chat_bubble_rounded, const Color(0xFF007AFF), 'Mesaj');
+      case 'system':
+        return _NotifStyle(Icons.info_rounded, const Color(0xFF8E8E93), 'Sistem');
+      case 'promotion':
+        return _NotifStyle(Icons.local_offer_rounded, const Color(0xFFFF2D55), 'Kampanya');
+      case 'report_result':
+        return _NotifStyle(Icons.shield_rounded, const Color(0xFFFF3B30), 'Moderasyon');
+      default:
+        return _NotifStyle(Icons.notifications_rounded, const Color(0xFF8E8E93), 'Bildirim');
+    }
+  }
+
+  // ════════════════════════════════════════════
+  // BİLDİRİME TIKLANDIĞINDA YÖNLENDİRME
+  // ════════════════════════════════════════════
+  void _handleNotificationTap(Map<String, dynamic> notif) {
     HapticFeedback.lightImpact();
-    setState(() {
-      _otherNotifications.removeWhere((item) => item['id'] == id);
-    });
+    final type = notif['type'] ?? '';
+    final data = notif['data'] is Map ? Map<String, dynamic>.from(notif['data']) : <String, dynamic>{};
+
+    switch (type) {
+      case 'follow_request':
+      case 'follow_accept':
+        final senderId = data['sender_id'];
+        if (senderId != null) {
+          Navigator.push(context, MaterialPageRoute(
+            builder: (context) => FriendProfileScreen(targetUserId: senderId),
+          ));
+        }
+        break;
+      case 'checkin':
+        final placeId = data['place_id'];
+        final placeName = data['place_name'] ?? 'Mekan';
+        if (placeId != null) {
+          Navigator.push(context, MaterialPageRoute(
+            builder: (context) => BusinessProfileScreen(
+              venueId: placeId.toString(),
+              venueName: placeName,
+              imageUrl: '',
+            ),
+          ));
+        }
+        break;
+      case 'message':
+        // DM ekranına yönlendir — chat_screen.dart
+        final senderId = data['sender_id'];
+        if (senderId != null) {
+          // Basit yönlendirme: profil üzerinden mesajlaşma
+          Navigator.push(context, MaterialPageRoute(
+            builder: (context) => FriendProfileScreen(targetUserId: senderId),
+          ));
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  // ════════════════════════════════════════════
+  // ZAMAN FORMATLAMA
+  // ════════════════════════════════════════════
+  String _formatTime(String? dateStr) {
+    if (dateStr == null) return '';
+    final date = DateTime.tryParse(dateStr);
+    if (date == null) return '';
+
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inMinutes < 1) return 'Az önce';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}dk';
+    if (diff.inHours < 24) return '${diff.inHours}sa';
+    if (diff.inDays < 7) return '${diff.inDays}g';
+    return '${date.day}.${date.month}';
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
+        backgroundColor: theme.cardColor.withOpacity(0.8),
         elevation: 0,
-        title: Text(
-          AppStrings.notificationsTitle, 
-          style: AppTextStyles.h2.copyWith(fontSize: 24)
+        scrolledUnderElevation: 0,
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: theme.dividerColor.withOpacity(0.1))),
+              ),
+            ),
+          ),
         ),
-        centerTitle: false,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.iconTheme.color, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        actions: [
-          if (_otherNotifications.isNotEmpty)
-            TextButton(
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                setState(() => _otherNotifications.clear());
-              }, 
-              child: Text(
-                AppStrings.clearAll, 
-                style: AppTextStyles.button.copyWith(color: theme.colorScheme.error)
-              )
-            ),
-          const SizedBox(width: 8),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: theme.dividerColor.withOpacity(0.1), height: 1.0), 
+        title: Text(
+          AppStrings.notifications,
+          style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.w700),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              _supabaseService.markAllNotificationsRead(_uid);
+            },
+            icon: Icon(Icons.done_all_rounded, color: theme.primaryColor, size: 22),
+            tooltip: 'Tümünü okundu işaretle',
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
-      
-      // 🔥 StreamBuilder: Veritabanındaki değişiklikleri dinler
       body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _supabase
-            .from('friend_requests')
-            .stream(primaryKey: ['id'])
-            .eq('receiver_id', _currentUserId),
+        stream: _supabaseService.getNotifications(_uid),
         builder: (context, snapshot) {
-          // İstek listesini al (Yoksa boş liste)
-          final friendRequests = snapshot.data ?? [];
-          final bool hasRequests = friendRequests.isNotEmpty;
-          final bool hasOtherNotifs = _otherNotifications.isNotEmpty;
-
-          // Eğer HİÇ bildirim yoksa
-          if (!hasRequests && !hasOtherNotifs) {
-            return _buildEmptyState(theme);
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator(color: theme.primaryColor));
           }
 
-          return ListView(
-            physics: const BouncingScrollPhysics(),
-            children: [
-              
-              // 1. İSTEK ÖZETİ (Supabase'den canlı veri)
-              if (hasRequests) ...[
-                Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: RequestSummaryTile(
-                    requests: friendRequests, 
-                    // 🔥 DÜZELTME BURADA YAPILDI 🔥
-                    onTap: () async { 
-                      HapticFeedback.selectionClick();
-                      
-                      // Sayfaya git ve DÖNMESİNİ BEKLE (await)
-                      await Navigator.push(
-                        context, 
-                        MaterialPageRoute(builder: (context) => const FriendRequestsScreen())
-                      );
+          final notifications = snapshot.data ?? [];
 
-                      // Döndüğünde ekranı zorla yenile ki veriler güncellensin
-                      if (mounted) {
-                        setState(() {});
-                      }
-                    },
+          if (notifications.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.notifications_off_rounded, size: 64, color: theme.disabledColor.withOpacity(0.4)),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Henüz bildirim yok',
+                    style: AppTextStyles.bodyLarge.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w600),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    'Yeni etkileşimler burada görünecek.',
+                    style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),
+                  ),
+                ],
+              ),
+            );
+          }
 
-              // 2. DİĞER BİLDİRİMLER (Varsa Göster)
-              if (hasOtherNotifs)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Başlık
-                      if (hasRequests)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12, left: 4, top: 10),
-                          child: Text(
-                            AppStrings.generalSection, 
-                            style: AppTextStyles.caption.copyWith(
-                              fontWeight: FontWeight.w900, 
-                              color: theme.disabledColor,
-                              letterSpacing: 1.2
-                            )
+          return ListView.builder(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.only(
+              top: kToolbarHeight + MediaQuery.of(context).padding.top + 12,
+              bottom: 100,
+            ),
+            itemCount: notifications.length,
+            itemBuilder: (context, index) {
+              final notif = notifications[index];
+              final style = _getStyle(notif['type'] ?? '');
+              final bool isRead = notif['is_read'] ?? false;
+
+              return Dismissible(
+                key: Key(notif['id'].toString()),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 24),
+                  color: Colors.red.withOpacity(0.1),
+                  child: const Icon(Icons.delete_outline_rounded, color: Colors.red),
+                ),
+                onDismissed: (_) {
+                  // Bildirimi sil
+                  _supabase.from('notifications').delete().eq('id', notif['id']);
+                },
+                child: InkWell(
+                  onTap: () => _handleNotificationTap(notif),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: isRead
+                          ? Colors.transparent
+                          : (isDark ? Colors.white.withOpacity(0.03) : theme.primaryColor.withOpacity(0.03)),
+                      border: Border(
+                        bottom: BorderSide(color: theme.dividerColor.withOpacity(0.08)),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // İkon
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: style.color.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Icon(style.icon, color: style.color, size: 22),
+                        ),
+                        const SizedBox(width: 14),
+
+                        // İçerik
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      notif['title'] ?? style.label,
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        fontWeight: isRead ? FontWeight.w500 : FontWeight.w700,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    _formatTime(notif['created_at']?.toString()),
+                                    style: AppTextStyles.caption.copyWith(
+                                      color: theme.disabledColor,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (notif['body'] != null && notif['body'].toString().isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  notif['body'],
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: theme.disabledColor,
+                                    height: 1.3,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ],
                           ),
                         ),
-                    
-                      ..._otherNotifications.map((item) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: NotificationTile(
-                          key: ValueKey(item['id']),
-                          id: item['id'],
-                          type: item['type'],
-                          title: item['title'],
-                          body: item['body'],
-                          time: item['time'],
-                          imageUrl: item['image'],
-                          isRead: item['isRead'],
-                          onDismiss: _removeNotification,
-                        ),
-                      )),
-                      
-                      const SizedBox(height: 40),
-                    ],
+
+                        // Okunmadı noktası
+                        if (!isRead) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 8,
+                            height: 8,
+                            margin: const EdgeInsets.only(top: 6),
+                            decoration: BoxDecoration(
+                              color: theme.primaryColor,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 ),
-            ],
+              );
+            },
           );
         },
       ),
     );
   }
+}
 
-  // --- BOŞ DURUM ---
-  Widget _buildEmptyState(ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(25),
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              shape: BoxShape.circle,
-              boxShadow: AppThemeStyles.shadowLow,
-            ),
-            child: Icon(Icons.notifications_off_rounded, size: 60, color: theme.disabledColor.withOpacity(0.5)),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            AppStrings.noNotifications, 
-            style: AppTextStyles.h3.copyWith(
-              fontWeight: FontWeight.bold, 
-              color: theme.textTheme.bodyLarge?.color
-            )
-          ),
-          const SizedBox(height: 8),
-          Text(
-            AppStrings.allQuiet, 
-            style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor)
-          ),
-        ],
-      ),
-    );
-  }
+// ════════════════════════════════════════════
+// YARDIMCI: Bildirim Stili
+// ════════════════════════════════════════════
+class _NotifStyle {
+  final IconData icon;
+  final Color color;
+  final String label;
+
+  _NotifStyle(this.icon, this.color, this.label);
 }
