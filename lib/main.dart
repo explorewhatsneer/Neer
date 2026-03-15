@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import 'core/theme_manager.dart';
 import 'core/language_manager.dart';
 import 'core/constants.dart';
@@ -21,26 +19,9 @@ final supabase = Supabase.instance.client;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    await dotenv.load(fileName: ".env");
-  } catch (e) {
-    debugPrint('dotenv load failed: $e');
-  }
-
-  final supabaseUrl = dotenv.env['SUPABASE_URL'] ??
-      const String.fromEnvironment('SUPABASE_URL');
-  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ??
-      const String.fromEnvironment('SUPABASE_ANON_KEY');
-
-  if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
-    debugPrint('ERROR: Supabase credentials not found. '
-        'Ensure .env file exists with SUPABASE_URL and SUPABASE_ANON_KEY.');
-    return;
-  }
-
   await Supabase.initialize(
-    url: supabaseUrl,
-    anonKey: supabaseAnonKey,
+    url: 'https://celkzibnupgacoesaxse.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlbGt6aWJudXBnYWNvZXNheHNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MDg1NjcsImV4cCI6MjA4NjA4NDU2N30.5cUu8uhqE2bLYhZZLwMFUVKhCPDt59UCCzCq4Wh3D_c',
   );
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
