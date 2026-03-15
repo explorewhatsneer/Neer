@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart'; // Bu dosyada gerek yok
-// import '../main.dart'; // Gerek yok
 import 'package:intl/intl.dart';
 
 // CORE IMPORTLARI

@@ -2,7 +2,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:supabase_flutter/supabase_flutter.dart';
-// import '../main.dart'; // Gerek kalmadı
 
 // CORE IMPORTLARI
 import '../../core/constants.dart';

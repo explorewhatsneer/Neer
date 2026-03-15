@@ -342,25 +342,4 @@ class SupabaseService {
     }
   }
 
-  // ════════════════════════════════════════════
-  // 18. ESKI UYUMLULUK — sendCheckIn (Deprecated)
-  // Eski check_in_button.dart ile uyumluluk için
-  // ════════════════════════════════════════════
-  @Deprecated('Use checkIn() instead — server-side geofence validation')
-  Future<String> sendCheckIn(String userId, String placeId, String placeName) async {
-    try {
-      final response = await _supabase.from('posts').insert({
-        'user_id': userId,
-        'location_name': placeName,
-        'type': 'check_in',
-        'content': '$placeName konumunda check-in yapıldı.',
-        'created_at': DateTime.now().toIso8601String(),
-      }).select().single();
-      await _supabase.rpc('increment_check_in_count', params: {'user_id': userId});
-      return response['id'].toString();
-    } catch (e) {
-      print("Check-in Hatası: $e");
-      return "";
-    }
-  }
 }

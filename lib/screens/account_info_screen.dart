@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback için
 import 'package:supabase_flutter/supabase_flutter.dart';
-// import '../main.dart'; // Gerek kalmadı, instance kullanıyoruz
 
 // CORE IMPORTLARI
 import '../core/constants.dart';

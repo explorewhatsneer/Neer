@@ -1,6 +1,3 @@
-// import 'package:supabase_flutter/supabase_flutter.dart'; // Modelde buna gerek yok
-// import '../main.dart'; 
-
 class PostModel {
   final String id;
   final String userId;

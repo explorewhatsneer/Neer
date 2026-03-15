@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:image_picker/image_picker.dart'; 
 import 'package:supabase_flutter/supabase_flutter.dart';
-// import '../main.dart'; // Gerek kalmadı
 
 // CORE & MODELLER
 import '../core/theme_styles.dart'; 
@@ -12,7 +11,6 @@ import '../core/app_strings.dart';
 import '../models/user_model.dart';
 
 // SERVİSLER
-// import '../services/firestore_service.dart'; // Gerek kalmadı
 import '../services/storage_service.dart';
 
 // WIDGETLAR

@@ -5,8 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 // CORE IMPORTLARI
 import '../../core/text_styles.dart';
-import '../../core/app_strings.dart'; 
-// import '../../core/theme_styles.dart';
+import '../../core/app_strings.dart';
 
 class MapFloatingButtons extends StatelessWidget {
   final VoidCallback onLocationTap;

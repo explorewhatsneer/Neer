@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-// import '../main.dart'; // Gerek kalmadı
 
 // CORE IMPORTLARI
 import '../core/text_styles.dart';
@@ -9,7 +8,6 @@ import '../core/app_strings.dart';
 
 import '../widgets/chat/chat_input.dart';
 import '../widgets/chat/message_bubble.dart';
-// import '../services/firestore_service.dart'; // Servis yerine direct logic
 import '../models/user_model.dart';
 
 class ChatScreen extends StatefulWidget {

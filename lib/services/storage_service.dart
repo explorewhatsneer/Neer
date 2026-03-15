@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
-// import '../main.dart'; // Gerek kalmadı, instance üzerinden erişiyoruz.
 
 // CORE IMPORT
 import '../core/app_strings.dart';

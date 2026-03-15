@@ -21,8 +21,6 @@ import '../widgets/feed/feed_widgets.dart';
 
 // Import Çakışmasını Önleme
 import '../widgets/friend/friend_profile_widgets.dart' show FriendEmptyCard;
-import '../services/fake_data_service.dart';
-
 // EKRANLAR
 import 'edit_profile_screen.dart'; 
 import 'settings_screen.dart';
@@ -169,29 +167,18 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   ),
                   const SizedBox(width: 8),
                   
-                  // AYARLAR BUTONU (Fake Data Basar)
+                  // AYARLAR BUTONU
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.only(right: 16.0),
                       child: _buildGlassButton(
                         icon: Icons.settings_rounded,
-                        onTap: () async {
+                        onTap: () {
                           HapticFeedback.lightImpact();
-                          final seeder = FakeDataService();
-                          await seeder.seedAll(); 
-                          if (context.mounted) {
-                             _fetchUserData(); 
-                             setState(() {
-                               _favoritesStream = _supabaseService.getUserFavorites(_uid);
-                               _notesStream = _supabaseService.getUserNotes(_uid);
-                               _photosStream = _supabaseService.getUserPhotos(_uid);
-                               _activityStream = _supabaseService.getUserActivityFeed(_uid);
-                               _questsFuture = _supabaseService.getUserQuests(_uid);
-                               _frequentPlacesFuture = _supabaseService.getFrequentPlaces(_uid);
-                               _surveyHistoryFuture = _supabaseService.getSurveyHistory(_uid);
-                             }); 
-                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Fake Data Eklendi! ✅")));
-                          }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                          );
                         },
                       ),
                     ),

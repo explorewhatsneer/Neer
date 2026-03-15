@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 
 // CORE IMPORTLARI
-import '../../core/app_strings.dart'; 
-// import '../../core/theme_styles.dart'; // Gerekirse eklenebilir
+import '../../core/app_strings.dart';
 
 // Sayfa Importları (Projende bu yolların doğru olduğundan emin ol)
 import '../../screens/notifications_screen.dart';
