@@ -19,6 +19,35 @@ class SupabaseService {
     }
   }
 
+  // Profil güncelleme
+  Future<void> updateProfile(String uid, Map<String, dynamic> data) async {
+    try {
+      await _supabase.from('profiles').update(data).eq('id', uid);
+    } catch (e) {
+      print("Profil güncelleme hatası: $e");
+    }
+  }
+
+  // Profil stream (realtime)
+  Stream<Map<String, dynamic>?> streamProfile(String uid) {
+    return _supabase
+        .from('profiles')
+        .stream(primaryKey: ['id'])
+        .eq('id', uid)
+        .map((data) => data.isNotEmpty ? data.first : null);
+  }
+
+  // Birden fazla profil çek (inFilter)
+  Future<List<Map<String, dynamic>>> getUsersByIds(List<String> ids) async {
+    if (ids.isEmpty) return [];
+    try {
+      final response = await _supabase.from('profiles').select().inFilter('id', ids);
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      return [];
+    }
+  }
+
   // ════════════════════════════════════════════
   // 2. AKTİVİTE AKIŞI (Kullanıcının Gönderileri)
   // ════════════════════════════════════════════
@@ -342,4 +371,193 @@ class SupabaseService {
     }
   }
 
+  // ════════════════════════════════════════════
+  // 18. MESAJ İŞLEMLERİ
+  // ════════════════════════════════════════════
+  Future<void> sendMessage(Map<String, dynamic> message) async {
+    try {
+      await _supabase.from('messages').insert(message);
+    } catch (e) {
+      print("Mesaj gönderme hatası: $e");
+    }
+  }
+
+  Stream<List<Map<String, dynamic>>> streamDMMessages(String roomId) {
+    return _supabase
+        .from('messages')
+        .stream(primaryKey: ['id'])
+        .eq('room_id', roomId)
+        .order('created_at', ascending: false);
+  }
+
+  Stream<List<Map<String, dynamic>>> streamGroupMessages(String groupId) {
+    return _supabase
+        .from('messages')
+        .stream(primaryKey: ['id'])
+        .eq('group_id', groupId)
+        .order('created_at', ascending: false);
+  }
+
+  Stream<List<Map<String, dynamic>>> streamRecentMessages() {
+    return _supabase
+        .from('messages')
+        .stream(primaryKey: ['id'])
+        .order('created_at', ascending: false)
+        .limit(50);
+  }
+
+  // ════════════════════════════════════════════
+  // 19. FEED (RPC)
+  // ════════════════════════════════════════════
+  Future<List<Map<String, dynamic>>> getFeedPosts({
+    required String userId,
+    required String filterMode,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      final response = await _supabase.rpc('get_feed_posts', params: {
+        'p_user_id': userId,
+        'p_filter': filterMode,
+        'p_limit': limit,
+        'p_offset': offset,
+      });
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // ════════════════════════════════════════════
+  // 20. HARİTA İŞLEMLERİ
+  // ════════════════════════════════════════════
+  Future<List<Map<String, dynamic>>> getNearbyPlaces({
+    required double lat,
+    required double lng,
+    double radiusKm = 5.0,
+  }) async {
+    try {
+      final response = await _supabase.rpc('get_nearby_places', params: {
+        'p_lat': lat,
+        'p_lng': lng,
+        'p_radius_km': radiusKm,
+      });
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getMutualFriendsLocations(String userId) async {
+    try {
+      final response = await _supabase.rpc('get_mutual_friends_locations', params: {
+        'my_id': userId,
+      });
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // ════════════════════════════════════════════
+  // 21. TAKİP İŞLEMLERİ
+  // ════════════════════════════════════════════
+  Future<bool> isFollowing(String followerId, String followingId) async {
+    try {
+      final response = await _supabase
+          .from('followers')
+          .select('id')
+          .eq('follower_id', followerId)
+          .eq('following_id', followingId)
+          .maybeSingle();
+      return response != null;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<void> follow(String followerId, String followingId) async {
+    await _supabase.from('followers').insert({
+      'follower_id': followerId,
+      'following_id': followingId,
+    });
+  }
+
+  Future<void> unfollow(String followerId, String followingId) async {
+    await _supabase
+        .from('followers')
+        .delete()
+        .match({'follower_id': followerId, 'following_id': followingId});
+  }
+
+  // Takip istekleri
+  Stream<List<Map<String, dynamic>>> streamFollowRequests(String userId) {
+    return _supabase
+        .from('friend_requests')
+        .stream(primaryKey: ['id'])
+        .eq('receiver_id', userId)
+        .order('created_at', ascending: false);
+  }
+
+  Future<void> sendFollowRequest(String senderId, String receiverId) async {
+    await _supabase.from('friend_requests').insert({
+      'sender_id': senderId,
+      'receiver_id': receiverId,
+    });
+  }
+
+  Future<void> acceptFollowRequest(String requestId, String followerId, String followingId) async {
+    await _supabase.from('followers').insert({
+      'follower_id': followerId,
+      'following_id': followingId,
+    });
+    await _supabase.from('friend_requests').delete().eq('id', requestId);
+  }
+
+  Future<void> declineFollowRequest(String requestId) async {
+    await _supabase.from('friend_requests').delete().eq('id', requestId);
+  }
+
+  // ════════════════════════════════════════════
+  // 22. ARAMA
+  // ════════════════════════════════════════════
+  Future<List<Map<String, dynamic>>> searchUsers(String query, {int limit = 10}) async {
+    try {
+      final response = await _supabase
+          .from('profiles')
+          .select()
+          .ilike('search_key', '%$query%')
+          .limit(limit);
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> searchPlaces(String query, {int limit = 10}) async {
+    try {
+      final response = await _supabase
+          .from('places')
+          .select()
+          .ilike('name', '%$query%')
+          .limit(limit);
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // Bildirim silme
+  Future<void> deleteNotification(dynamic notificationId) async {
+    await _supabase.from('notifications').delete().eq('id', notificationId);
+  }
+
+  // Bildirim stream (harita ekranı için)
+  Stream<List<Map<String, dynamic>>> streamNotifications(String userId) {
+    return _supabase
+        .from('notifications')
+        .stream(primaryKey: ['id'])
+        .eq('user_id', userId)
+        .order('created_at', ascending: false);
+  }
 }
