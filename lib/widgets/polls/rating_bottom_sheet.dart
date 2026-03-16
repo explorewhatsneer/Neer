@@ -1,10 +1,10 @@
-import 'dart:ui'; // ImageFilter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 
 // CORE IMPORTLARI
 import '../../core/text_styles.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
+import '../common/glass_panel.dart'; 
 
 class RatingBottomSheet extends StatefulWidget {
   final String placeName;
@@ -76,18 +76,11 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
+    return GlassPanel.sheet(
+          darkAlpha: 0.85,
+          lightAlpha: 0.92,
           height: MediaQuery.of(context).size.height * 0.9,
-          decoration: BoxDecoration(
-            // Dinamik Glass Rengi
-            color: isDark ? Colors.black.withValues(alpha: 0.85) : Colors.white.withValues(alpha: 0.92),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
-            border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1)),
-          ),
+          border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1)),
           child: Column(
             children: [
               const SizedBox(height: 15),
@@ -210,8 +203,6 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
               ),
             ],
           ),
-        ),
-      ),
     );
   }
 

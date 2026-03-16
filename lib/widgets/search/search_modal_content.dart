@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +9,7 @@ import '../../core/app_strings.dart';
 
 import '../../models/user_model.dart';
 import '../../services/supabase_service.dart';
+import '../common/glass_panel.dart';
 import 'search_widgets.dart';
 
 class SearchModalContent extends StatefulWidget {
@@ -93,19 +93,11 @@ class _SearchModalContentState extends State<SearchModalContent> with SingleTick
       minChildSize: 0.5,
       maxChildSize: 0.95,
       builder: (_, scrollController) {
-        return ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                color: isDark ? Colors.black.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.9),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 40, offset: const Offset(0, -10))
-                ],
-                border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1)),
-              ),
+        return GlassPanel.sheet(
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 40, offset: const Offset(0, -10))
+              ],
+              border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1)),
               child: Column(
                 children: [
                   // --- HEADER ---
@@ -199,8 +191,6 @@ class _SearchModalContentState extends State<SearchModalContent> with SingleTick
                   ),
                 ],
               ),
-            ),
-          ),
         );
       },
     );

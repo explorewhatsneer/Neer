@@ -1,4 +1,3 @@
-import 'dart:ui'; // ImageFilter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:go_router/go_router.dart';
@@ -9,6 +8,9 @@ import '../../core/text_styles.dart';
 import '../../core/app_strings.dart';
 import '../../core/constants.dart'; // AppColors için
 import '../../core/app_router.dart';
+
+// WIDGETS
+import '../common/glass_panel.dart';
 
 // 🔥 Servis Importu
 import '../../services/supabase_service.dart';
@@ -40,20 +42,13 @@ class UserSheet {
         initialChildSize: 0.75, 
         minChildSize: 0.5,
         maxChildSize: 0.95,
-        builder: (_, controller) => ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                // Dinamik Glass Rengi
-                color: isDark ? Colors.black.withValues(alpha: 0.85) : Colors.white.withValues(alpha: 0.95),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 40, offset: const Offset(0, 10))
-                ],
-                border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1)),
-              ),
+        builder: (_, controller) => GlassPanel.sheet(
+              darkAlpha: 0.85,
+              lightAlpha: 0.95,
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 40, offset: const Offset(0, 10))
+              ],
+              border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1)),
               child: ListView(
                 controller: controller,
                 padding: EdgeInsets.zero,
@@ -392,8 +387,6 @@ class UserSheet {
               ),
             ),
           ),
-        ),
-      ),
     );
   }
 

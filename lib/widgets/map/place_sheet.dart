@@ -1,4 +1,3 @@
-import 'dart:ui'; // ImageFilter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:go_router/go_router.dart';
@@ -9,6 +8,7 @@ import '../../core/text_styles.dart';
 import '../../core/app_strings.dart';
 
 import '../../widgets/common/check_in_button.dart';
+import '../../widgets/common/glass_panel.dart';
 
 class PlaceSheet {
   static void show(BuildContext context, Map<String, dynamic> placeData, String placeId) {
@@ -50,20 +50,11 @@ class PlaceSheet {
         initialChildSize: 0.65, 
         minChildSize: 0.4,
         maxChildSize: 0.9,
-        builder: (_, controller) => ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                // Dinamik Arka Plan Rengi (Glass)
-                color: isDark ? Colors.black.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.9),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 40, offset: const Offset(0, 10))
-                ],
-                border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1)),
-              ),
+        builder: (_, controller) => GlassPanel.sheet(
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 40, offset: const Offset(0, 10))
+              ],
+              border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1)),
               child: ListView(
                 controller: controller,
                 padding: EdgeInsets.zero,
@@ -359,8 +350,6 @@ class PlaceSheet {
                   ),
                 ],
               ),
-            ),
-          ),
         ),
       ),
     );

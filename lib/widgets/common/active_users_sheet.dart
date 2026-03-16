@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:go_router/go_router.dart';
@@ -10,6 +9,7 @@ import '../../core/constants.dart';
 import '../../core/app_strings.dart';
 
 import '../../services/supabase_service.dart';
+import 'glass_panel.dart';
 
 // --- DIŞARIDAN ÇAĞRILAN FONKSİYON ---
 void showGroupMembers(BuildContext context, String chatId) {
@@ -67,18 +67,11 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
       initialChildSize: 0.6,
       minChildSize: 0.4,
       maxChildSize: 0.9,
-      builder: (_, controller) => ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            decoration: BoxDecoration(
-              // Dinamik Glass Rengi
-              color: isDark ? Colors.black.withValues(alpha: 0.7) : Colors.white.withValues(alpha: 0.8),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
-              boxShadow: AppThemeStyles.shadowHigh, 
-              border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1)),
-            ),
+      builder: (_, controller) => GlassPanel.sheet(
+            darkAlpha: 0.7,
+            lightAlpha: 0.8,
+            boxShadow: AppThemeStyles.shadowHigh,
+            border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1)),
             child: Column(
               children: [
                 // --- HEADER (GRAB BAR) ---
@@ -155,8 +148,6 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
                 ),
               ],
             ),
-          ),
-        ),
       ),
     );
   }
