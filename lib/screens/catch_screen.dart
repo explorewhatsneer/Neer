@@ -14,6 +14,7 @@ import '../core/snackbar_helper.dart';
 import '../services/catch_service.dart';
 import '../services/availability_service.dart';
 import '../services/watcher_service.dart';
+import '../widgets/common/shimmer_loading.dart';
 
 class CatchScreen extends StatefulWidget {
   const CatchScreen({super.key});
@@ -420,7 +421,12 @@ class _CatchScreenState extends State<CatchScreen> {
         toolbarHeight: 50,
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator(color: theme.primaryColor))
+          ? Column(
+              children: [
+                _buildStatusCard(theme, isDark),
+                const Expanded(child: ShimmerGrid(itemCount: 4)),
+              ],
+            )
           : Column(
               children: [
                 // ═══ DURUM KARTI ═══
