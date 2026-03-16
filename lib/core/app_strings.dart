@@ -506,6 +506,33 @@ class AppStrings {
   static String get chats => lang == 'tr' ? "Sohbetler" : "Chats";
   static String get typeMessage => lang == 'tr' ? "Mesaj yaz..." : "Type a message...";
 
+  // --- CATCH ---
+  static String get navCatch => lang == 'tr' ? "Catch" : "Catch";
+  static String get catchTitle => lang == 'tr' ? "Catch" : "Catch";
+  static String get available => lang == 'tr' ? "Müsait" : "Available";
+  static String get busy => lang == 'tr' ? "Meşgul" : "Busy";
+  static String get pendingStatus => lang == 'tr' ? "Bekliyor" : "Pending";
+  static String get beAvailable => lang == 'tr' ? "Müsait Ol" : "Be Available";
+  static String get goBusy => lang == 'tr' ? "Meşgul Ol" : "Go Busy";
+  static String get selectDuration => lang == 'tr' ? "Süre Seç" : "Select Duration";
+  static String get min30 => lang == 'tr' ? "30 dk" : "30 min";
+  static String get hour1 => lang == 'tr' ? "1 saat" : "1 hour";
+  static String get hour2 => lang == 'tr' ? "2 saat" : "2 hours";
+  static String get hour4 => lang == 'tr' ? "4 saat" : "4 hours";
+  static String get catchSent => lang == 'tr' ? "Catch gönderildi!" : "Catch sent!";
+  static String get catchAccepted => lang == 'tr' ? "Catch kabul edildi!" : "Catch accepted!";
+  static String get catchRejected => lang == 'tr' ? "Catch reddedildi" : "Catch rejected";
+  static String get catchExpired => lang == 'tr' ? "Catch süresi doldu" : "Catch expired";
+  static String get incomingCatch => lang == 'tr' ? "Catch geliyor!" : "Incoming Catch!";
+  static String get wantsToMeet => lang == 'tr' ? "seninle buluşmak istiyor" : "wants to meet you";
+  static String get cooldownActive => lang == 'tr' ? "Bekleniyor..." : "Waiting...";
+  static String get noFriendsForCatch => lang == 'tr' ? "Henüz arkadaşın yok" : "No friends yet";
+  static String get noFriendsForCatchDesc => lang == 'tr' ? "Haritadan kişileri takip ederek arkadaş edin." : "Follow people from the map to add friends.";
+  static String get youAreAvailable => lang == 'tr' ? "Müsaitsin" : "You're Available";
+  static String get youAreBusy => lang == 'tr' ? "Meşgulsün" : "You're Busy";
+  static String get remainingTime => lang == 'tr' ? "Kalan süre" : "Remaining";
+  static String get call => lang == 'tr' ? "Ara" : "Call";
+
   // --- ARKADAŞLIK AKSİYONLARI ---
   static String get youAreFriends => lang == 'tr' ? "Arkadaşsınız" : "Friends";
   static String get requestSent => lang == 'tr' ? "İstek Gönderildi" : "Request Sent";

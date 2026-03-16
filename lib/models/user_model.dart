@@ -21,6 +21,12 @@ class UserModel {
   final double? longitude;
   final DateTime? lastLocationUpdate;
 
+  // Catch feature
+  final String catchStatus;       // 'available', 'busy', 'pending'
+  final DateTime? availableUntil;
+  final String? pendingCatchId;
+  final String? phoneNumber;
+
   UserModel({
     required this.uid,
     required this.email,
@@ -42,6 +48,10 @@ class UserModel {
     this.latitude,
     this.longitude,
     this.lastLocationUpdate,
+    this.catchStatus = 'busy',
+    this.availableUntil,
+    this.pendingCatchId,
+    this.phoneNumber,
   });
 
   // Veritabanına yazarken (Supabase snake_case kullanır)
@@ -65,6 +75,10 @@ class UserModel {
       'latitude': latitude,
       'longitude': longitude,
       'last_location_update': lastLocationUpdate?.toIso8601String(),
+      'status': catchStatus,
+      'available_until': availableUntil?.toIso8601String(),
+      'pending_catch_id': pendingCatchId,
+      'phone_number': phoneNumber,
     };
   }
 
@@ -101,9 +115,15 @@ class UserModel {
       // 🔥 KONUM VERİLERİNİ ÇEKİYORUZ
       latitude: map['latitude'] != null ? (map['latitude'] as num).toDouble() : null,
       longitude: map['longitude'] != null ? (map['longitude'] as num).toDouble() : null,
-      lastLocationUpdate: map['last_location_update'] != null 
-          ? DateTime.tryParse(map['last_location_update'].toString()) 
+      lastLocationUpdate: map['last_location_update'] != null
+          ? DateTime.tryParse(map['last_location_update'].toString())
           : null,
+      catchStatus: map['status'] ?? 'busy',
+      availableUntil: map['available_until'] != null
+          ? DateTime.tryParse(map['available_until'].toString())
+          : null,
+      pendingCatchId: map['pending_catch_id']?.toString(),
+      phoneNumber: map['phone_number']?.toString(),
     );
   }
 
@@ -125,6 +145,10 @@ class UserModel {
     double? trustScore,
     int? followersCount,
     int? followingCount,
+    String? catchStatus,
+    DateTime? availableUntil,
+    String? pendingCatchId,
+    String? phoneNumber,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -143,6 +167,10 @@ class UserModel {
       trustScore: trustScore ?? this.trustScore,
       followersCount: followersCount ?? this.followersCount,
       followingCount: followingCount ?? this.followingCount,
+      catchStatus: catchStatus ?? this.catchStatus,
+      availableUntil: availableUntil ?? this.availableUntil,
+      pendingCatchId: pendingCatchId ?? this.pendingCatchId,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
     );
   }
 }

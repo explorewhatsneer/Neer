@@ -158,7 +158,7 @@ class CustomNavBar extends StatelessWidget {
       case 1: return Icons.chat_bubble_rounded;
       case 2: return Icons.location_on_rounded; 
       case 3: return Icons.dynamic_feed_rounded; // Akış
-      case 4: return Icons.people_alt_rounded;
+      case 4: return Icons.bolt_rounded;
       default: return Icons.circle;
     }
   }
@@ -170,7 +170,7 @@ class CustomNavBar extends StatelessWidget {
       case 1: return AppStrings.navChat;
       case 2: return AppStrings.navMap;
       case 3: return AppStrings.navFeed;
-      case 4: return AppStrings.navFriends;
+      case 4: return AppStrings.navCatch;
       default: return "";
     }
   }

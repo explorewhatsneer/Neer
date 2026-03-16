@@ -9,7 +9,7 @@ import 'screens/map_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/chat_list_screen.dart';
 import 'screens/feed_screen.dart';   
-import 'screens/friends_screen.dart'; 
+import 'screens/catch_screen.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -23,13 +23,13 @@ class _MainLayoutState extends State<MainLayout> {
   int _currentIndex = 2;
 
   // Sayfaların Listesi (Sıralama Navbar ikonlarıyla aynı olmalı)
-  // 0: Profil, 1: Sohbet, 2: Harita, 3: Akış, 4: Arkadaşlar
+  // 0: Profil, 1: Sohbet, 2: Harita, 3: Akış, 4: Catch
   final List<Widget> _screens = [
-    const ProfileScreen(),    
-    const ChatListScreen(),   
-    const MapScreen(),        
-    const FeedScreen(),       
-    const FriendsScreen(),    
+    const ProfileScreen(),
+    const ChatListScreen(),
+    const MapScreen(),
+    const FeedScreen(),
+    const CatchScreen(),
   ];
 
   void _onTabChange(int index) {

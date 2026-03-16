@@ -28,6 +28,7 @@ dependencies:
   intl: ^0.20.0
   
   image_picker: ^1.2.1
+  url_launcher: ^6.2.5
 
   # Harita ve Konum
   flutter_map: ^6.1.0
