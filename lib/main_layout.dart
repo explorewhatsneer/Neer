@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 
 // WIDGETLAR
-import 'screens/custom_navbar.dart'; // 🔥 Daha önce oluşturduğumuz widget
+import 'screens/custom_navbar.dart';
+import 'widgets/common/offline_banner.dart';
 
 // EKRANLAR
 import 'screens/map_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/chat_list_screen.dart';
-import 'screens/feed_screen.dart';   
+import 'screens/feed_screen.dart';
 import 'screens/catch_screen.dart';
 
 class MainLayout extends StatefulWidget {
@@ -54,25 +55,27 @@ class _MainLayoutState extends State<MainLayout> {
       // (Chat ekranı gibi sayfalar kendi içlerinde Scaffold kullanarak klavyeyi yönetir)
       resizeToAvoidBottomInset: false, 
       
-      body: Stack(
-        children: [
-          // 1. EKRANLAR (Durumu korumak için IndexedStack kullanıyoruz, böylece harita her seferinde yeniden yüklenmez)
-          IndexedStack(
-            index: _currentIndex,
-            children: _screens,
-          ),
-
-          // 2. SABİT NAVBAR (En Üst Katman)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: CustomNavBar(
-              activeIndex: _currentIndex, 
-              onTabChange: _onTabChange,  
+      body: OfflineAwareBody(
+        child: Stack(
+          children: [
+            // 1. EKRANLAR (IndexedStack ile durum korunur)
+            IndexedStack(
+              index: _currentIndex,
+              children: _screens,
             ),
-          ),
-        ],
+
+            // 2. SABİT NAVBAR (En Üst Katman)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: CustomNavBar(
+                activeIndex: _currentIndex,
+                onTabChange: _onTabChange,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

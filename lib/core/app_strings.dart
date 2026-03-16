@@ -554,4 +554,7 @@ static String get remove => lang == 'tr' ? "Çıkar" : "Remove";
   static String get photoShort => lang == 'tr' ? "Foto" : "Photo";
   static String get surveyShort => lang == 'tr' ? "Anket" : "Survey";
   static String get followBack => lang == 'tr' ? "Sen de Takip Et" : "Follow Back";
+
+  // --- BAĞLANTI DURUMU ---
+  static String get backOnline => lang == 'tr' ? "Tekrar bağlandı" : "Back online";
 }

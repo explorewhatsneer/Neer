@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'core/theme_manager.dart';
 import 'core/language_manager.dart';
 import 'core/app_router.dart';
+import 'core/connectivity_service.dart';
 import 'providers/auth_provider.dart';
 import 'providers/profile_provider.dart';
 import 'providers/catch_provider.dart';
@@ -34,6 +35,8 @@ void main() async {
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
+
+  await ConnectivityService.instance.init();
 
   runApp(const MyApp());
 }
