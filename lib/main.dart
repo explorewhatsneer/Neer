@@ -2,18 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+
 import 'core/theme_manager.dart';
 import 'core/language_manager.dart';
 import 'core/constants.dart';
+import 'providers/auth_provider.dart';
+import 'providers/profile_provider.dart';
+import 'providers/catch_provider.dart';
 
 import 'main_layout.dart';
 import 'screens/login_screen.dart';
 
-// GLOBAL YÖNETİCİLER
+// GLOBAL YÖNETİCİLER (geriye uyumluluk — yeni kodda Provider kullanın)
 final ThemeManager themeManager = ThemeManager();
 final LanguageManager languageManager = LanguageManager();
 
-// Supabase Client Erişimi (Tüm uygulama buradan erişecek)
+// Supabase Client Erişimi
 final supabase = Supabase.instance.client;
 
 void main() async {
@@ -41,73 +46,62 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: themeManager,
-      builder: (context, _) {
-        return ListenableBuilder(
-          listenable: languageManager,
-          builder: (context, _) {
-            return MaterialApp(
-              debugShowCheckedModeBanner: false,
-              title: 'Neer',
-              themeMode: themeManager.themeMode, 
-              theme: themeManager.lightTheme, 
-              darkTheme: themeManager.darkTheme,
-              locale: languageManager.locale,
-              localizationsDelegates: const [
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              supportedLocales: const [
-                Locale('tr', 'TR'),
-                Locale('en', 'US'),
-              ],
-              home: const AuthGate(),
-            );
-          },
-        );
-      },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: themeManager),
+        ChangeNotifierProvider.value(value: languageManager),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => CatchProvider()),
+      ],
+      child: Consumer2<ThemeManager, LanguageManager>(
+        builder: (context, theme, lang, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Neer',
+            themeMode: theme.themeMode,
+            theme: theme.lightTheme,
+            darkTheme: theme.darkTheme,
+            locale: lang.locale,
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('tr', 'TR'),
+              Locale('en', 'US'),
+            ],
+            home: const AuthGate(),
+          );
+        },
+      ),
     );
   }
 }
 
-class AuthGate extends StatefulWidget {
+class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
   @override
-  State<AuthGate> createState() => _AuthGateState();
-}
-
-class _AuthGateState extends State<AuthGate> {
-  // Supabase oturum durumunu dinlemek için Stream
-  late final Stream<AuthState> _authStream;
-
-  @override
-  void initState() {
-    super.initState();
-    _authStream = supabase.auth.onAuthStateChange;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return StreamBuilder<AuthState>(
-      stream: _authStream,
-      builder: (context, snapshot) {
-        // Yükleniyor durumu (Opsiyonel, Supabase genelde anlık yanıt verir)
-        if (snapshot.connectionState == ConnectionState.waiting) {
-           return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.primary)));
-        }
+    final auth = context.watch<AuthProvider>();
 
-        final session = snapshot.data?.session;
+    if (auth.isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
+    }
 
-        // Oturum varsa Ana Ekrana, yoksa Giriş Ekranına
-        if (session != null) {
-          return const MainLayout();
-        } else {
-          return const LoginScreen();
-        }
-      },
-    );
+    if (auth.isAuthenticated) {
+      // Profili yükle
+      final profileProvider = context.read<ProfileProvider>();
+      if (profileProvider.profile == null && !profileProvider.isLoading) {
+        profileProvider.loadProfile(auth.userId!);
+      }
+      return const MainLayout();
+    } else {
+      return const LoginScreen();
+    }
   }
 }

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
+import 'package:provider/provider.dart';
 
 // CORE IMPORTLARI
 import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
+import '../core/theme_manager.dart';
+import '../core/language_manager.dart';
 
 import '../services/supabase_service.dart';
-
-// GLOBAL STATE MANAGERS
-import '../../main.dart'; 
+import '../providers/auth_provider.dart';
 
 // WIDGETLAR
 import '../widgets/settings/settings_widgets.dart'; 
@@ -121,12 +122,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildThemeOption(BuildContext context, String title, ThemeMode mode, IconData icon) {
-    final isSelected = themeManager.themeMode == mode;
+    final isSelected = context.read<ThemeManager>().themeMode == mode;
     final theme = Theme.of(context);
 
     return ListTile(
       onTap: () {
-        themeManager.toggleTheme(mode); // Temayı değiştir
+        context.read<ThemeManager>().toggleTheme(mode); // Temayı değiştir
         Navigator.pop(context);
       },
       leading: Container(
@@ -182,12 +183,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildLanguageOption(BuildContext context, String title, Locale locale, String flag) {
-    final isSelected = languageManager.locale.languageCode == locale.languageCode;
+    final isSelected = context.read<LanguageManager>().locale.languageCode == locale.languageCode;
     final theme = Theme.of(context);
 
     return ListTile(
       onTap: () {
-        languageManager.changeLanguage(locale); // Dili değiştir
+        context.read<LanguageManager>().changeLanguage(locale); // Dili değiştir
         Navigator.pop(context);
       },
       leading: Text(flag, style: const TextStyle(fontSize: 24)),
@@ -209,7 +210,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     
     HapticFeedback.mediumImpact();
     
-    await _service.client.auth.signOut();
+    await context.read<AuthProvider>().signOut();
 
     if (mounted) {
       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (route) => false);
@@ -303,14 +304,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     // Şu anki tema adını al
     String currentThemeName;
-    switch (themeManager.themeMode) {
+    final tm = context.watch<ThemeManager>();
+    final lm = context.watch<LanguageManager>();
+
+    switch (tm.themeMode) {
       case ThemeMode.light: currentThemeName = AppStrings.lightMode; break;
       case ThemeMode.dark: currentThemeName = AppStrings.darkMode; break;
       case ThemeMode.system: currentThemeName = AppStrings.systemTheme; break;
     }
 
     // Şu anki dil adını al
-    String currentLangName = languageManager.locale.languageCode == 'tr' ? "Türkçe (TR)" : "English (US)";
+    String currentLangName = lm.locale.languageCode == 'tr' ? "Türkçe (TR)" : "English (US)";
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
