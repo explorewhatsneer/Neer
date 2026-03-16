@@ -9,6 +9,8 @@ import '../core/text_styles.dart';
 import '../core/theme_styles.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
+import '../core/app_exception.dart';
+import '../core/snackbar_helper.dart';
 import '../services/catch_service.dart';
 import '../services/availability_service.dart';
 import '../services/watcher_service.dart';
@@ -80,16 +82,22 @@ class _CatchScreenState extends State<CatchScreen> {
   }
 
   Future<void> _loadFriends(String userId) async {
-    _friends = await _availabilityService.getFriendsWithStatus(userId);
-    // Her arkadaş için cooldown kontrol et
-    for (final f in _friends) {
-      final remaining = await _catchService.getCooldownRemaining(f['id']);
-      if (remaining > 0) _cooldowns[f['id']] = remaining;
-    }
+    final result = await _availabilityService.getFriendsWithStatus(userId);
+    result.when(
+      success: (friends) async {
+        _friends = friends;
+        for (final f in _friends) {
+          final remaining = await _catchService.getCooldownRemaining(f['id']);
+          if (remaining > 0) _cooldowns[f['id']] = remaining;
+        }
+      },
+      failure: (error) => debugPrint('Arkadaş listesi hatası: ${error.message}'),
+    );
   }
 
   Future<void> _loadWatchedIds() async {
-    _watchedIds = await _watcherService.getWatchedIds();
+    final result = await _watcherService.getWatchedIds();
+    result.ifSuccess((ids) => _watchedIds = ids);
   }
 
   void _startRealtimeListeners(String userId) {
@@ -239,33 +247,36 @@ class _CatchScreenState extends State<CatchScreen> {
   Future<void> _sendCatch(String receiverId) async {
     HapticFeedback.mediumImpact();
     final result = await _catchService.sendCatch(receiverId);
-    if (result != null && mounted) {
-      setState(() {
-        _cooldowns[receiverId] = CatchService.cooldownSeconds;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppStrings.catchSent, style: AppTextStyles.bodySmall.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-          backgroundColor: const Color(0xFF22C55E),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-        ),
-      );
-    }
+    if (!mounted) return;
+    result.when(
+      success: (_) {
+        setState(() {
+          _cooldowns[receiverId] = CatchService.cooldownSeconds;
+        });
+        AppSnackBar.success(context, AppStrings.catchSent);
+      },
+      failure: (error) {
+        AppSnackBar.error(context, error.message);
+      },
+    );
   }
 
   Future<void> _toggleWatch(String targetId) async {
     HapticFeedback.selectionClick();
-    final isNowWatching = await _watcherService.toggleWatch(targetId);
-    if (mounted) {
-      setState(() {
-        if (isNowWatching) {
-          _watchedIds.add(targetId);
-        } else {
-          _watchedIds.remove(targetId);
-        }
-      });
-    }
+    final result = await _watcherService.toggleWatch(targetId);
+    if (!mounted) return;
+    result.when(
+      success: (isNowWatching) {
+        setState(() {
+          if (isNowWatching) {
+            _watchedIds.add(targetId);
+          } else {
+            _watchedIds.remove(targetId);
+          }
+        });
+      },
+      failure: (error) => AppSnackBar.error(context, error.message),
+    );
   }
 
   Future<void> _callFriend(String? phoneNumber) async {
@@ -336,8 +347,11 @@ class _CatchScreenState extends State<CatchScreen> {
                       child: OutlinedButton.icon(
                         onPressed: () async {
                           HapticFeedback.mediumImpact();
-                          await _catchService.rejectCatch(catchId);
+                          final r = await _catchService.rejectCatch(catchId);
                           if (ctx.mounted) Navigator.pop(ctx);
+                          r.ifFailure((e) {
+                            if (mounted) AppSnackBar.error(context, e.message);
+                          });
                         },
                         icon: const Icon(Icons.close_rounded, color: Color(0xFFEF4444)),
                         label: Text(AppStrings.decline, style: AppTextStyles.button.copyWith(color: const Color(0xFFEF4444))),
@@ -356,16 +370,12 @@ class _CatchScreenState extends State<CatchScreen> {
                       child: ElevatedButton.icon(
                         onPressed: () async {
                           HapticFeedback.heavyImpact();
-                          await _catchService.acceptCatch(catchId);
+                          final r = await _catchService.acceptCatch(catchId);
                           if (ctx.mounted) Navigator.pop(ctx);
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(AppStrings.catchAccepted, style: AppTextStyles.bodySmall.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-                                backgroundColor: const Color(0xFF22C55E),
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-                              ),
+                            r.when(
+                              success: (_) => AppSnackBar.success(context, AppStrings.catchAccepted),
+                              failure: (e) => AppSnackBar.error(context, e.message),
                             );
                           }
                         },

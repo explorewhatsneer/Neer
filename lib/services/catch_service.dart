@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/app_exception.dart';
 import '../models/catch_request.dart';
 
 class CatchService {
@@ -7,13 +9,16 @@ class CatchService {
   static const int cooldownSeconds = 180; // 3 dakika
 
   /// Catch gönder (sadece available olanlara)
-  Future<CatchRequest?> sendCatch(String receiverId) async {
+  Future<Result<CatchRequest>> sendCatch(String receiverId) async {
     final senderId = _supabase.auth.currentUser?.id;
-    if (senderId == null) return null;
+    if (senderId == null) {
+      return Result.failure(const AppException('Oturum açmanız gerekiyor.', code: 'AUTH'));
+    }
 
-    // Cooldown kontrolü
     final remaining = await getCooldownRemaining(receiverId);
-    if (remaining > 0) return null;
+    if (remaining > 0) {
+      return Result.failure(AppException('$remaining saniye beklemeniz gerekiyor.', code: 'COOLDOWN'));
+    }
 
     try {
       final response = await _supabase
@@ -25,43 +30,42 @@ class CatchService {
           .select()
           .single();
 
-      return CatchRequest.fromMap(response);
+      return Result.success(CatchRequest.fromMap(response));
     } catch (e) {
-      print('Catch gönderme hatası: $e');
-      return null;
+      debugPrint('Catch gönderme hatası: $e');
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
   /// Catch'i kabul et
-  Future<bool> acceptCatch(String catchId) async {
+  Future<Result<bool>> acceptCatch(String catchId) async {
     try {
       await _supabase
           .from('catches')
           .update({'status': 'accepted'})
           .eq('id', catchId);
-      return true;
+      return const Result.success(true);
     } catch (e) {
-      print('Catch kabul hatası: $e');
-      return false;
+      debugPrint('Catch kabul hatası: $e');
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
   /// Catch'i reddet
-  Future<bool> rejectCatch(String catchId) async {
+  Future<Result<bool>> rejectCatch(String catchId) async {
     try {
       await _supabase
           .from('catches')
           .update({'status': 'rejected'})
           .eq('id', catchId);
-      return true;
+      return const Result.success(true);
     } catch (e) {
-      print('Catch reddetme hatası: $e');
-      return false;
+      debugPrint('Catch reddetme hatası: $e');
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
-  /// Cooldown kontrolü: aynı kişiye son 3dk içinde catch atılmış mı?
-  /// Kalan süreyi saniye olarak döndürür (0 = atılabilir)
+  /// Cooldown kontrolü: kalan süreyi saniye olarak döndürür (0 = atılabilir)
   Future<int> getCooldownRemaining(String receiverId) async {
     final senderId = _supabase.auth.currentUser?.id;
     if (senderId == null) return 0;

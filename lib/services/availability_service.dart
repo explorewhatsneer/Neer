@@ -1,12 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/app_exception.dart';
 
 class AvailabilityService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
   /// Müsait ol (süre dakika cinsinden: 30, 60, 120, 240)
-  Future<bool> setAvailable(int durationMinutes) async {
+  Future<Result<bool>> setAvailable(int durationMinutes) async {
     final userId = _supabase.auth.currentUser?.id;
-    if (userId == null) return false;
+    if (userId == null) {
+      return Result.failure(const AppException('Oturum açmanız gerekiyor.', code: 'AUTH'));
+    }
 
     final until = DateTime.now().toUtc().add(Duration(minutes: durationMinutes));
 
@@ -16,17 +20,19 @@ class AvailabilityService {
         'available_until': until.toIso8601String(),
         'pending_catch_id': null,
       }).eq('id', userId);
-      return true;
+      return const Result.success(true);
     } catch (e) {
-      print('Müsaitlik güncelleme hatası: $e');
-      return false;
+      debugPrint('Müsaitlik güncelleme hatası: $e');
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
   /// Meşgul ol
-  Future<bool> setBusy() async {
+  Future<Result<bool>> setBusy() async {
     final userId = _supabase.auth.currentUser?.id;
-    if (userId == null) return false;
+    if (userId == null) {
+      return Result.failure(const AppException('Oturum açmanız gerekiyor.', code: 'AUTH'));
+    }
 
     try {
       await _supabase.from('profiles').update({
@@ -34,10 +40,10 @@ class AvailabilityService {
         'available_until': null,
         'pending_catch_id': null,
       }).eq('id', userId);
-      return true;
+      return const Result.success(true);
     } catch (e) {
-      print('Meşgul güncelleme hatası: $e');
-      return false;
+      debugPrint('Meşgul güncelleme hatası: $e');
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
@@ -54,10 +60,8 @@ class AvailabilityService {
   }
 
   /// Arkadaşların durumlarını çek (mutual follows)
-  Future<List<Map<String, dynamic>>> getFriendsWithStatus(String userId) async {
+  Future<Result<List<Map<String, dynamic>>>> getFriendsWithStatus(String userId) async {
     try {
-      // Karşılıklı takip = arkadaş
-      // Ben takip ediyorum VE onlar beni takip ediyor
       final myFollowing = await _supabase
           .from('followers')
           .select('following_id')
@@ -67,7 +71,7 @@ class AvailabilityService {
           .map((e) => e['following_id'] as String)
           .toList();
 
-      if (myFollowingIds.isEmpty) return [];
+      if (myFollowingIds.isEmpty) return const Result.success([]);
 
       final myFollowers = await _supabase
           .from('followers')
@@ -79,22 +83,21 @@ class AvailabilityService {
           .map((e) => e['follower_id'] as String)
           .toList();
 
-      if (mutualIds.isEmpty) return [];
+      if (mutualIds.isEmpty) return const Result.success([]);
 
-      // Arkadaşların profil bilgilerini çek
       final profiles = await _supabase
           .from('profiles')
           .select('id, full_name, username, avatar_url, status, available_until, phone_number, is_online')
           .inFilter('id', mutualIds);
 
-      return List<Map<String, dynamic>>.from(profiles);
+      return Result.success(List<Map<String, dynamic>>.from(profiles));
     } catch (e) {
-      print('Arkadaş listesi hatası: $e');
-      return [];
+      debugPrint('Arkadaş listesi hatası: $e');
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
-  /// Arkadaş profillerini realtime stream (status değişimlerini yakala)
+  /// Arkadaş profillerini realtime stream
   Stream<List<Map<String, dynamic>>> streamFriendsStatus(List<String> friendIds) {
     if (friendIds.isEmpty) return const Stream.empty();
 

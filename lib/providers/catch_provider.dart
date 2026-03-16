@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../core/app_exception.dart';
 import '../services/catch_service.dart';
 import '../services/availability_service.dart';
 import '../services/watcher_service.dart';
@@ -78,15 +79,19 @@ class CatchProvider with ChangeNotifier {
   }
 
   Future<void> _loadFriends(String userId) async {
-    _friends = await _availabilityService.getFriendsWithStatus(userId);
-    for (final f in _friends) {
-      final remaining = await _catchService.getCooldownRemaining(f['id']);
-      if (remaining > 0) _cooldowns[f['id']] = remaining;
-    }
+    final result = await _availabilityService.getFriendsWithStatus(userId);
+    result.ifSuccess((friends) async {
+      _friends = friends;
+      for (final f in _friends) {
+        final remaining = await _catchService.getCooldownRemaining(f['id']);
+        if (remaining > 0) _cooldowns[f['id']] = remaining;
+      }
+    });
   }
 
   Future<void> _loadWatchedIds() async {
-    _watchedIds = await _watcherService.getWatchedIds();
+    final result = await _watcherService.getWatchedIds();
+    result.ifSuccess((ids) => _watchedIds = ids);
   }
 
   void _startRealtimeListeners(String userId) {
@@ -101,8 +106,6 @@ class CatchProvider with ChangeNotifier {
     });
 
     _catchesSub = _catchService.streamIncomingCatches(userId).listen((catches) {
-      // Incoming catch'ler UI tarafında handle edilecek (bottom sheet)
-      // Bu provider sadece state tutar, UI logic catch_screen'de
       notifyListeners();
     });
 
@@ -149,56 +152,63 @@ class CatchProvider with ChangeNotifier {
     });
 
     _statusTimer = Timer.periodic(const Duration(seconds: 30), (_) {
-      notifyListeners(); // Kalan süre güncelleme
+      notifyListeners();
     });
   }
 
   // ═══ ACTIONS ═══
 
-  Future<void> setAvailable(int durationMinutes) async {
-    final success = await _availabilityService.setAvailable(durationMinutes);
-    if (success) {
+  Future<Result<bool>> setAvailable(int durationMinutes) async {
+    final result = await _availabilityService.setAvailable(durationMinutes);
+    result.ifSuccess((_) {
       _myStatus = 'available';
       _availableUntil = DateTime.now().add(Duration(minutes: durationMinutes));
       notifyListeners();
-    }
+    });
+    return result;
   }
 
-  Future<void> setBusy() async {
-    final success = await _availabilityService.setBusy();
-    if (success) {
+  Future<Result<bool>> setBusy() async {
+    final result = await _availabilityService.setBusy();
+    result.ifSuccess((_) {
       _myStatus = 'busy';
       _availableUntil = null;
       notifyListeners();
-    }
+    });
+    return result;
   }
 
-  Future<bool> sendCatch(String receiverId) async {
+  Future<Result<bool>> sendCatch(String receiverId) async {
     final result = await _catchService.sendCatch(receiverId);
-    if (result != null) {
+    result.ifSuccess((_) {
       _cooldowns[receiverId] = CatchService.cooldownSeconds;
       notifyListeners();
-      return true;
-    }
-    return false;
+    });
+    return result.when(
+      success: (_) => const Result.success(true),
+      failure: (e) => Result.failure(e),
+    );
   }
 
-  Future<bool> acceptCatch(String catchId) async {
+  Future<Result<bool>> acceptCatch(String catchId) async {
     return await _catchService.acceptCatch(catchId);
   }
 
-  Future<bool> rejectCatch(String catchId) async {
+  Future<Result<bool>> rejectCatch(String catchId) async {
     return await _catchService.rejectCatch(catchId);
   }
 
-  Future<void> toggleWatch(String targetId) async {
-    final isNowWatching = await _watcherService.toggleWatch(targetId);
-    if (isNowWatching) {
-      _watchedIds.add(targetId);
-    } else {
-      _watchedIds.remove(targetId);
-    }
-    notifyListeners();
+  Future<Result<bool>> toggleWatch(String targetId) async {
+    final result = await _watcherService.toggleWatch(targetId);
+    result.ifSuccess((isNowWatching) {
+      if (isNowWatching) {
+        _watchedIds.add(targetId);
+      } else {
+        _watchedIds.remove(targetId);
+      }
+      notifyListeners();
+    });
+    return result;
   }
 
   /// Gelen catch stream'i (UI'da bottom sheet göstermek için)
