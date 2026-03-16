@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart'; 
+import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
+import '../core/app_strings.dart';
+
+import '../services/supabase_service.dart';
 
 // GLOBAL STATE MANAGERS
 import '../../main.dart'; 
@@ -30,8 +31,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  // 🔥 SUPABASE AUTH
-  final _supabase = Supabase.instance.client;
+  final _service = SupabaseService();
 
   // Switch Durumları
   bool _isPrivateAccount = false; // 🔥 YENİ: Gizli Hesap Durumu
@@ -49,17 +49,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // 🔥 PROFİL AYARLARINI ÇEK
   Future<void> _loadProfileSettings() async {
     try {
-      final userId = _supabase.auth.currentUser?.id;
+      final userId = _service.client.auth.currentUser?.id;
       if (userId != null) {
-        final data = await _supabase
-            .from('profiles')
-            .select('is_private') // is_private sütununu çek
-            .eq('id', userId)
-            .single();
+        final data = await _service.getProfileFields(userId, 'is_private');
         
         if (mounted) {
           setState(() {
-            _isPrivateAccount = data['is_private'] ?? false;
+            _isPrivateAccount = data?['is_private'] ?? false;
             _isLoading = false;
           });
         }
@@ -75,12 +71,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() => _isPrivateAccount = value);
     
     try {
-      final userId = _supabase.auth.currentUser?.id;
+      final userId = _service.client.auth.currentUser?.id;
       if (userId != null) {
-        await _supabase
-            .from('profiles')
-            .update({'is_private': value})
-            .eq('id', userId);
+        await _service.updateProfile(userId, {'is_private': value});
       }
     } catch (e) {
       // Hata olursa geri al
@@ -216,8 +209,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     
     HapticFeedback.mediumImpact();
     
-    await _supabase.auth.signOut();
-    
+    await _service.client.auth.signOut();
+
     if (mounted) {
       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (route) => false);
     }
@@ -230,13 +223,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     
     HapticFeedback.heavyImpact();
     try {
-      String? uid = _supabase.auth.currentUser?.id;
+      String? uid = _service.client.auth.currentUser?.id;
       if (uid != null) {
         // 1. Profil verisini sil (Cascade ile diğer veriler de silinir)
-        await _supabase.from('profiles').delete().eq('id', uid);
-        
-        // 2. Çıkış yap (Supabase Client'dan Auth User'ı silmek için Admin yetkisi gerekir, bu yüzden çıkış yapıyoruz)
-        await _supabase.auth.signOut();
+        await _service.deleteProfile(uid);
+
+        // 2. Çıkış yap
+        await _service.client.auth.signOut();
         
         if (mounted) {
           Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (route) => false);
@@ -304,8 +297,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    // 🔥 SUPABASE USER INFO
-    final user = _supabase.auth.currentUser;
+    final user = _service.client.auth.currentUser;
     final userImage = user?.userMetadata?['avatar_url'] ?? "https://i.pravatar.cc/150?img=60";
     final userName = user?.userMetadata?['full_name'] ?? "Kullanıcı";
 

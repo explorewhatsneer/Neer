@@ -4,9 +4,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 // CORE IMPORTLARI
 import '../core/constants.dart';
-import '../core/theme_styles.dart'; 
+import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
+import '../core/app_strings.dart';
+
+import '../services/supabase_service.dart';
 
 class LoginMethodsScreen extends StatefulWidget {
   const LoginMethodsScreen({super.key});
@@ -16,8 +18,7 @@ class LoginMethodsScreen extends StatefulWidget {
 }
 
 class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
-  // 🔥 SUPABASE AUTH
-  final _supabase = Supabase.instance.client;
+  final _service = SupabaseService();
   
   bool _isEmailLinked = false;
   bool _isGoogleLinked = false;
@@ -32,7 +33,7 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
 
   // Hangi yöntemlerin bağlı olduğunu kontrol et
   void _checkLinkedProviders() {
-    final User? user = _supabase.auth.currentUser;
+    final User? user = _service.client.auth.currentUser;
     
     if (user != null) {
       if (mounted) {

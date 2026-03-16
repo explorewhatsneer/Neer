@@ -1,15 +1,15 @@
-import 'dart:ui'; 
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/services.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart'; 
+import '../../core/theme_styles.dart';
 import '../../core/text_styles.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
 
 import '../../models/user_model.dart';
-import 'search_widgets.dart'; 
+import '../../services/supabase_service.dart';
+import 'search_widgets.dart';
 
 import '../../screens/friend_profile_screen.dart';
 
@@ -21,8 +21,8 @@ class SearchModalContent extends StatefulWidget {
 }
 
 class _SearchModalContentState extends State<SearchModalContent> with SingleTickerProviderStateMixin {
-  final _supabase = Supabase.instance.client;
-  
+  final _service = SupabaseService();
+
   final TextEditingController _searchController = TextEditingController();
   late TabController _tabController;
   
@@ -55,18 +55,10 @@ class _SearchModalContentState extends State<SearchModalContent> with SingleTick
     if (query.isNotEmpty) {
       try {
         // 1. KULLANICILARI ARA
-        final userResponse = await _supabase
-            .from('profiles')
-            .select() // Tüm sütunları çekiyoruz (trust_score dahil)
-            .ilike('search_key', '%${query.toLowerCase()}%') 
-            .limit(10);
-            
+        final userResponse = await _service.searchUsers(query, limit: 10);
+
         // 2. MEKANLARI ARA
-        final placeResponse = await _supabase
-            .from('places')
-            .select()
-            .ilike('name', '%$query%') 
-            .limit(10);
+        final placeResponse = await _service.searchPlaces(query, limit: 10);
 
         if (mounted) {
           setState(() {
@@ -249,7 +241,7 @@ class _SearchModalContentState extends State<SearchModalContent> with SingleTick
     if (_query.isEmpty) return _buildEmptyState(AppStrings.findFriends, Icons.people_alt_rounded, theme);
     if (_isSearching) return Center(child: CircularProgressIndicator(color: theme.primaryColor));
     
-    final myUid = _supabase.auth.currentUser?.id;
+    final myUid = _service.client.auth.currentUser?.id;
     // Kendimi listede gösterme
     final results = _userResults.where((user) => user.uid != myUid).toList();
 

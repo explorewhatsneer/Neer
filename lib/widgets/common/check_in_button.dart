@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 
 // CORE IMPORTLAR
@@ -45,7 +44,7 @@ class _CheckInButtonState extends State<CheckInButton> {
 
     try {
       // --- 1. Oturum Kontrolü ---
-      final String? myUid = Supabase.instance.client.auth.currentUser?.id;
+      final String? myUid = _supabaseService.client.auth.currentUser?.id;
       if (myUid == null) throw Exception("Oturum açık değil.");
 
       // --- 2. GPS İzinleri ---

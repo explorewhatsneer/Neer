@@ -1,9 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../widgets/common/glass_button.dart';
+import '../services/supabase_service.dart';
 
 // CORE 
 import '../core/theme_styles.dart'; 
@@ -36,7 +36,7 @@ class FriendProfileScreen extends StatefulWidget {
 }
 
 class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTickerProviderStateMixin {
-  final _supabase = Supabase.instance.client;
+  final _service = SupabaseService();
   
   late TabController _mainTabController;
   final ScrollController _scrollController = ScrollController();
@@ -72,7 +72,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
     super.initState();
     _mainTabController = TabController(length: 3, vsync: this);
     
-    final user = _supabase.auth.currentUser;
+    final user = _service.client.auth.currentUser;
     if (user != null) {
       _currentUserId = user.id;
       _initProfileData();
@@ -85,11 +85,11 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
   // --- VERİ ÇEKME ---
   Future<void> _initProfileData() async {
     try {
-      final profileData = await _supabase
-          .from('profiles')
-          .select('is_private, full_name, followers_count, following_count, check_in_count, photo_count, trust_score')
-          .eq('id', widget.targetUserId)
-          .single();
+      final profileData = await _service.getProfileFields(
+        widget.targetUserId,
+        'is_private, full_name, followers_count, following_count, check_in_count, photo_count, trust_score',
+      );
+      if (profileData == null) return;
 
       if (mounted) {
         setState(() {
@@ -102,23 +102,13 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
         });
       }
 
-      final followCheck = await _supabase
-          .from('followers')
-          .select()
-          .eq('follower_id', _currentUserId)
-          .eq('following_id', widget.targetUserId)
-          .maybeSingle();
-      
+      final isFollowingResult = await _service.isFollowing(_currentUserId, widget.targetUserId);
+
       if (mounted) {
-        setState(() => _isFollowing = followCheck != null);
+        setState(() => _isFollowing = isFollowingResult);
       }
 
-      final req = await _supabase
-          .from('friend_requests')
-          .select()
-          .eq('sender_id', widget.targetUserId)
-          .eq('receiver_id', _currentUserId)
-          .maybeSingle();
+      final req = await _service.getIncomingFollowRequest(widget.targetUserId, _currentUserId);
 
       if (req != null && mounted) {
         setState(() {
@@ -133,29 +123,22 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
 
   // --- YENİ VERİ FONKSİYONLARI ---
   Future<List<Map<String, dynamic>>> _getFrequentPlaces() async {
-    try {
-      final List<dynamic> response = await _supabase.rpc('get_top_places', params: {'target_uid': widget.targetUserId});
-      return List<Map<String, dynamic>>.from(response);
-    } catch (e) { return []; }
+    return _service.getFrequentPlaces(widget.targetUserId);
   }
 
   Future<List<Map<String, dynamic>>> _getReviews() async {
-    try {
-      final response = await _supabase
-          .from('posts')
-          .select('location_name, rating, review_comment, created_at')
-          .eq('user_id', widget.targetUserId)
-          .eq('type', 'review')
-          .order('created_at', ascending: false)
-          .limit(10);
-      return List<Map<String, dynamic>>.from(response);
-    } catch (e) { return []; }
+    return _service.getUserPosts(
+      userId: widget.targetUserId,
+      type: 'review',
+      selectFields: 'location_name, rating, review_comment, created_at',
+      limit: 10,
+    );
   }
 
   Future<List<Map<String, dynamic>>> _getMutualHistory() async {
     try {
-      final myPlaces = await _supabase.from('posts').select('location_name').eq('user_id', _currentUserId).not('location_name', 'is', null).limit(50);
-      final theirPlaces = await _supabase.from('posts').select('location_name').eq('user_id', widget.targetUserId).not('location_name', 'is', null).limit(50);
+      final myPlaces = await _service.getUserPostsNotNull(userId: _currentUserId, notNullField: 'location_name', selectFields: 'location_name', limit: 50);
+      final theirPlaces = await _service.getUserPostsNotNull(userId: widget.targetUserId, notNullField: 'location_name', selectFields: 'location_name', limit: 50);
 
       Set<String> myLocs = myPlaces.map((e) => e['location_name'].toString()).toSet();
       Set<String> theirLocs = theirPlaces.map((e) => e['location_name'].toString()).toSet();
@@ -170,16 +153,10 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
   }
 
   void _initStreams() {
-    _favoritesStream = _supabase.from('favorites').stream(primaryKey: ['id']).eq('user_id', widget.targetUserId).map((data) => data); 
-    _notesStream = _supabase.from('notes').stream(primaryKey: ['id']).eq('user_id', widget.targetUserId).map((data) => data);
-    _activityStream = _supabase.from('posts').stream(primaryKey: ['id']).eq('user_id', widget.targetUserId).order('created_at', ascending: false).map((data) => data.map((e) => PostModel.fromMap(e)).toList());
-    
-    _photosStream = _supabase.from('posts').stream(primaryKey: ['id']).eq('user_id', widget.targetUserId).order('created_at', ascending: false).map((data) {
-        return data
-            .where((e) => e['type'] == 'post' && e['image_url'] != null)
-            .map((e) => e['image_url'] as String)
-            .toList();
-    });
+    _favoritesStream = _service.getUserFavorites(widget.targetUserId);
+    _notesStream = _service.getUserNotes(widget.targetUserId);
+    _activityStream = _service.getUserActivityFeed(widget.targetUserId);
+    _photosStream = _service.getUserPhotos(widget.targetUserId);
     
     _frequentPlacesFuture = _getFrequentPlaces();
     _surveyHistoryFuture = _getReviews();
@@ -193,9 +170,10 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
     if (reqId == null) return;
     try {
       if (accept) {
-        await _supabase.from('followers').insert({'follower_id': widget.targetUserId, 'following_id': _currentUserId});
+        await _service.acceptFollowRequest(reqId, widget.targetUserId, _currentUserId);
+      } else {
+        await _service.declineFollowRequest(reqId);
       }
-      await _supabase.from('friend_requests').delete().eq('id', reqId);
     } catch (e) {
       if (mounted) setState(() => _incomingRequestId = reqId); 
     }
@@ -500,7 +478,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
       body: Stack(
         children: [
           StreamBuilder<List<Map<String, dynamic>>>(
-            stream: _supabase.from('profiles').stream(primaryKey: ['id']).eq('id', widget.targetUserId),
+            stream: _service.streamProfileAsList(widget.targetUserId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());

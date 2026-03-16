@@ -1,14 +1,14 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart'; 
-import '../../core/text_styles.dart'; 
+import '../../core/theme_styles.dart';
+import '../../core/text_styles.dart';
 import '../../core/constants.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
 
+import '../../services/supabase_service.dart';
 import '../../screens/friend_profile_screen.dart';
 
 // --- DIŞARIDAN ÇAĞRILAN FONKSİYON ---
@@ -38,14 +38,13 @@ class ActiveUsersSheet extends StatefulWidget {
 }
 
 class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
-  // 🔥 Supabase İstemcisi
-  final _supabase = Supabase.instance.client;
+  final _service = SupabaseService();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final String currentUid = _supabase.auth.currentUser?.id ?? "";
+    final String currentUid = _service.client.auth.currentUser?.id ?? "";
 
     // 🛡️ GÜVENLİK KONTROLÜ
     if (widget.chatId.isEmpty) {
@@ -112,11 +111,12 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
                   // Not: Gerçek senaryoda burası 'checkins' tablosundan veri çekmelidir.
                   // Şimdilik 'profiles' tablosundan tüm kullanıcıları getiriyoruz (Demo amaçlı).
                   // İleride: .from('checkins').stream(primaryKey: ['id']).eq('place_id', widget.chatId)
+                  // Note: Demo data — should use active_sessions stream in production
                   child: StreamBuilder<List<Map<String, dynamic>>>(
-                    stream: _supabase
+                    stream: _service.client
                         .from('profiles')
                         .stream(primaryKey: ['id'])
-                        .limit(20), // Demo: Rastgele 20 kişiyi gösteriyor gibi düşünelim
+                        .limit(20),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(child: CircularProgressIndicator(color: theme.primaryColor));

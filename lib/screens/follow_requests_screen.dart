@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/services.dart';
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart'; 
+import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
+import '../core/app_strings.dart';
+
+import '../services/supabase_service.dart';
 
 // PROFİL EKRANI
 import 'friend_profile_screen.dart';
@@ -18,7 +19,7 @@ class FriendRequestsScreen extends StatefulWidget {
 }
 
 class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
-  final _supabase = Supabase.instance.client;
+  final _service = SupabaseService();
   late String _currentUserId;
 
   // Anlık gizleme listesi (Optimistic UI)
@@ -27,7 +28,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
   @override
   void initState() {
     super.initState();
-    _currentUserId = _supabase.auth.currentUser?.id ?? '';
+    _currentUserId = _service.client.auth.currentUser?.id ?? '';
   }
 
   // --- İSTEK KABUL ETME ---
@@ -40,15 +41,8 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
     });
 
     try {
-      // 2. YENİ MANTIK: Followers tablosuna ekle
-      // Sender (O) -> Beni takip ediyor (Follower: O, Following: Ben)
-      await _supabase.from('followers').insert({
-        'follower_id': senderId,      // O beni takip edecek
-        'following_id': _currentUserId, // Ben takip edilenim
-      });
-
-      // 3. İsteği sil
-      await _supabase.from('friend_requests').delete().eq('id', requestId);
+      // 2. YENİ MANTIK: SupabaseService ile kabul et
+      await _service.acceptFollowRequest(requestId, senderId, _currentUserId);
 
     } catch (e) {
       // Hata olursa geri getir
@@ -70,7 +64,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
 
     try {
       // 2. Sadece isteği sil
-      await _supabase.from('friend_requests').delete().eq('id', requestId);
+      await _service.declineFollowRequest(requestId);
     } catch (e) {
       if (mounted) setState(() => _hiddenRequestIds.remove(requestId));
     }
@@ -99,10 +93,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
       ),
 
       body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _supabase
-            .from('friend_requests')
-            .stream(primaryKey: ['id'])
-            .eq('receiver_id', _currentUserId),
+        stream: _service.streamFollowRequests(_currentUserId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator(color: theme.primaryColor));
@@ -177,10 +168,10 @@ class _RequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final supabase = Supabase.instance.client;
+    final service = SupabaseService();
 
-    return FutureBuilder<Map<String, dynamic>>(
-      future: supabase.from('profiles').select().eq('id', senderId).single(),
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: service.getProfileSingle(senderId),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Container(height: 70, margin: const EdgeInsets.only(bottom: 12), child: const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))));

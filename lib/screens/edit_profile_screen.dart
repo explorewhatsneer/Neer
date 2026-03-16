@@ -1,16 +1,16 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
-import 'package:image_picker/image_picker.dart'; 
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 
 // CORE & MODELLER
-import '../core/theme_styles.dart'; 
+import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
+import '../core/app_strings.dart';
 import '../models/user_model.dart';
 
 // SERVİSLER
+import '../services/supabase_service.dart';
 import '../services/storage_service.dart';
 
 // WIDGETLAR
@@ -24,9 +24,7 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  // 🔥 SUPABASE CLIENT
-  final _supabase = Supabase.instance.client;
-  
+  final _service = SupabaseService();
   final StorageService _storageService = StorageService();
   late String _uid;
 
@@ -41,7 +39,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _uid = _supabase.auth.currentUser?.id ?? "";
+    _uid = _service.client.auth.currentUser?.id ?? "";
     
     _nameController = TextEditingController();
     _usernameController = TextEditingController();
@@ -63,15 +61,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   // --- 1. VERİLERİ ÇEK ---
   Future<void> _loadUserData() async {
     setState(() => _isLoading = true);
-    
+
     try {
-      final data = await _supabase
-          .from('profiles')
-          .select()
-          .eq('id', _uid)
-          .single();
-      
-      UserModel user = UserModel.fromMap(data);
+      final userModel = await _service.getUser(_uid);
+      if (userModel == null) throw Exception('User not found');
+      UserModel user = userModel;
       
       if (mounted) {
         setState(() {
@@ -172,13 +166,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
 
       // Veritabanını güncelle
-      // Supabase sütun isimleri: full_name, username, bio, avatar_url
-      await _supabase.from('profiles').update({
+      await _service.updateProfile(_uid, {
         'full_name': _nameController.text.trim(),
         'username': _usernameController.text.trim(),
         'bio': _bioController.text.trim(),
-        'avatar_url': finalPhotoUrl, 
-      }).eq('id', _uid);
+        'avatar_url': finalPhotoUrl,
+      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

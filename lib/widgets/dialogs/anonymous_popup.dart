@@ -1,20 +1,21 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/services.dart';
 
 // CORE IMPORTLARI
 import '../../core/constants.dart';
-import '../../core/text_styles.dart'; 
+import '../../core/text_styles.dart';
 import '../../core/theme_styles.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
+
+import '../../services/supabase_service.dart';
 
 // --- DIALOG BAŞLATICI ---
 void showAnonymousDialog(BuildContext context) {
-  HapticFeedback.lightImpact(); 
-  
-  // 🔥 Supabase Current User ID
-  final String? uid = Supabase.instance.client.auth.currentUser?.id;
+  HapticFeedback.lightImpact();
+
+  final service = SupabaseService();
+  final String? uid = service.client.auth.currentUser?.id;
 
   if (uid == null) return; // Oturum yoksa açma
 
@@ -37,12 +38,8 @@ void showAnonymousDialog(BuildContext context) {
             backgroundColor: Colors.transparent,
             insetPadding: const EdgeInsets.symmetric(horizontal: 24),
             elevation: 0,
-            // 🔥 SUPABASE REALTIME STREAM
             child: StreamBuilder<List<Map<String, dynamic>>>(
-              stream: Supabase.instance.client
-                  .from('profiles')
-                  .stream(primaryKey: ['id'])
-                  .eq('id', uid),
+              stream: service.streamProfileAsList(uid),
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                    // Veri yüklenene kadar loading veya varsayılan durum
@@ -77,7 +74,7 @@ class _PremiumAnonymousCard extends StatefulWidget {
 class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
-  final _supabase = Supabase.instance.client; // İstemci örneği
+  final _service = SupabaseService();
 
   @override
   void initState() {
@@ -228,14 +225,10 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
                       onPressed: () async {
                         HapticFeedback.mediumImpact(); 
                         
-                        // 🔥 SUPABASE UPDATE İŞLEMİ
                         try {
-                          await _supabase
-                              .from('profiles')
-                              .update({
-                                'is_anonymous': !widget.isAnonymous // SQL sütun adı snake_case
-                              })
-                              .eq('id', widget.uid);
+                          await _service.updateProfile(widget.uid, {
+                            'is_anonymous': !widget.isAnonymous,
+                          });
                         } catch (e) {
                           debugPrint("Anonim mod hatası: $e");
                         }

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart'; 
+import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
+import '../core/app_strings.dart';
 
+import '../services/supabase_service.dart';
 import 'chat_screen.dart';
-import 'friend_profile_screen.dart';  
+import 'friend_profile_screen.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -18,8 +18,7 @@ class FriendsScreen extends StatefulWidget {
 }
 
 class _FriendsScreenState extends State<FriendsScreen> {
-  // 🔥 SUPABASE CLIENT
-  final _supabase = Supabase.instance.client;
+  final _service = SupabaseService();
   
   final TextEditingController _searchController = TextEditingController();
   String _searchText = "";
@@ -30,7 +29,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
     final isDark = theme.brightness == Brightness.dark;
     
     // Supabase User ID
-    String myUid = _supabase.auth.currentUser?.id ?? "";
+    String myUid = _service.client.auth.currentUser?.id ?? "";
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -118,11 +117,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
       // 1. KENDİ PROFİLİNDEN ARKADAŞ LİSTESİNİ ÇEK (Stream)
       body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _supabase
-            .from('profiles')
-            .stream(primaryKey: ['id'])
-            .eq('id', myUid)
-            .limit(1),
+        stream: _service.streamProfileAsList(myUid),
         builder: (context, snapshot) {
           if (!snapshot.hasData) return Center(child: CircularProgressIndicator(color: theme.primaryColor));
           if (snapshot.data!.isEmpty) return _bosArkadasEkrani(theme);
@@ -140,10 +135,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
           // 2. ARKADAŞLARIN DETAYLARINI ÇEK (FutureBuilder'a çevrildi)
           // ⚠️ DÜZELTME: .inFilter Stream'de çalışmaz, .select() kullanıyoruz.
           return FutureBuilder<List<Map<String, dynamic>>>(
-            future: _supabase
-                .from('profiles')
-                .select()
-                .inFilter('id', friendIds), // 🔥 DÜZELTİLDİ: .in_ yerine .inFilter
+            future: _service.getUsersByIds(friendIds),
             builder: (context, friendsSnapshot) {
               if (friendsSnapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator(color: theme.primaryColor));
@@ -240,12 +232,12 @@ class _FriendsScreenState extends State<FriendsScreen> {
         );
       },
       onDismissed: (direction) async {
-        String myUid = _supabase.auth.currentUser!.id;
+        String myUid = _service.client.auth.currentUser!.id;
         try {
-          final data = await _supabase.from('profiles').select('friends').eq('id', myUid).single();
-          List currentFriends = List.from(data['friends'] ?? []);
+          final data = await _service.getProfileFields(myUid, 'friends');
+          List currentFriends = List.from(data?['friends'] ?? []);
           currentFriends.remove(uid);
-          await _supabase.from('profiles').update({'friends': currentFriends}).eq('id', myUid);
+          await _service.updateProfile(myUid, {'friends': currentFriends});
 
           if(mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 // CORE IMPORTLARI
 import '../core/text_styles.dart';
@@ -31,8 +30,7 @@ class GroupChatScreen extends StatefulWidget {
 }
 
 class _GroupChatScreenState extends State<GroupChatScreen> {
-  final _supabase = Supabase.instance.client;
-  final _supabaseService = SupabaseService();
+  final _service = SupabaseService();
 
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -48,7 +46,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   @override
   void initState() {
     super.initState();
-    final user = _supabase.auth.currentUser;
+    final user = _service.client.auth.currentUser;
     if (user != null) {
       currentUserId = user.id;
       _fetchCurrentUser();
@@ -64,20 +62,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   void _fetchCurrentUser() async {
-    try {
-      final data = await _supabase
-          .from('profiles')
-          .select()
-          .eq('id', currentUserId)
-          .single();
-
-      if (mounted) {
-        setState(() {
-          _currentUser = UserModel.fromMap(data);
-        });
-      }
-    } catch (e) {
-      debugPrint("Kullanıcı getirme hatası: $e");
+    final user = await _service.getUser(currentUserId);
+    if (mounted && user != null) {
+      setState(() {
+        _currentUser = user;
+      });
     }
   }
 
@@ -136,7 +125,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
     try {
       // 🔥 1. RATE LIMIT KONTROLÜ (Sunucu tarafı)
-      final rateCheck = await _supabaseService.canSendMessage(currentUserId, widget.groupId);
+      final rateCheck = await _service.canSendMessage(currentUserId, widget.groupId);
 
       if (rateCheck['allowed'] != true) {
         int waitSecs = (rateCheck['wait_seconds'] ?? 3).toInt();
@@ -149,7 +138,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       // 🔥 2. MESAJI GÖNDER
       _messageController.clear();
 
-      await _supabase.from('messages').insert({
+      await _service.sendMessage({
         'group_id': widget.groupId,
         'sender_id': currentUserId,
         'message': msg,
@@ -294,11 +283,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         children: [
           Expanded(
             child: StreamBuilder<List<Map<String, dynamic>>>(
-              stream: _supabase
-                  .from('messages')
-                  .stream(primaryKey: ['id'])
-                  .eq('group_id', widget.groupId)
-                  .order('created_at', ascending: false),
+              stream: _service.streamGroupMessages(widget.groupId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator(color: theme.primaryColor));

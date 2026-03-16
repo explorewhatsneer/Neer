@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 // CORE IMPORTLARI
 import '../core/constants.dart';
@@ -21,17 +20,16 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  final _supabaseService = SupabaseService();
-  final _supabase = Supabase.instance.client;
+  final _service = SupabaseService();
   late String _uid;
 
   @override
   void initState() {
     super.initState();
-    _uid = _supabase.auth.currentUser?.id ?? '';
+    _uid = _service.client.auth.currentUser?.id ?? '';
     // Ekran açıldığında tüm bildirimleri okundu yap
     Future.delayed(const Duration(seconds: 2), () {
-      _supabaseService.markAllNotificationsRead(_uid);
+      _service.markAllNotificationsRead(_uid);
     });
   }
 
@@ -157,7 +155,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           IconButton(
             onPressed: () {
               HapticFeedback.lightImpact();
-              _supabaseService.markAllNotificationsRead(_uid);
+              _service.markAllNotificationsRead(_uid);
             },
             icon: Icon(Icons.done_all_rounded, color: theme.primaryColor, size: 22),
             tooltip: 'Tümünü okundu işaretle',
@@ -166,7 +164,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ],
       ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _supabaseService.getNotifications(_uid),
+        stream: _service.getNotifications(_uid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator(color: theme.primaryColor));
@@ -218,7 +216,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ),
                 onDismissed: (_) {
                   // Bildirimi sil
-                  _supabase.from('notifications').delete().eq('id', notif['id']);
+                  _service.deleteNotification(notif['id']);
                 },
                 child: InkWell(
                   onTap: () => _handleNotificationTap(notif),

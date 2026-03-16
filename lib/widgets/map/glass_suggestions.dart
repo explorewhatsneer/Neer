@@ -1,12 +1,12 @@
 import 'dart:ui'; // ImageFilter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 
 // CORE IMPORTLARI
 import '../../core/text_styles.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
+
+import '../../services/supabase_service.dart';
 
 class GlassSuggestions extends StatelessWidget {
   final String query;
@@ -21,6 +21,7 @@ class GlassSuggestions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (query.isEmpty) return const SizedBox();
+    final service = SupabaseService();
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -70,11 +71,7 @@ class GlassSuggestions extends StatelessWidget {
               
               // 🔥 SUPABASE MEKAN SORGUSU
               FutureBuilder<List<Map<String, dynamic>>>(
-                future: Supabase.instance.client
-                    .from('places')
-                    .select()
-                    .ilike('name', '$query%') // Harf duyarsız "ile başlayan" araması
-                    .limit(5),
+                future: service.searchPlacesPrefix(query, limit: 5),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
                      return const SliverToBoxAdapter(child: SizedBox());
@@ -114,12 +111,7 @@ class GlassSuggestions extends StatelessWidget {
 
               // 🔥 SUPABASE PROFİL SORGUSU
               FutureBuilder<List<Map<String, dynamic>>>(
-                // 'profiles' tablosunda 'full_name' veya 'username' içinde arama
-                future: Supabase.instance.client
-                    .from('profiles')
-                    .select()
-                    .ilike('full_name', '$query%') // İsme göre ara
-                    .limit(5),
+                future: service.searchUsersPrefix(query, limit: 5),
                 builder: (context, snapshot) {
                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
                      return const SliverToBoxAdapter(child: SizedBox());

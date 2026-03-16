@@ -4,9 +4,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 // CORE IMPORTLARI
 import '../core/constants.dart';
-import '../core/theme_styles.dart'; 
+import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
+import '../core/app_strings.dart';
+
+import '../services/supabase_service.dart';
 
 class AccountInfoScreen extends StatefulWidget {
   const AccountInfoScreen({super.key});
@@ -16,12 +18,11 @@ class AccountInfoScreen extends StatefulWidget {
 }
 
 class _AccountInfoScreenState extends State<AccountInfoScreen> {
-  // 🔥 SUPABASE CLIENT
-  final _supabase = Supabase.instance.client;
-  
+  final _service = SupabaseService();
+
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  
+
   bool _isLoading = false;
 
   @override
@@ -32,19 +33,15 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
 
   // --- VERİ YÜKLEME ---
   Future<void> _loadData() async {
-    final user = _supabase.auth.currentUser;
+    final user = _service.client.auth.currentUser;
     if (user != null) {
       _emailController.text = user.email ?? "";
-      
+
       try {
         // Profil tablosundan telefon bilgisini çek
-        final data = await _supabase
-            .from('profiles')
-            .select('phone')
-            .eq('id', user.id)
-            .single();
-        
-        if (mounted) {
+        final data = await _service.getProfileFields(user.id, 'phone');
+
+        if (mounted && data != null) {
           setState(() {
             _phoneController.text = data['phone'] ?? "";
           });
@@ -59,27 +56,27 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
   Future<void> _saveChanges() async {
     // Klavyeyi kapat
     FocusScope.of(context).unfocus();
-    HapticFeedback.mediumImpact(); 
+    HapticFeedback.mediumImpact();
 
     setState(() => _isLoading = true);
-    
+
     try {
-      final user = _supabase.auth.currentUser;
+      final user = _service.client.auth.currentUser;
       if (user == null) return;
 
       String uid = user.id;
-      
+
       // 1. Telefonu Veritabanına Kaydet (profiles tablosu)
-      await _supabase.from('profiles').update({
+      await _service.updateProfile(uid, {
         'phone': _phoneController.text.trim(),
-      }).eq('id', uid);
+      });
 
       // 2. E-posta İşlemleri (Auth Güncelleme)
       String newEmail = _emailController.text.trim();
-      
+
       if (newEmail != user.email) {
         // Supabase'de e-posta güncelleme
-        await _supabase.auth.updateUser(
+        await _service.client.auth.updateUser(
           UserAttributes(email: newEmail)
         );
 

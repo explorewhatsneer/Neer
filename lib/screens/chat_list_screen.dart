@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart'; 
+import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
+import '../core/app_strings.dart';
 
+import '../services/supabase_service.dart';
 import 'chat_screen.dart';
-import 'group_chat_screen.dart'; 
+import 'group_chat_screen.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -19,8 +19,7 @@ class ChatListScreen extends StatefulWidget {
 }
 
 class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProviderStateMixin {
-  // 🔥 SUPABASE CLIENT
-  final _supabase = Supabase.instance.client;
+  final _service = SupabaseService();
   
   late TabController _tabController;
   
@@ -47,7 +46,7 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
     final isDark = theme.brightness == Brightness.dark;
     
     // Supabase Auth ID
-    String myUid = _supabase.auth.currentUser?.id ?? "";
+    String myUid = _service.client.auth.currentUser?.id ?? "";
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -153,16 +152,12 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
   // --- 1. BİREYSEL SOHBETLER ---
   Widget _buildPersonalChatsStream(String myUid, ThemeData theme) {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: _supabase
-          .from('messages')
-          .stream(primaryKey: ['id'])
-          .order('created_at', ascending: false)
-          .limit(50), 
+      stream: _service.streamRecentMessages(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return Center(child: CircularProgressIndicator(color: theme.primaryColor));
-        
+
         final allMessages = snapshot.data!;
-        
+
         Map<String, Map<String, dynamic>> lastMessagesMap = {};
         
         for (var msg in allMessages) {
@@ -219,13 +214,8 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
 
   // --- 2. MEKAN (GRUP) SOHBETLERİ ---
   Widget _buildGroupChatsStream(String myUid, ThemeData theme) {
-    // 🔥 DÜZELTME: .neq() hatası kaldırıldı. Filtreleme aşağıda yapılıyor.
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: _supabase
-          .from('messages')
-          .stream(primaryKey: ['id'])
-          .order('created_at', ascending: false)
-          .limit(50),
+      stream: _service.streamRecentMessages(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return Center(child: CircularProgressIndicator(color: theme.primaryColor));
         

@@ -5,8 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
+
+import '../services/supabase_service.dart';
 
 // 🔥 CORE IMPORTLAR
 import '../core/theme_styles.dart'; 
@@ -29,7 +30,7 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMixin {
-  final _supabase = Supabase.instance.client;
+  final _service = SupabaseService();
   final MapController _mapController = MapController();
   
   // 🔥 LİSTELER VE KONUM
@@ -81,7 +82,7 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
   // --- 📡 1. Kendi Konumumu Al ve Güncelle ---
   Future<void> _updateMyLocation() async {
     try {
-      final myId = _supabase.auth.currentUser?.id;
+      final myId = _service.client.auth.currentUser?.id;
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) return;
 
@@ -91,17 +92,13 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
         setState(() {
           _myLocation = LatLng(position.latitude, position.longitude);
         });
-        _rebuildPeopleMarkers(); // Konum değişince insan listesini güncelle
+        _rebuildPeopleMarkers();
       }
 
       if (myId == null) return;
 
       // Veritabanına kaydet
-      await _supabase.from('profiles').update({
-        'latitude': position.latitude,
-        'longitude': position.longitude,
-        'last_location_update': DateTime.now().toIso8601String(),
-      }).eq('id', myId);
+      await _service.updateLocation(myId, position.latitude, position.longitude);
       
     } catch (e) {
       debugPrint("Konum güncelleme hatası: $e");
@@ -111,11 +108,11 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
   // 👤 Kendi Profil Resmimi Çek
   Future<void> _fetchMyProfileImage() async {
     try {
-      final myId = _supabase.auth.currentUser?.id;
+      final myId = _service.client.auth.currentUser?.id;
       if (myId == null) return;
 
-      final data = await _supabase.from('profiles').select('avatar_url').eq('id', myId).single();
-      if (mounted && data['avatar_url'] != null) {
+      final data = await _service.getProfileFields(myId, 'avatar_url');
+      if (mounted && data != null && data['avatar_url'] != null) {
         setState(() {
           profileImage = data['avatar_url'];
         });
@@ -128,12 +125,11 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
 
   // --- 📡 2. Arkadaşları Çek ---
   Future<void> _fetchMutualFriends() async {
-    final myId = _supabase.auth.currentUser?.id;
+    final myId = _service.client.auth.currentUser?.id;
     if (myId == null) return;
 
     try {
-      final List<dynamic> response = await _supabase
-          .rpc('get_mutual_friends_locations', params: {'my_id': myId});
+      final response = await _service.getMutualFriendsLocations(myId);
 
       if (!mounted) return;
 
@@ -199,13 +195,10 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
       try {
         final center = _mapController.camera.center;
         
-        final List<dynamic> response = await _supabase.rpc(
-          'get_nearby_places',
-          params: {
-            'lat': center.latitude,
-            'long': center.longitude,
-            'radius_meters': 5000.0,
-          },
+        final response = await _service.getNearbyPlaces(
+          lat: center.latitude,
+          lng: center.longitude,
+          radiusKm: 5.0,
         );
 
         List<PlaceModel> tempPlaces = [];
@@ -439,7 +432,7 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    String? myUid = _supabase.auth.currentUser?.id;
+    String? myUid = _service.client.auth.currentUser?.id;
     final topPadding = MediaQuery.of(context).padding.top;
 
     // 🔥 ZOOM LOJİĞİ
@@ -587,8 +580,8 @@ class _MapScreenState extends State<MapScreen> with SingleTickerProviderStateMix
           Positioned(
             top: topPadding + 24, right: 20,
             child: StreamBuilder<List<Map<String, dynamic>>>(
-              stream: myUid != null 
-                  ? _supabase.from('notifications').stream(primaryKey: ['id']).eq('user_id', myUid).limit(10)
+              stream: myUid != null
+                  ? _service.streamNotifications(myUid)
                   : const Stream.empty(),
               builder: (context, snapshot) {
                 bool hasUnread = false;

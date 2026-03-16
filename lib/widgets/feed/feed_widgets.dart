@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart'; 
+import '../../core/theme_styles.dart';
 import '../../core/text_styles.dart';
 import '../../core/constants.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
 
 import '../../models/post_model.dart';
+import '../../services/supabase_service.dart';
 
 // ==========================================
 // YARDIMCI: AKILLI ZAMAN FORMATLAYICI ⏰
@@ -46,7 +46,7 @@ class StoryItem extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     
     // Auth kullanıcısı resmini al
-    final user = Supabase.instance.client.auth.currentUser;
+    final user = SupabaseService().client.auth.currentUser;
     final userImage = user?.userMetadata?['avatar_url'] ?? "https://i.pravatar.cc/150?img=1";
 
     return Container(
@@ -271,7 +271,7 @@ class FeedPostCard extends StatefulWidget {
 }
 
 class _FeedPostCardState extends State<FeedPostCard> {
-  final String currentUid = Supabase.instance.client.auth.currentUser?.id ?? "";
+  final String currentUid = SupabaseService().client.auth.currentUser?.id ?? "";
   bool isLiked = false;
 
   @override
@@ -357,7 +357,7 @@ class FeedReviewCard extends StatefulWidget {
 }
 
 class _FeedReviewCardState extends State<FeedReviewCard> {
-  final String currentUid = Supabase.instance.client.auth.currentUser?.id ?? "";
+  final String currentUid = SupabaseService().client.auth.currentUser?.id ?? "";
   bool isLiked = false;
 
   @override

@@ -3,9 +3,11 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart'; 
+import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
+import '../core/app_strings.dart';
+
+import '../services/supabase_service.dart';
 
 class BlockedUsersScreen extends StatefulWidget {
   const BlockedUsersScreen({super.key});
@@ -15,34 +17,26 @@ class BlockedUsersScreen extends StatefulWidget {
 }
 
 class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
-  // 🔥 SUPABASE CLIENT
-  final _supabase = Supabase.instance.client;
+  final _service = SupabaseService();
 
   // Engeli Kaldırma Fonksiyonu
   Future<void> _unblockUser(String targetUid, String targetName) async {
     HapticFeedback.mediumImpact(); // Titreşim efekti
-    
-    String? myUid = _supabase.auth.currentUser?.id;
+
+    String? myUid = _service.client.auth.currentUser?.id;
     if (myUid == null) return;
 
     try {
       // 1. Mevcut engelli listesini çek
-      final data = await _supabase
-          .from('profiles')
-          .select('blocked_users')
-          .eq('id', myUid)
-          .single();
-      
-      List<dynamic> blockedList = List.from(data['blocked_users'] ?? []);
-      
+      final data = await _service.getProfileFields(myUid, 'blocked_users');
+
+      List<dynamic> blockedList = List.from(data?['blocked_users'] ?? []);
+
       // 2. Listeden çıkar
       blockedList.remove(targetUid);
 
       // 3. Güncel listeyi kaydet
-      await _supabase
-          .from('profiles')
-          .update({'blocked_users': blockedList})
-          .eq('id', myUid);
+      await _service.updateProfile(myUid, {'blocked_users': blockedList});
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -72,7 +66,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    String? myUid = _supabase.auth.currentUser?.id;
+    String? myUid = _service.client.auth.currentUser?.id;
 
     if (myUid == null) return const SizedBox();
 
@@ -80,22 +74,19 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          AppStrings.blockedUsersTitle, 
+          AppStrings.blockedUsersTitle,
           style: AppTextStyles.h3.copyWith(fontSize: 20)
         ),
-        centerTitle: true, 
+        centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.iconTheme.color, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      
+
       // 1. Kendi profilimizi dinle (blocked_users listesi için)
       body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _supabase
-            .from('profiles')
-            .stream(primaryKey: ['id'])
-            .eq('id', myUid),
+        stream: _service.streamProfileAsList(myUid),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator(color: theme.primaryColor));
@@ -114,10 +105,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
           // 2. Engellenen kullanıcıların detaylarını çek (FutureBuilder)
           // Not: Liste çok uzunsa pagination gerekebilir, şimdilik basit select
           return FutureBuilder<List<Map<String, dynamic>>>(
-            future: _supabase
-                .from('profiles')
-                .select()
-                .inFilter('id', blockedList), // ID'si bu listede olanları getir
+            future: _service.getUsersByIds(blockedList), // ID'si bu listede olanları getir
             builder: (context, userSnapshot) {
               if (!userSnapshot.hasData) return Center(child: CircularProgressIndicator(color: theme.primaryColor));
               

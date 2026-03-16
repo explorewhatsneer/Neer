@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/services.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart'; 
+import '../../core/theme_styles.dart';
 import '../../core/text_styles.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
+
+import '../../services/supabase_service.dart'; 
 
 class RequestSummaryTile extends StatelessWidget {
   final List<Map<String, dynamic>> requests; // Supabase'den gelen ham veri
@@ -47,12 +48,8 @@ class RequestSummaryTile extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(16),
             // 🔥 KRİTİK NOKTA: Gönderen kişinin bilgilerini burada çekiyoruz
-            child: FutureBuilder<Map<String, dynamic>>(
-              future: Supabase.instance.client
-                  .from('profiles')
-                  .select()
-                  .eq('id', senderId)
-                  .single(),
+            child: FutureBuilder<Map<String, dynamic>?>(
+              future: SupabaseService().getProfileSingle(senderId),
               builder: (context, snapshot) {
                 // Varsayılan değerler (Veri yüklenirken veya hata varsa)
                 String titleText = AppStrings.followRequest;

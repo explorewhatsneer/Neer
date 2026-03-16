@@ -560,4 +560,168 @@ class SupabaseService {
         .eq('user_id', userId)
         .order('created_at', ascending: false);
   }
+
+  // ════════════════════════════════════════════
+  // 23. YARDIMCI METODLAR
+  // ════════════════════════════════════════════
+
+  /// Supabase client erişimi (auth işlemleri için)
+  SupabaseClient get client => _supabase;
+
+  /// Tek profil alanı çek
+  Future<Map<String, dynamic>?> getProfileSingle(String uid) async {
+    try {
+      final response = await _supabase.from('profiles').select().eq('id', uid).single();
+      return response;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Belirli alanları çek
+  Future<Map<String, dynamic>?> getProfileFields(String uid, String fields) async {
+    try {
+      final response = await _supabase.from('profiles').select(fields).eq('id', uid).single();
+      return response;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Profil stream (liste döndürür)
+  Stream<List<Map<String, dynamic>>> streamProfileAsList(String uid) {
+    return _supabase
+        .from('profiles')
+        .stream(primaryKey: ['id'])
+        .eq('id', uid);
+  }
+
+  /// Profil sil
+  Future<void> deleteProfile(String uid) async {
+    await _supabase.from('profiles').delete().eq('id', uid);
+  }
+
+  /// Mekan sohbet mesaj stream
+  Stream<List<Map<String, dynamic>>> streamPlaceMessages(String groupId) {
+    return _supabase
+        .from('messages')
+        .stream(primaryKey: ['id'])
+        .eq('group_id', groupId)
+        .order('created_at', ascending: false);
+  }
+
+  /// Takip isteği kontrol (gelen)
+  Future<Map<String, dynamic>?> getIncomingFollowRequest(String senderId, String receiverId) async {
+    try {
+      return await _supabase
+          .from('friend_requests')
+          .select()
+          .eq('sender_id', senderId)
+          .eq('receiver_id', receiverId)
+          .maybeSingle();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Gönderilen takip isteği kontrol
+  Future<Map<String, dynamic>?> getSentFollowRequest(String senderId, String receiverId) async {
+    try {
+      return await _supabase
+          .from('friend_requests')
+          .select()
+          .eq('sender_id', senderId)
+          .eq('receiver_id', receiverId)
+          .maybeSingle();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Takip isteği sil (match ile)
+  Future<void> deleteFollowRequestByMatch(String senderId, String receiverId) async {
+    await _supabase.from('friend_requests').delete().match({
+      'sender_id': senderId,
+      'receiver_id': receiverId,
+    });
+  }
+
+  /// Kullanıcı konumu güncelle
+  Future<void> updateLocation(String uid, double lat, double lng) async {
+    try {
+      await _supabase.from('profiles').update({
+        'latitude': lat,
+        'longitude': lng,
+        'last_location_update': DateTime.now().toIso8601String(),
+      }).eq('id', uid);
+    } catch (e) {
+      print("Konum güncelleme hatası: $e");
+    }
+  }
+
+  /// Posts sorgusu (kullanıcıya ait, belirli alanlar ve filtre)
+  Future<List<Map<String, dynamic>>> getUserPosts({
+    required String userId,
+    String? type,
+    String? selectFields,
+    int limit = 50,
+  }) async {
+    try {
+      var query = _supabase.from('posts').select(selectFields ?? '*').eq('user_id', userId);
+      if (type != null) query = query.eq('type', type);
+      final response = await query.order('created_at', ascending: false).limit(limit);
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Posts sorgusu (null olmayan alan filtresi ile)
+  Future<List<Map<String, dynamic>>> getUserPostsNotNull({
+    required String userId,
+    required String notNullField,
+    String? selectFields,
+    int limit = 50,
+  }) async {
+    try {
+      final response = await _supabase
+          .from('posts')
+          .select(selectFields ?? '*')
+          .eq('user_id', userId)
+          .not(notNullField, 'is', null)
+          .limit(limit);
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // ════════════════════════════════════════════
+  // 28. ÖNEK ARAMA (Glass Suggestions için)
+  // ════════════════════════════════════════════
+  Future<List<Map<String, dynamic>>> searchPlacesPrefix(String query, {int limit = 5}) async {
+    try {
+      final response = await _supabase
+          .from('places')
+          .select()
+          .ilike('name', '$query%')
+          .limit(limit);
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> searchUsersPrefix(String query, {int limit = 5}) async {
+    try {
+      final response = await _supabase
+          .from('profiles')
+          .select()
+          .ilike('full_name', '$query%')
+          .limit(limit);
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      return [];
+    }
+  }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../core/app_strings.dart'; 
+import 'package:flutter/services.dart';
+import '../../core/app_strings.dart';
+import '../../services/supabase_service.dart'; 
 
 class FriendActionButton extends StatefulWidget {
   final String targetUserId;
@@ -23,7 +23,7 @@ class FriendActionButton extends StatefulWidget {
 }
 
 class _FriendActionButtonState extends State<FriendActionButton> {
-  final _supabase = Supabase.instance.client;
+  final _service = SupabaseService();
   
   // Olası Durumlar: 
   // 'follow'      -> Nötr (Takip Et)
@@ -43,32 +43,13 @@ class _FriendActionButtonState extends State<FriendActionButton> {
   Future<void> _checkStatus() async {
     try {
       // 1. BEN ONU TAKİP EDİYOR MUYUM?
-      // followers tablosunda: follower_id = BEN, following_id = O
-      final iFollowHimCheck = await _supabase
-          .from('followers')
-          .select()
-          .eq('follower_id', widget.currentUserId)
-          .eq('following_id', widget.targetUserId)
-          .maybeSingle();
-      bool iFollowHim = iFollowHimCheck != null;
+      bool iFollowHim = await _service.isFollowing(widget.currentUserId, widget.targetUserId);
 
       // 2. O BENİ TAKİP EDİYOR MU?
-      // followers tablosunda: follower_id = O, following_id = BEN
-      final heFollowsMeCheck = await _supabase
-          .from('followers')
-          .select()
-          .eq('follower_id', widget.targetUserId)
-          .eq('following_id', widget.currentUserId)
-          .maybeSingle();
-      bool heFollowsMe = heFollowsMeCheck != null;
+      bool heFollowsMe = await _service.isFollowing(widget.targetUserId, widget.currentUserId);
 
       // 3. İSTEK VAR MI? (Sadece ben ona attıysam ve beklemedeyse)
-      final req = await _supabase
-          .from('friend_requests')
-          .select()
-          .eq('sender_id', widget.currentUserId)
-          .eq('receiver_id', widget.targetUserId)
-          .maybeSingle();
+      final req = await _service.getSentFollowRequest(widget.currentUserId, widget.targetUserId);
 
       if (mounted) {
         setState(() {
@@ -105,10 +86,7 @@ class _FriendActionButtonState extends State<FriendActionButton> {
         widget.onStatusChanged('requested');
         
         try {
-          await _supabase.from('friend_requests').insert({
-            'sender_id': widget.currentUserId, 
-            'receiver_id': widget.targetUserId
-          });
+          await _service.sendFollowRequest(widget.currentUserId, widget.targetUserId);
         } catch (e) { _checkStatus(); }
       } else {
         // AÇIK HESAP -> Direkt Takip Et (Followers tablosuna ekle)
@@ -120,10 +98,7 @@ class _FriendActionButtonState extends State<FriendActionButton> {
         widget.onStatusChanged(nextStatus); // Ekranı Aç
         
         try {
-          await _supabase.from('followers').insert({
-            'follower_id': widget.currentUserId, 
-            'following_id': widget.targetUserId
-          });
+          await _service.follow(widget.currentUserId, widget.targetUserId);
         } catch (e) { _checkStatus(); }
       }
     } 
@@ -133,10 +108,7 @@ class _FriendActionButtonState extends State<FriendActionButton> {
       setState(() => _status = 'follow');
       widget.onStatusChanged('follow');
       try {
-        await _supabase.from('friend_requests').delete().match({
-          'sender_id': widget.currentUserId, 
-          'receiver_id': widget.targetUserId
-        });
+        await _service.deleteFollowRequestByMatch(widget.currentUserId, widget.targetUserId);
       } catch (e) { _checkStatus(); }
     } 
     
@@ -157,10 +129,7 @@ class _FriendActionButtonState extends State<FriendActionButton> {
     widget.onStatusChanged(nextStatus); // Ekranı Kilitle (Eğer kural sadece takip edense)
 
     try {
-      await _supabase.from('followers').delete().match({
-        'follower_id': widget.currentUserId, 
-        'following_id': widget.targetUserId
-      });
+      await _service.unfollow(widget.currentUserId, widget.targetUserId);
     } catch (e) { _checkStatus(); }
   }
 

@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/services.dart';
 
 // CORE IMPORTLARI
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
+import '../core/app_strings.dart';
 
 // MODELLER
 import '../models/post_model.dart';
 
+// SERVİSLER
+import '../services/supabase_service.dart';
+
 // WIDGETLAR
-import '../widgets/feed/feed_widgets.dart'; 
+import '../widgets/feed/feed_widgets.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -20,7 +22,7 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
-  final _supabase = Supabase.instance.client;
+  final _service = SupabaseService();
   
   Future<List<PostModel>>? _feedFuture;
   
@@ -35,19 +37,16 @@ class _FeedScreenState extends State<FeedScreen> {
 
   Future<List<PostModel>> _fetchFeed() async {
     try {
-      // 🔥 SQL FONKSİYONUNA FİLTREYİ GÖNDERİYORUZ
-      final List<dynamic> response = await _supabase.rpc(
-        'get_feed_posts', 
-        params: {
-          'page_number': 0, 
-          'page_size': 50,
-          'filter_mode': _selectedFilter // 'all' veya 'friends'
-        } 
+      final uid = _service.client.auth.currentUser?.id ?? '';
+      final response = await _service.getFeedPosts(
+        userId: uid,
+        filterMode: _selectedFilter,
+        limit: 50,
+        offset: 0,
       );
-
       return response.map((e) => PostModel.fromMap(e)).toList();
     } catch (e) {
-      debugPrint("Feed Hatası: $e");
+      debugPrint("Feed Hatasi: $e");
       return [];
     }
   }

@@ -4,9 +4,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 // CORE IMPORTLARI
 import '../core/constants.dart';
-import '../core/theme_styles.dart'; 
+import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
+import '../core/app_strings.dart';
+
+import '../services/supabase_service.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -16,8 +18,7 @@ class ChangePasswordScreen extends StatefulWidget {
 }
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
-  // 🔥 SUPABASE CLIENT
-  final _supabase = Supabase.instance.client;
+  final _service = SupabaseService();
   
   final _formKey = GlobalKey<FormState>();
   final _currentPassController = TextEditingController();
@@ -42,13 +43,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final user = _supabase.auth.currentUser;
+      final user = _service.client.auth.currentUser;
       String email = user?.email ?? "";
 
       // 1. ADIM: Kullanıcıyı "Mevcut Şifre" ile doğrula (Re-Auth Simülasyonu)
       // Supabase'de signIn çağrısı yaparak şifrenin doğruluğunu test edebiliriz.
       // Not: Bu işlem yeni bir oturum açar ve mevcut session'ı yeniler.
-      final AuthResponse res = await _supabase.auth.signInWithPassword(
+      final AuthResponse res = await _service.client.auth.signInWithPassword(
         email: email,
         password: _currentPassController.text.trim(),
       );
@@ -58,7 +59,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       }
 
       // 2. ADIM: Doğrulama başarılıysa şifreyi güncelle
-      await _supabase.auth.updateUser(
+      await _service.client.auth.updateUser(
         UserAttributes(
           password: _newPassController.text.trim(),
         ),
