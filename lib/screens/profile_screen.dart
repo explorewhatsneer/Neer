@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../main.dart'; // supabase nesnesi için
 
 // CORE
@@ -10,9 +11,9 @@ import '../core/app_strings.dart';
 import '../core/app_router.dart';
 
 // MODELLER & SERVİSLER
-import '../models/user_model.dart';
 import '../models/post_model.dart';
 import '../services/supabase_service.dart';
+import '../providers/profile_provider.dart';
 
 // WIDGETLAR
 // 🔥 YENİ TASARIM COMPONENTLERİ (StackedCardCarousel, RankingPodium vb.)
@@ -37,16 +38,13 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   late TabController _mainTabController;
   final ScrollController _scrollController = ScrollController();
-  
-  UserModel? _user; 
-  bool _isLoading = true;
 
-  // Streams & Futures
+  // Streams & Futures (profil verisi hariç — o ProfileProvider'da)
   late Stream<List<Map<String, dynamic>>> _favoritesStream;
   late Stream<List<Map<String, dynamic>>> _notesStream;
   late Stream<List<String>> _photosStream;
   late Stream<List<PostModel>> _activityStream;
-  
+
   late Future<List<Map<String, dynamic>>> _questsFuture;
   late Future<List<Map<String, dynamic>>> _frequentPlacesFuture;
   late Future<List<Map<String, dynamic>>> _surveyHistoryFuture;
@@ -55,28 +53,18 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   void initState() {
     super.initState();
     _mainTabController = TabController(length: 3, vsync: this);
-    
-    _fetchUserData();
+
+    // Profil verisi Provider'dan yükleniyor
+    context.read<ProfileProvider>().loadProfile(_uid);
+
     _favoritesStream = _supabaseService.getUserFavorites(_uid);
     _notesStream = _supabaseService.getUserNotes(_uid);
     _photosStream = _supabaseService.getUserPhotos(_uid);
     _activityStream = _supabaseService.getUserActivityFeed(_uid);
-    
+
     _questsFuture = _supabaseService.getUserQuests(_uid);
     _frequentPlacesFuture = _supabaseService.getFrequentPlaces(_uid);
     _surveyHistoryFuture = _supabaseService.getSurveyHistory(_uid);
-  }
-
-  Future<void> _fetchUserData() async {
-    final result = await _supabaseService.getUser(_uid);
-    if (mounted) {
-      setState(() {
-        if (result.isSuccess) {
-          _user = result.data;
-        }
-        _isLoading = false;
-      });
-    }
   }
 
   // --- YARDIMCI: ID BULUCU ---
@@ -109,13 +97,15 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final profileProvider = context.watch<ProfileProvider>();
+    final _user = profileProvider.profile;
 
-    if (_isLoading) {
+    if (profileProvider.isLoading) {
       return Scaffold(backgroundColor: theme.scaffoldBackgroundColor, body: Center(child: CircularProgressIndicator(color: theme.primaryColor)));
     }
 
     final String displayImage = (_user?.profileImage != null && _user!.profileImage.isNotEmpty)
-        ? _user!.profileImage
+        ? _user.profileImage
         : "https://i.pravatar.cc/150?img=60";
 
     return Scaffold(
@@ -140,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       onTap: () async {
                         HapticFeedback.lightImpact();
                         await context.push(AppRoutes.editProfile);
-                        _fetchUserData();
+                        // ProfileProvider realtime stream otomatik güncelleyecek
                       },
                     ),
                   ),
@@ -164,14 +154,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 flexibleSpace: FlexibleSpaceBar(
                   stretchModes: const [StretchMode.zoomBackground],
                   background: ProfileHeader(
-                    imageUrl: displayImage, 
-                    name: _user?.name ?? AppStrings.nameless, 
-                    username: _user?.username ?? "kullanici", 
-                    bio: _user?.bio ?? "", 
-                    followersCount: (_user?.followersCount ?? 0).toString(), 
+                    imageUrl: displayImage,
+                    name: _user?.name ?? AppStrings.nameless,
+                    username: _user?.username ?? "kullanici",
+                    bio: _user?.bio ?? "",
+                    followersCount: (_user?.followersCount ?? 0).toString(),
                     followingCount: (_user?.followingCount ?? 0).toString(),
-                    friendsCount: "42", 
-                    trustScore: (_user?.trustScore ?? 5.0).toDouble(), 
+                    friendsCount: "42",
+                    trustScore: (_user?.trustScore ?? 5.0).toDouble(),
                   ),
                 ),
                 
@@ -222,7 +212,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           controller: _mainTabController,
           physics: const BouncingScrollPhysics(),
           children: [
-            _buildProfileTab(theme),
+            _buildProfileTab(theme, _user),
             _buildActivityTab(theme),
             _buildGalleryTab(theme),
           ],
@@ -236,7 +226,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 // ======================
 // 🟢 TAB 1: PROFİL (YENİ SIRALAMA & GÖRÜNÜM)
 // ======================
-Widget _buildProfileTab(ThemeData theme) {
+Widget _buildProfileTab(ThemeData theme, dynamic _user) {
   return Builder(builder: (BuildContext context) {
     return CustomScrollView(
       key: const PageStorageKey<String>('tab1'),

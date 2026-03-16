@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
@@ -9,11 +11,8 @@ import '../core/text_styles.dart';
 import '../core/theme_styles.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
-import '../core/app_exception.dart';
 import '../core/snackbar_helper.dart';
-import '../services/catch_service.dart';
-import '../services/availability_service.dart';
-import '../services/watcher_service.dart';
+import '../providers/catch_provider.dart';
 import '../widgets/common/shimmer_loading.dart';
 
 class CatchScreen extends StatefulWidget {
@@ -25,166 +24,41 @@ class CatchScreen extends StatefulWidget {
 
 class _CatchScreenState extends State<CatchScreen> {
   final _supabase = Supabase.instance.client;
-  final _catchService = CatchService();
-  final _availabilityService = AvailabilityService();
-  final _watcherService = WatcherService();
-
-  String _myStatus = 'busy';
-  DateTime? _availableUntil;
-  List<Map<String, dynamic>> _friends = [];
-  Set<String> _watchedIds = {};
-  Map<String, int> _cooldowns = {}; // friendId -> remaining seconds
-  Timer? _cooldownTimer;
-  Timer? _statusTimer;
-  bool _isLoading = true;
-
-  // Realtime subscriptions
-  StreamSubscription? _profileSub;
-  StreamSubscription? _catchesSub;
-
-  // Catch onay animasyonu
-  String? _acceptedCatchReceiverId;
+  StreamSubscription? _incomingCatchSub;
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
-    _init();
+    _initProvider();
   }
 
-  Future<void> _init() async {
+  Future<void> _initProvider() async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return;
 
-    // Paralel yükleme
-    await Future.wait([
-      _loadFriends(userId),
-      _loadWatchedIds(),
-      _loadMyStatus(userId),
-    ]);
+    final provider = context.read<CatchProvider>();
+    if (!_initialized) {
+      await provider.init(userId);
+      _initialized = true;
+    }
 
-    _startRealtimeListeners(userId);
-    _startCooldownTimer();
-
-    if (mounted) setState(() => _isLoading = false);
-  }
-
-  Future<void> _loadMyStatus(String userId) async {
-    try {
-      final data = await _supabase
-          .from('profiles')
-          .select('status, available_until')
-          .eq('id', userId)
-          .single();
-      _myStatus = data['status'] ?? 'busy';
-      _availableUntil = data['available_until'] != null
-          ? DateTime.tryParse(data['available_until'])
-          : null;
-    } catch (_) {}
-  }
-
-  Future<void> _loadFriends(String userId) async {
-    final result = await _availabilityService.getFriendsWithStatus(userId);
-    result.when(
-      success: (friends) async {
-        _friends = friends;
-        for (final f in _friends) {
-          final remaining = await _catchService.getCooldownRemaining(f['id']);
-          if (remaining > 0) _cooldowns[f['id']] = remaining;
-        }
-      },
-      failure: (error) => debugPrint('Arkadaş listesi hatası: ${error.message}'),
-    );
-  }
-
-  Future<void> _loadWatchedIds() async {
-    final result = await _watcherService.getWatchedIds();
-    result.ifSuccess((ids) => _watchedIds = ids);
-  }
-
-  void _startRealtimeListeners(String userId) {
-    // Kendi profil değişimlerini dinle
-    _profileSub = _availabilityService.streamMyStatus().listen((data) {
-      if (data != null && mounted) {
-        setState(() {
-          _myStatus = data['status'] ?? 'busy';
-          _availableUntil = data['available_until'] != null
-              ? DateTime.tryParse(data['available_until'])
-              : null;
-        });
-      }
-    });
-
-    // Gelen catch'leri dinle
-    _catchesSub = _catchService.streamIncomingCatches(userId).listen((catches) {
+    // Gelen catch'leri dinle (bottom sheet göstermek için — UI sorumluluğu)
+    _incomingCatchSub = provider.streamIncomingCatches(userId).listen((catches) {
       if (catches.isNotEmpty && mounted) {
         _showIncomingCatchSheet(catches.first);
       }
-    });
-
-    // Gönderilen catch'lerin durumunu dinle (onay animasyonu)
-    _catchService.streamSentCatches(userId).listen((catches) {
-      if (catches.isNotEmpty && mounted) {
-        final latest = catches.first;
-        if (latest['status'] == 'accepted') {
-          setState(() => _acceptedCatchReceiverId = latest['receiver_id']);
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) setState(() => _acceptedCatchReceiverId = null);
-          });
-        }
-      }
-    });
-
-    // Arkadaş profillerinin status değişimlerini dinle
-    final friendIds = _friends.map((f) => f['id'] as String).toList();
-    if (friendIds.isNotEmpty) {
-      _availabilityService.streamFriendsStatus(friendIds).listen((profiles) {
-        if (mounted) {
-          setState(() {
-            for (final profile in profiles) {
-              final idx = _friends.indexWhere((f) => f['id'] == profile['id']);
-              if (idx != -1) _friends[idx] = profile;
-            }
-          });
-        }
-      });
-    }
-  }
-
-  void _startCooldownTimer() {
-    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted) return;
-      setState(() {
-        final expired = <String>[];
-        _cooldowns.forEach((id, remaining) {
-          if (remaining <= 1) {
-            expired.add(id);
-          } else {
-            _cooldowns[id] = remaining - 1;
-          }
-        });
-        for (final id in expired) {
-          _cooldowns.remove(id);
-        }
-      });
-    });
-
-    // Status kalan süre timer
-    _statusTimer = Timer.periodic(const Duration(seconds: 30), (_) {
-      if (mounted) setState(() {});
     });
   }
 
   @override
   void dispose() {
-    _cooldownTimer?.cancel();
-    _statusTimer?.cancel();
-    _profileSub?.cancel();
-    _catchesSub?.cancel();
+    _incomingCatchSub?.cancel();
     super.dispose();
   }
 
   // ═══════════════════════════════════════════
-  // ACTIONS
+  // ACTIONS (UI → Provider)
   // ═══════════════════════════════════════════
 
   void _showDurationPicker() {
@@ -223,12 +97,9 @@ class _CatchScreenState extends State<CatchScreen> {
       onTap: () async {
         Navigator.pop(ctx);
         HapticFeedback.mediumImpact();
-        await _availabilityService.setAvailable(minutes);
+        final result = await context.read<CatchProvider>().setAvailable(minutes);
         if (mounted) {
-          setState(() {
-            _myStatus = 'available';
-            _availableUntil = DateTime.now().add(Duration(minutes: minutes));
-          });
+          result.ifFailure((e) => AppSnackBar.error(context, e.message));
         }
       },
     );
@@ -236,48 +107,28 @@ class _CatchScreenState extends State<CatchScreen> {
 
   Future<void> _handleBusy() async {
     HapticFeedback.mediumImpact();
-    await _availabilityService.setBusy();
+    final result = await context.read<CatchProvider>().setBusy();
     if (mounted) {
-      setState(() {
-        _myStatus = 'busy';
-        _availableUntil = null;
-      });
+      result.ifFailure((e) => AppSnackBar.error(context, e.message));
     }
   }
 
   Future<void> _sendCatch(String receiverId) async {
     HapticFeedback.mediumImpact();
-    final result = await _catchService.sendCatch(receiverId);
+    final result = await context.read<CatchProvider>().sendCatch(receiverId);
     if (!mounted) return;
     result.when(
-      success: (_) {
-        setState(() {
-          _cooldowns[receiverId] = CatchService.cooldownSeconds;
-        });
-        AppSnackBar.success(context, AppStrings.catchSent);
-      },
-      failure: (error) {
-        AppSnackBar.error(context, error.message);
-      },
+      success: (_) => AppSnackBar.success(context, AppStrings.catchSent),
+      failure: (error) => AppSnackBar.error(context, error.message),
     );
   }
 
   Future<void> _toggleWatch(String targetId) async {
     HapticFeedback.selectionClick();
-    final result = await _watcherService.toggleWatch(targetId);
-    if (!mounted) return;
-    result.when(
-      success: (isNowWatching) {
-        setState(() {
-          if (isNowWatching) {
-            _watchedIds.add(targetId);
-          } else {
-            _watchedIds.remove(targetId);
-          }
-        });
-      },
-      failure: (error) => AppSnackBar.error(context, error.message),
-    );
+    final result = await context.read<CatchProvider>().toggleWatch(targetId);
+    if (mounted) {
+      result.ifFailure((e) => AppSnackBar.error(context, e.message));
+    }
   }
 
   Future<void> _callFriend(String? phoneNumber) async {
@@ -290,7 +141,6 @@ class _CatchScreenState extends State<CatchScreen> {
   }
 
   void _showIncomingCatchSheet(Map<String, dynamic> catchData) async {
-    // Sender bilgilerini çek
     final senderId = catchData['sender_id'];
     Map<String, dynamic>? senderProfile;
     try {
@@ -307,6 +157,7 @@ class _CatchScreenState extends State<CatchScreen> {
     final senderName = senderProfile?['full_name'] ?? 'Biri';
     final senderAvatar = senderProfile?['avatar_url'] ?? '';
     final catchId = catchData['id'];
+    final provider = context.read<CatchProvider>();
 
     showModalBottomSheet(
       context: context,
@@ -322,7 +173,6 @@ class _CatchScreenState extends State<CatchScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Sender avatar
               CircleAvatar(
                 radius: 40,
                 backgroundImage: senderAvatar.isNotEmpty ? NetworkImage(senderAvatar) : null,
@@ -348,7 +198,7 @@ class _CatchScreenState extends State<CatchScreen> {
                       child: OutlinedButton.icon(
                         onPressed: () async {
                           HapticFeedback.mediumImpact();
-                          final r = await _catchService.rejectCatch(catchId);
+                          final r = await provider.rejectCatch(catchId);
                           if (ctx.mounted) Navigator.pop(ctx);
                           r.ifFailure((e) {
                             if (mounted) AppSnackBar.error(context, e.message);
@@ -371,7 +221,7 @@ class _CatchScreenState extends State<CatchScreen> {
                       child: ElevatedButton.icon(
                         onPressed: () async {
                           HapticFeedback.heavyImpact();
-                          final r = await _catchService.acceptCatch(catchId);
+                          final r = await provider.acceptCatch(catchId);
                           if (ctx.mounted) Navigator.pop(ctx);
                           if (mounted) {
                             r.when(
@@ -406,6 +256,7 @@ class _CatchScreenState extends State<CatchScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final provider = context.watch<CatchProvider>();
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -420,23 +271,20 @@ class _CatchScreenState extends State<CatchScreen> {
         automaticallyImplyLeading: false,
         toolbarHeight: 50,
       ),
-      body: _isLoading
+      body: provider.isLoading
           ? Column(
               children: [
-                _buildStatusCard(theme, isDark),
+                _buildStatusCard(theme, isDark, provider),
                 const Expanded(child: ShimmerGrid(itemCount: 4)),
               ],
             )
           : Column(
               children: [
-                // ═══ DURUM KARTI ═══
-                _buildStatusCard(theme, isDark),
-
-                // ═══ ARKADAŞ LİSTESİ ═══
+                _buildStatusCard(theme, isDark, provider),
                 Expanded(
-                  child: _friends.isEmpty
+                  child: provider.friends.isEmpty
                       ? _buildEmptyState(theme)
-                      : _buildFriendGrid(theme, isDark),
+                      : _buildFriendGrid(theme, isDark, provider),
                 ),
               ],
             ),
@@ -444,22 +292,22 @@ class _CatchScreenState extends State<CatchScreen> {
   }
 
   // ═══════════════════════════════════════════
-  // STATUS CARD (Kendi durumun)
+  // STATUS CARD
   // ═══════════════════════════════════════════
 
-  Widget _buildStatusCard(ThemeData theme, bool isDark) {
-    final isAvailable = _myStatus == 'available';
+  Widget _buildStatusCard(ThemeData theme, bool isDark, CatchProvider provider) {
+    final isAvailable = provider.myStatus == 'available';
     final statusColor = isAvailable ? const Color(0xFF22C55E) : const Color(0xFFEF4444);
 
     String remainingText = '';
-    if (isAvailable && _availableUntil != null) {
-      final diff = _availableUntil!.difference(DateTime.now());
-      if (diff.isNegative) {
-        remainingText = '';
-      } else if (diff.inHours > 0) {
-        remainingText = '${diff.inHours}s ${diff.inMinutes % 60}dk';
-      } else {
-        remainingText = '${diff.inMinutes}dk';
+    if (isAvailable && provider.availableUntil != null) {
+      final diff = provider.availableUntil!.difference(DateTime.now());
+      if (!diff.isNegative) {
+        if (diff.inHours > 0) {
+          remainingText = '${diff.inHours}s ${diff.inMinutes % 60}dk';
+        } else {
+          remainingText = '${diff.inMinutes}dk';
+        }
       }
     }
 
@@ -474,7 +322,6 @@ class _CatchScreenState extends State<CatchScreen> {
       ),
       child: Row(
         children: [
-          // Status dot
           Container(
             width: 14,
             height: 14,
@@ -485,8 +332,6 @@ class _CatchScreenState extends State<CatchScreen> {
             ),
           ),
           const SizedBox(width: 14),
-
-          // Text
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -503,8 +348,6 @@ class _CatchScreenState extends State<CatchScreen> {
               ],
             ),
           ),
-
-          // Toggle button
           SizedBox(
             height: 44,
             child: ElevatedButton(
@@ -529,13 +372,8 @@ class _CatchScreenState extends State<CatchScreen> {
   // FRIEND GRID
   // ═══════════════════════════════════════════
 
-  Widget _buildFriendGrid(ThemeData theme, bool isDark) {
-    // Sırala: available > pending > busy
-    final sorted = List<Map<String, dynamic>>.from(_friends);
-    sorted.sort((a, b) {
-      const order = {'available': 0, 'pending': 1, 'busy': 2};
-      return (order[a['status']] ?? 2).compareTo(order[b['status']] ?? 2);
-    });
+  Widget _buildFriendGrid(ThemeData theme, bool isDark, CatchProvider provider) {
+    final sorted = provider.sortedFriends;
 
     return GridView.builder(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
@@ -547,22 +385,21 @@ class _CatchScreenState extends State<CatchScreen> {
         childAspectRatio: 0.75,
       ),
       itemCount: sorted.length,
-      itemBuilder: (context, index) => _buildFriendCard(sorted[index], theme, isDark),
+      itemBuilder: (context, index) => _buildFriendCard(sorted[index], theme, isDark, provider),
     );
   }
 
-  Widget _buildFriendCard(Map<String, dynamic> friend, ThemeData theme, bool isDark) {
+  Widget _buildFriendCard(Map<String, dynamic> friend, ThemeData theme, bool isDark, CatchProvider provider) {
     final friendId = friend['id'] as String;
     final name = friend['full_name'] ?? AppStrings.nameless;
-    // final username = friend['username'] ?? '';
     final avatar = friend['avatar_url'] ?? '';
     final status = friend['status'] ?? 'busy';
     final phoneNumber = friend['phone_number']?.toString();
     final isAvailable = status == 'available';
     final isPending = status == 'pending';
-    final isWatched = _watchedIds.contains(friendId);
-    final cooldown = _cooldowns[friendId] ?? 0;
-    final showAcceptedAnim = _acceptedCatchReceiverId == friendId;
+    final isWatched = provider.watchedIds.contains(friendId);
+    final cooldown = provider.cooldowns[friendId] ?? 0;
+    final showAcceptedAnim = provider.acceptedCatchReceiverId == friendId;
 
     Color statusColor;
     if (isAvailable) {
@@ -600,7 +437,7 @@ class _CatchScreenState extends State<CatchScreen> {
                   )
                 : _buildAvatarPlaceholder(name, theme),
 
-            // ═══ ALT GRADIENT (daha uzun, butonlar için alan) ═══
+            // ═══ ALT GRADIENT ═══
             Positioned(
               bottom: 0,
               left: 0,
@@ -640,7 +477,7 @@ class _CatchScreenState extends State<CatchScreen> {
               ),
             ),
 
-            // ═══ ÜST SOL: TELEFON (sadece available) ═══
+            // ═══ ÜST SOL: TELEFON ═══
             if (isAvailable && phoneNumber != null && phoneNumber.isNotEmpty)
               Positioned(
                 top: 8,
@@ -663,7 +500,6 @@ class _CatchScreenState extends State<CatchScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // İsim
                     Text(
                       name,
                       style: AppTextStyles.bodyLarge.copyWith(
@@ -675,8 +511,6 @@ class _CatchScreenState extends State<CatchScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
-
-                    // Durum yazısı
                     Text(
                       isAvailable
                           ? AppStrings.available
@@ -692,7 +526,6 @@ class _CatchScreenState extends State<CatchScreen> {
                     // ═══ 3 BUTON SATIRI ═══
                     Row(
                       children: [
-                        // Profil butonu
                         Expanded(
                           child: _buildCardAction(
                             icon: Icons.person_rounded,
@@ -705,8 +538,6 @@ class _CatchScreenState extends State<CatchScreen> {
                           ),
                         ),
                         const SizedBox(width: 6),
-
-                        // Mesaj butonu
                         Expanded(
                           child: _buildCardAction(
                             icon: Icons.chat_bubble_rounded,
@@ -719,8 +550,6 @@ class _CatchScreenState extends State<CatchScreen> {
                           ),
                         ),
                         const SizedBox(width: 6),
-
-                        // Catch butonu / Cooldown
                         Expanded(
                           child: cooldown > 0 && !showAcceptedAnim
                               ? _buildCardAction(
