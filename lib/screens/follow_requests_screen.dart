@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
 import '../core/theme_styles.dart';
@@ -7,9 +8,6 @@ import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 
 import '../services/supabase_service.dart';
-
-// PROFİL EKRANI
-import 'friend_profile_screen.dart';
 
 class FriendRequestsScreen extends StatefulWidget {
   const FriendRequestsScreen({super.key});
@@ -184,7 +182,7 @@ class _RequestCard extends StatelessWidget {
 
         return GestureDetector(
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => FriendProfileScreen(targetUserId: senderId)));
+            context.push('/profile/$senderId');
           },
           child: Container(
             margin: const EdgeInsets.only(bottom: 12),

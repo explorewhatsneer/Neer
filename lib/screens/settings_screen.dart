@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
 import '../core/theme_styles.dart';
@@ -8,21 +9,14 @@ import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 import '../core/theme_manager.dart';
 import '../core/language_manager.dart';
+import '../core/app_router.dart';
 
 import '../services/supabase_service.dart';
 import '../providers/auth_provider.dart';
 
 // WIDGETLAR
-import '../widgets/settings/settings_widgets.dart'; 
-import '../widgets/dialogs/anonymous_popup.dart'; 
-
-// DİĞER EKRANLAR
-import 'login_screen.dart';
-import 'account_info_screen.dart';
-import 'change_password_screen.dart';
-import 'login_methods_screen.dart';
-import 'premium_screen.dart';
-import 'blocked_users_screen.dart';
+import '../widgets/settings/settings_widgets.dart';
+import '../widgets/dialogs/anonymous_popup.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -213,7 +207,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await context.read<AuthProvider>().signOut();
 
     if (mounted) {
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (route) => false);
+      context.go(AppRoutes.login);
     }
   }
 
@@ -233,7 +227,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         await _service.client.auth.signOut();
         
         if (mounted) {
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (route) => false);
+          context.go(AppRoutes.login);
         }
       }
     } catch (e) {
@@ -414,21 +408,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               SettingsItem(
                 icon: Icons.person_outline_rounded, color: Colors.blueAccent, title: AppStrings.accountInfo,
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountInfoScreen())),
+                onTap: () => context.push(AppRoutes.accountInfo),
               ),
               SettingsItem(
                 icon: Icons.lock_outline_rounded, color: Colors.blueAccent, title: AppStrings.passwordSecurity,
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChangePasswordScreen())),
+                onTap: () => context.push(AppRoutes.changePassword),
               ),
               SettingsItem(
                 icon: Icons.link_rounded, color: Colors.blueAccent, title: AppStrings.linkedAccounts,
                 trailing: Text("Google", style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor)),
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginMethodsScreen())),
+                onTap: () => context.push(AppRoutes.loginMethods),
               ),
 
               // 🔥 PREMIUM KARTI
               GestureDetector(
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PremiumScreen())),
+                onTap: () => context.push(AppRoutes.premium),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
@@ -509,7 +503,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               SettingsItem(
                 icon: Icons.block_rounded, color: Colors.indigo, title: AppStrings.blockedUsers,
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const BlockedUsersScreen())),
+                onTap: () => context.push(AppRoutes.blockedUsers),
               ),
               SettingsSwitch(
                 icon: Icons.data_saver_on_rounded, color: Colors.teal, title: AppStrings.dataSaver, value: _dataSaver,

@@ -1,18 +1,17 @@
 import 'dart:ui'; // ImageFilter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
+import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart'; 
+import '../../core/theme_styles.dart';
 import '../../core/text_styles.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
 import '../../core/constants.dart'; // AppColors için
+import '../../core/app_router.dart';
 
-import '../../screens/chat_screen.dart';
-import '../../screens/friend_profile_screen.dart';
-import '../../screens/business_profile_screen.dart';
 // 🔥 Servis Importu
-import '../../services/supabase_service.dart'; 
+import '../../services/supabase_service.dart';
 
 class UserSheet {
   static void show(BuildContext context, Map<String, dynamic> userData, String targetUid) {
@@ -357,7 +356,7 @@ class UserSheet {
                                 onPressed: () {
                                   HapticFeedback.mediumImpact();
                                   Navigator.pop(context);
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(userName: displayName, userId: targetUid)));
+                                  context.push(AppRoutes.chat, extra: {'userId': targetUid, 'userName': displayName, 'userImage': null});
                                 },
                                 icon: const Icon(Icons.chat_bubble_rounded, size: 22),
                                 label: Text("Mesaj Gönder", style: AppTextStyles.button),
@@ -377,8 +376,8 @@ class UserSheet {
                                 ),
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
-                                  Navigator.pop(context); 
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => FriendProfileScreen(targetUserId: targetUid)));
+                                  Navigator.pop(context);
+                                  context.push('/profile/$targetUid');
                                 }, 
                                 child: Text("Profili Gör", style: AppTextStyles.button.copyWith(color: theme.textTheme.bodyLarge?.color)),
                               ),
@@ -439,12 +438,7 @@ class UserSheet {
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BusinessProfileScreen(venueId: venueId, venueName: name, imageUrl: imgUrl),
-          ),
-        );
+        context.push('/venue/$venueId', extra: {'venueName': name, 'imageUrl': imgUrl});
       },
       child: Container(
         width: 130,

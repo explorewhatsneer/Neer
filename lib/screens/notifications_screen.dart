@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
 import '../core/constants.dart';
@@ -9,8 +10,6 @@ import '../core/theme_styles.dart';
 import '../core/app_strings.dart';
 
 import '../services/supabase_service.dart';
-import '../screens/friend_profile_screen.dart';
-import '../screens/business_profile_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -70,22 +69,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       case 'follow_accept':
         final senderId = data['sender_id'];
         if (senderId != null) {
-          Navigator.push(context, MaterialPageRoute(
-            builder: (context) => FriendProfileScreen(targetUserId: senderId),
-          ));
+          context.push('/profile/$senderId');
         }
         break;
       case 'checkin':
         final placeId = data['place_id'];
         final placeName = data['place_name'] ?? 'Mekan';
         if (placeId != null) {
-          Navigator.push(context, MaterialPageRoute(
-            builder: (context) => BusinessProfileScreen(
-              venueId: placeId.toString(),
-              venueName: placeName,
-              imageUrl: '',
-            ),
-          ));
+          context.push('/venue/${placeId.toString()}', extra: {'venueName': placeName, 'imageUrl': ''});
         }
         break;
       case 'message':
@@ -93,9 +84,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         final senderId = data['sender_id'];
         if (senderId != null) {
           // Basit yönlendirme: profil üzerinden mesajlaşma
-          Navigator.push(context, MaterialPageRoute(
-            builder: (context) => FriendProfileScreen(targetUserId: senderId),
-          ));
+          context.push('/profile/$senderId');
         }
         break;
       default:

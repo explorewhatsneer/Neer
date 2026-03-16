@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
+import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
 import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
+import '../core/app_router.dart';
 
 import '../services/supabase_service.dart';
-import 'chat_screen.dart';
-import 'friend_profile_screen.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -257,7 +257,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
       child: GestureDetector(
         onTap: () {
           HapticFeedback.lightImpact();
-          Navigator.push(context, MaterialPageRoute(builder: (context) => FriendProfileScreen(targetUserId: uid)));
+          context.push('/profile/$uid');
         },
         child: Container(
           margin: const EdgeInsets.only(bottom: 15),
@@ -333,7 +333,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   borderRadius: BorderRadius.circular(12),
                   onTap: () {
                     HapticFeedback.selectionClick();
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(userName: name, userId: uid, userImage: image)));
+                    context.push(AppRoutes.chat, extra: {'userId': uid, 'userName': name, 'userImage': image});
                   },
                   child: Container(
                     padding: const EdgeInsets.all(10),

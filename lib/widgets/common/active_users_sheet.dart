@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
+import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
 import '../../core/theme_styles.dart';
@@ -9,7 +10,6 @@ import '../../core/constants.dart';
 import '../../core/app_strings.dart';
 
 import '../../services/supabase_service.dart';
-import '../../screens/friend_profile_screen.dart';
 
 // --- DIŞARIDAN ÇAĞRILAN FONKSİYON ---
 void showGroupMembers(BuildContext context, String chatId) {
@@ -176,7 +176,7 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
       onTap: () {
         if (!isMe) {
           HapticFeedback.lightImpact();
-          Navigator.push(context, MaterialPageRoute(builder: (context) => FriendProfileScreen(targetUserId: userId)));
+          context.push('/profile/$userId');
         }
       },
       child: Container(

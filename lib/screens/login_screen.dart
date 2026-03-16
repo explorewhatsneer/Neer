@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
+import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart'; 
+import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
+import '../core/app_strings.dart';
+import '../core/app_router.dart';
 
 import 'package:neer/services/auth_service.dart';
-
-// Sayfalar
-import '../main_layout.dart';
-import 'register_screen.dart'; 
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -61,10 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (error == null) {
         // Başarılı Giriş
         HapticFeedback.mediumImpact();
-        Navigator.pushReplacement(
-          context, 
-          MaterialPageRoute(builder: (context) => const MainLayout()) 
-        );
+        context.go(AppRoutes.home);
       } else {
         // Hata
         HapticFeedback.heavyImpact();
@@ -214,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextButton(
                     onPressed: () {
                       HapticFeedback.selectionClick();
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen()));
+                      context.push(AppRoutes.register);
                     }, 
                     child: Text(
                       AppStrings.signUp, 

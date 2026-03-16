@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
 import '../../core/theme_styles.dart';
@@ -10,8 +11,6 @@ import '../../core/app_strings.dart';
 import '../../models/user_model.dart';
 import '../../services/supabase_service.dart';
 import 'search_widgets.dart';
-
-import '../../screens/friend_profile_screen.dart';
 
 class SearchModalContent extends StatefulWidget {
   const SearchModalContent({super.key});
@@ -270,10 +269,7 @@ class _SearchModalContentState extends State<SearchModalContent> with SingleTick
           onTap: () {
             HapticFeedback.lightImpact();
             // Profil sayfasına git
-            Navigator.push(
-              context, 
-              MaterialPageRoute(builder: (context) => FriendProfileScreen(targetUserId: user.uid))
-            );
+            context.push('/profile/${user.uid}');
           },
         );
       },

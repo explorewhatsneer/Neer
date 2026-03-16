@@ -1,14 +1,14 @@
 import 'dart:ui'; // ImageFilter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
+import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart'; 
+import '../../core/theme_styles.dart';
 import '../../core/text_styles.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
 
-import '../../widgets/common/check_in_button.dart'; 
-import '../../screens/business_profile_screen.dart';
+import '../../widgets/common/check_in_button.dart';
 
 class PlaceSheet {
   static void show(BuildContext context, Map<String, dynamic> placeData, String placeId) {
@@ -340,9 +340,9 @@ class PlaceSheet {
                                   ),
                                   onPressed: () {
                                     HapticFeedback.lightImpact();
-                                    Navigator.pop(context); 
+                                    Navigator.pop(context);
                                     // 🔥 Gerçek Detay Sayfasına Git
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => BusinessProfileScreen(venueId: placeId, venueName: name, imageUrl: placeImageUrl)));
+                                    context.push('/venue/$placeId', extra: {'venueName': name, 'imageUrl': placeImageUrl});
                                   }, 
                                   child: Text(
                                     AppStrings.details, 

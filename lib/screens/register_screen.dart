@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:go_router/go_router.dart';
 import '../main.dart'; // 🔥 Global supabase client erişimi
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart'; 
+import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
-
-// Yönlendirme
-import '../main_layout.dart';
+import '../core/app_strings.dart';
+import '../core/app_router.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -82,11 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         // Kayıt başarılıysa (Session varsa)
         if (res.session != null) {
           HapticFeedback.mediumImpact();
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const MainLayout()),
-            (route) => false,
-          );
+          context.go(AppRoutes.home);
         } else {
           // E-posta onayı açıksa buraya düşebilir (Biz kapattık ama güvenlik önlemi)
           ScaffoldMessenger.of(context).showSnackBar(

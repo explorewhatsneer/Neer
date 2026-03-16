@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
 
 import '../core/text_styles.dart';
 import '../core/theme_styles.dart';
 import '../core/app_strings.dart';
+import '../core/app_router.dart';
 import '../services/catch_service.dart';
 import '../services/availability_service.dart';
 import '../services/watcher_service.dart';
-import 'friend_profile_screen.dart';
-import 'chat_screen.dart';
 
 class CatchScreen extends StatefulWidget {
   const CatchScreen({super.key});
@@ -684,9 +684,7 @@ class _CatchScreenState extends State<CatchScreen> {
                             bgColor: Colors.white.withValues(alpha: 0.15),
                             onTap: () {
                               HapticFeedback.selectionClick();
-                              Navigator.push(context, MaterialPageRoute(
-                                builder: (_) => FriendProfileScreen(targetUserId: friendId),
-                              ));
+                              context.push('/profile/$friendId');
                             },
                           ),
                         ),
@@ -700,13 +698,7 @@ class _CatchScreenState extends State<CatchScreen> {
                             bgColor: Colors.white.withValues(alpha: 0.15),
                             onTap: () {
                               HapticFeedback.selectionClick();
-                              Navigator.push(context, MaterialPageRoute(
-                                builder: (_) => ChatScreen(
-                                  userId: friendId,
-                                  userName: name,
-                                  userImage: avatar.isNotEmpty ? avatar : null,
-                                ),
-                              ));
+                              context.push(AppRoutes.chat, extra: {'userId': friendId, 'userName': name, 'userImage': avatar.isNotEmpty ? avatar : null});
                             },
                           ),
                         ),

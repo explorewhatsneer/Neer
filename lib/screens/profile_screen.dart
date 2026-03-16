@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import '../main.dart'; // supabase nesnesi için
 
-// CORE 
-import '../core/theme_styles.dart'; 
+// CORE
+import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
+import '../core/app_strings.dart';
+import '../core/app_router.dart';
 
 // MODELLER & SERVİSLER
 import '../models/user_model.dart';
@@ -14,17 +16,13 @@ import '../services/supabase_service.dart';
 
 // WIDGETLAR
 // 🔥 YENİ TASARIM COMPONENTLERİ (StackedCardCarousel, RankingPodium vb.)
-import '../widgets/profile/profile_components.dart'; 
-import '../widgets/profile/profile_header.dart'; 
+import '../widgets/profile/profile_components.dart';
+import '../widgets/profile/profile_header.dart';
 import '../widgets/feed/feed_widgets.dart';
 import '../widgets/common/glass_button.dart';
 
 // Import Çakışmasını Önleme
 import '../widgets/friend/friend_profile_widgets.dart' show FriendEmptyCard;
-// EKRANLAR
-import 'edit_profile_screen.dart'; 
-import 'settings_screen.dart';
-import 'business_profile_screen.dart'; 
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -139,7 +137,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       icon: Icons.edit_rounded,
                       onTap: () async {
                         HapticFeedback.lightImpact();
-                        await Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfileScreen()));
+                        await context.push(AppRoutes.editProfile);
                         _fetchUserData();
                       },
                     ),
@@ -154,10 +152,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                         icon: Icons.settings_rounded,
                         onTap: () {
                           HapticFeedback.lightImpact();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                          );
+                          context.push(AppRoutes.settings);
                         },
                       ),
                     ),
@@ -297,7 +292,7 @@ Widget _buildProfileTab(ThemeData theme) {
                         // PODYUM (1, 2, 3)
                         RankingPodium(
                           top3Places: top3, 
-                          onTap: (id, name, img) => Navigator.push(context, MaterialPageRoute(builder: (context) => BusinessProfileScreen(venueId: id, venueName: name, imageUrl: img)))
+                          onTap: (id, name, img) => context.push('/venue/$id', extra: {'venueName': name, 'imageUrl': img})
                         ),
                         
                         // LİSTE (4 - 10 Arası)
@@ -319,7 +314,7 @@ Widget _buildProfileTab(ThemeData theme) {
                                   name: entry['place_name'] ?? "",
                                   count: (entry['visit_count'] as num).toInt(),
                                   imgUrl: entry['image_url'] ?? "",
-                                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => BusinessProfileScreen(venueId: _findPlaceId(entry), venueName: entry['place_name']??"", imageUrl: entry['image_url']??""))),
+                                  onTap: () => context.push('/venue/${_findPlaceId(entry)}', extra: {'venueName': entry['place_name']??"", 'imageUrl': entry['image_url']??""}),
                                 );
                               },
                             ),
@@ -350,7 +345,7 @@ Widget _buildProfileTab(ThemeData theme) {
                           name: fav['place_name'] ?? 'Mekan',
                           rating: (fav['rating'] is num) ? (fav['rating'] as num).toStringAsFixed(1) : "0.0",
                           imgUrl: fav['image'] ?? "https://picsum.photos/400",
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => BusinessProfileScreen(venueId: _findPlaceId(fav), venueName: fav['place_name'] ?? 'Mekan', imageUrl: fav['image'] ?? "https://picsum.photos/400"))),
+                          onTap: () => context.push('/venue/${_findPlaceId(fav)}', extra: {'venueName': fav['place_name'] ?? 'Mekan', 'imageUrl': fav['image'] ?? "https://picsum.photos/400"}),
                         );
                       },
                     );
@@ -378,7 +373,7 @@ Widget _buildProfileTab(ThemeData theme) {
                           note: note['content'] ?? "",
                           date: _formatDate(note['date']),
                           profileImg: _user?.profileImage ?? "https://i.pravatar.cc/150",
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => BusinessProfileScreen(venueId: _findPlaceId(note), venueName: note['place_name'] ?? "Mekan", imageUrl: "https://picsum.photos/200"))),
+                          onTap: () => context.push('/venue/${_findPlaceId(note)}', extra: {'venueName': note['place_name'] ?? "Mekan", 'imageUrl': "https://picsum.photos/200"}),
                         );
                       },
                     );
@@ -404,7 +399,7 @@ Widget _buildProfileTab(ThemeData theme) {
                           placeName: survey['location_name'] ?? 'Mekan', 
                           score: (survey['rating'] is num) ? (survey['rating'] as num).toDouble() : 0.0,
                           date: _formatDate(survey['created_at']),
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => BusinessProfileScreen(venueId: _findPlaceId(survey), venueName: survey['location_name'] ?? "Mekan", imageUrl: "https://picsum.photos/200"))),
+                          onTap: () => context.push('/venue/${_findPlaceId(survey)}', extra: {'venueName': survey['location_name'] ?? "Mekan", 'imageUrl': "https://picsum.photos/200"}),
                         );
                       },
                     );

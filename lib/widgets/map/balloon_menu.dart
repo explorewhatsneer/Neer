@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
+import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
 import '../../core/app_strings.dart';
+import '../../core/app_router.dart';
 import '../common/glass_button.dart';
 
-// Sayfa Importları (Projende bu yolların doğru olduğundan emin ol)
-import '../../screens/notifications_screen.dart';
-import '../../screens/settings_screen.dart';
-import '../../screens/polls_screen.dart'; 
-import '../dialogs/anonymous_popup.dart'; 
+import '../dialogs/anonymous_popup.dart';
 
 class BalloonMenu extends StatelessWidget {
   final bool isOpen;
@@ -62,7 +60,7 @@ class BalloonMenu extends StatelessWidget {
               color: Colors.pinkAccent,
               onTap: () {
                 onToggleMenu();
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationsScreen()));
+                context.push(AppRoutes.notifications);
               },
             ),
             
@@ -73,7 +71,7 @@ class BalloonMenu extends StatelessWidget {
               color: Colors.orange,
               onTap: () {
                 onToggleMenu();
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const PollsScreen()));
+                context.push(AppRoutes.polls);
               },
             ),
             
@@ -95,7 +93,7 @@ class BalloonMenu extends StatelessWidget {
               color: Colors.blueGrey,
               onTap: () {
                 onToggleMenu();
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()));
+                context.push(AppRoutes.settings);
               },
             ),
           ],

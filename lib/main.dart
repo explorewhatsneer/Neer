@@ -6,13 +6,10 @@ import 'package:provider/provider.dart';
 
 import 'core/theme_manager.dart';
 import 'core/language_manager.dart';
-import 'core/constants.dart';
+import 'core/app_router.dart';
 import 'providers/auth_provider.dart';
 import 'providers/profile_provider.dart';
 import 'providers/catch_provider.dart';
-
-import 'main_layout.dart';
-import 'screens/login_screen.dart';
 
 // GLOBAL YÖNETİCİLER (geriye uyumluluk — yeni kodda Provider kullanın)
 final ThemeManager themeManager = ThemeManager();
@@ -56,7 +53,7 @@ class MyApp extends StatelessWidget {
       ],
       child: Consumer2<ThemeManager, LanguageManager>(
         builder: (context, theme, lang, _) {
-          return MaterialApp(
+          return MaterialApp.router(
             debugShowCheckedModeBanner: false,
             title: 'Neer',
             themeMode: theme.themeMode,
@@ -72,36 +69,10 @@ class MyApp extends StatelessWidget {
               Locale('tr', 'TR'),
               Locale('en', 'US'),
             ],
-            home: const AuthGate(),
+            routerConfig: appRouter,
           );
         },
       ),
     );
-  }
-}
-
-class AuthGate extends StatelessWidget {
-  const AuthGate({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-
-    if (auth.isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
-      );
-    }
-
-    if (auth.isAuthenticated) {
-      // Profili yükle
-      final profileProvider = context.read<ProfileProvider>();
-      if (profileProvider.profile == null && !profileProvider.isLoading) {
-        profileProvider.loadProfile(auth.userId!);
-      }
-      return const MainLayout();
-    } else {
-      return const LoginScreen();
-    }
   }
 }

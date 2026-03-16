@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
 import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
+import '../core/app_router.dart';
 
 import '../services/supabase_service.dart';
-import 'chat_screen.dart';
-import 'group_chat_screen.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -348,10 +348,10 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
         onTap: () {
           HapticFeedback.selectionClick();
           if (isGroup) {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => GroupChatScreen(groupId: docId, groupName: name, groupImage: image)));
+            context.push(AppRoutes.groupChat, extra: {'groupId': docId, 'groupName': name, 'groupImage': image});
           } else {
             String targetId = data['friendId'] ?? docId;
-            Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(userId: targetId, userName: name, userImage: image)));
+            context.push(AppRoutes.chat, extra: {'userId': targetId, 'userName': name, 'userImage': image});
           }
         },
         child: Container(

@@ -2,19 +2,19 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../widgets/common/glass_button.dart';
 import '../services/supabase_service.dart';
 
-// CORE 
-import '../core/theme_styles.dart'; 
+// CORE
+import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
-import '../core/constants.dart'; 
+import '../core/app_strings.dart';
+import '../core/constants.dart';
+import '../core/app_router.dart';
 
 // MODELS & SCREENS
 import '../models/post_model.dart';
-import 'chat_screen.dart'; 
-import 'business_profile_screen.dart'; 
 
 // WIDGETS
 import '../widgets/friend/friend_profile_header.dart'; 
@@ -254,7 +254,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(children: [
                         Expanded(child: FriendActionButton(targetUserId: widget.targetUserId, currentUserId: _currentUserId, isTargetPrivate: _isTargetPrivate, onStatusChanged: (status) => setState(() => _isFollowing = (status == 'following' || status == 'friend')))),
-                        if (canViewContent) ...[const SizedBox(width: 10), Expanded(child: SizedBox(height: 45, child: OutlinedButton.icon(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(userId: widget.targetUserId, userName: userData['full_name'], userImage: userData['avatar_url']))), icon: const Icon(Icons.chat_bubble_outline_rounded, size: 20), label: Text(AppStrings.message), style: OutlinedButton.styleFrom(foregroundColor: theme.textTheme.bodyLarge?.color, side: BorderSide(color: theme.dividerColor), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))))))]
+                        if (canViewContent) ...[const SizedBox(width: 10), Expanded(child: SizedBox(height: 45, child: OutlinedButton.icon(onPressed: () => context.push(AppRoutes.chat, extra: {'userId': widget.targetUserId, 'userName': userData['full_name'], 'userImage': userData['avatar_url']}), icon: const Icon(Icons.chat_bubble_outline_rounded, size: 20), label: Text(AppStrings.message), style: OutlinedButton.styleFrom(foregroundColor: theme.textTheme.bodyLarge?.color, side: BorderSide(color: theme.dividerColor), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))))))]
                     ]),
                   ),
                   const SizedBox(height: 30),
@@ -287,7 +287,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                             children: [
                               RankingPodium(
                                 top3Places: top3, 
-                                onTap: (id, name, img) => Navigator.push(context, MaterialPageRoute(builder: (context) => BusinessProfileScreen(venueId: id, venueName: name, imageUrl: img)))
+                                onTap: (id, name, img) => context.push('/venue/$id', extra: {'venueName': name, 'imageUrl': img})
                               ),
                               if (others.isNotEmpty) ...[
                                 const SizedBox(height: 10),
@@ -299,7 +299,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                                       name: entry.value['place_name'] ?? "Bilinmeyen",
                                       count: (entry.value['visit_count'] as num?)?.toInt() ?? 0,
                                       imgUrl: entry.value['image_url'] ?? "https://picsum.photos/200",
-                                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => BusinessProfileScreen(venueId: _findPlaceId(entry.value), venueName: entry.value['place_name'] ?? "Mekan", imageUrl: entry.value['image_url'] ?? "https://picsum.photos/200")))
+                                      onTap: () => context.push('/venue/${_findPlaceId(entry.value)}', extra: {'venueName': entry.value['place_name'] ?? "Mekan", 'imageUrl': entry.value['image_url'] ?? "https://picsum.photos/200"})
                                     )).toList(),
                                   ),
                                 )
@@ -326,7 +326,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                                 name: fav['name'] ?? 'Mekan',
                                 rating: (fav['rating'] is num) ? (fav['rating'] as num).toStringAsFixed(1) : "0.0",
                                 imgUrl: fav['image'] ?? "https://picsum.photos/400",
-                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => BusinessProfileScreen(venueId: _findPlaceId(fav), venueName: fav['name'] ?? 'Mekan', imageUrl: fav['image'] ?? "https://picsum.photos/400")))
+                                onTap: () => context.push('/venue/${_findPlaceId(fav)}', extra: {'venueName': fav['name'] ?? 'Mekan', 'imageUrl': fav['image'] ?? "https://picsum.photos/400"})
                               );
                             },
                           );
@@ -351,7 +351,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                                 note: note['content'] ?? "",
                                 date: _formatDate(note['date']),
                                 profileImg: userData['avatar_url'] ?? _defaultProfileUrl,
-                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => BusinessProfileScreen(venueId: _findPlaceId(note), venueName: note['place_name'] ?? "Mekan", imageUrl: "https://picsum.photos/200")))
+                                onTap: () => context.push('/venue/${_findPlaceId(note)}', extra: {'venueName': note['place_name'] ?? "Mekan", 'imageUrl': "https://picsum.photos/200"})
                               );
                             },
                           );
@@ -375,7 +375,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                                 placeName: rev['location_name'] ?? "Mekan", 
                                 score: (rev['rating'] is num) ? (rev['rating'] as num).toDouble() : 0.0, 
                                 date: _formatDate(rev['created_at']), 
-                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => BusinessProfileScreen(venueId: _findPlaceId(rev), venueName: rev['location_name'] ?? "Mekan", imageUrl: "https://picsum.photos/200")))
+                                onTap: () => context.push('/venue/${_findPlaceId(rev)}', extra: {'venueName': rev['location_name'] ?? "Mekan", 'imageUrl': "https://picsum.photos/200"})
                               );
                             },
                           );
