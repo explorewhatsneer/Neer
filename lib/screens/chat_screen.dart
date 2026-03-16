@@ -57,10 +57,10 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _fetchCurrentUser() async {
-    final user = await _service.getUser(currentUserId);
-    if (mounted && user != null) {
+    final result = await _service.getUser(currentUserId);
+    if (mounted && result.isSuccess) {
       setState(() {
-        _currentUser = user;
+        _currentUser = result.data;
       });
     }
   }
@@ -72,28 +72,29 @@ class _ChatScreenState extends State<ChatScreen> {
     String msg = _messageController.text.trim();
     _messageController.clear();
 
-    try {
-      await _service.sendMessage({
-        'room_id': chatRoomId,
-        'sender_id': currentUserId,
-        'receiver_id': widget.userId,
-        'message': msg,
-        'sender_name': _currentUser!.name,
-        'sender_image': _currentUser!.profileImage,
-        'created_at': DateTime.now().toIso8601String(),
-      });
+    final result = await _service.sendMessage({
+      'room_id': chatRoomId,
+      'sender_id': currentUserId,
+      'receiver_id': widget.userId,
+      'message': msg,
+      'sender_name': _currentUser!.name,
+      'sender_image': _currentUser!.profileImage,
+      'created_at': DateTime.now().toIso8601String(),
+    });
 
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          0, 
-          duration: const Duration(milliseconds: 300), 
-          curve: Curves.easeOut
-        );
-      }
-    } catch (e) {
+    if (result.isFailure) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Mesaj gönderilemedi: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Mesaj gönderilemedi: ${result.error.message}")));
       }
+      return;
+    }
+
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut
+      );
     }
   }
 

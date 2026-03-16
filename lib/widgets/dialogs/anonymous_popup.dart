@@ -225,12 +225,11 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
                       onPressed: () async {
                         HapticFeedback.mediumImpact(); 
                         
-                        try {
-                          await _service.updateProfile(widget.uid, {
-                            'is_anonymous': !widget.isAnonymous,
-                          });
-                        } catch (e) {
-                          debugPrint("Anonim mod hatası: $e");
+                        final result = await _service.updateProfile(widget.uid, {
+                          'is_anonymous': !widget.isAnonymous,
+                        });
+                        if (result.isFailure) {
+                          debugPrint("Anonim mod hatası: ${result.error.message}");
                         }
                       },
                       style: ElevatedButton.styleFrom(

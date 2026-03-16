@@ -71,12 +71,18 @@ class _CheckInButtonState extends State<CheckInButton> {
       final int placeId = int.tryParse(widget.venueId) ?? 0;
       if (placeId == 0) throw Exception('Geçersiz mekan kimliği.');
 
-      final result = await _supabaseService.checkIn(
+      final checkInResult = await _supabaseService.checkIn(
         userId: myUid,
         placeId: placeId,
         userLat: userPosition.latitude,
         userLng: userPosition.longitude,
       );
+
+      if (checkInResult.isFailure) {
+        throw Exception(checkInResult.error.message);
+      }
+
+      final result = checkInResult.data;
 
       // --- 5. SONUCU İŞLE ---
       if (result['success'] == true) {

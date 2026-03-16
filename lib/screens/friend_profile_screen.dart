@@ -168,14 +168,17 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
     final reqId = _incomingRequestId;
     setState(() => _incomingRequestId = null);
     if (reqId == null) return;
-    try {
-      if (accept) {
-        await _service.acceptFollowRequest(reqId, widget.targetUserId, _currentUserId);
-      } else {
-        await _service.declineFollowRequest(reqId);
+
+    if (accept) {
+      final result = await _service.acceptFollowRequest(reqId, widget.targetUserId, _currentUserId);
+      if (result.isFailure && mounted) {
+        setState(() => _incomingRequestId = reqId);
       }
-    } catch (e) {
-      if (mounted) setState(() => _incomingRequestId = reqId); 
+    } else {
+      final result = await _service.declineFollowRequest(reqId);
+      if (result.isFailure && mounted) {
+        setState(() => _incomingRequestId = reqId);
+      }
     }
   }
 

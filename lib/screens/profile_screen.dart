@@ -68,10 +68,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 
   Future<void> _fetchUserData() async {
-    UserModel? user = await _supabaseService.getUser(_uid);
+    final result = await _supabaseService.getUser(_uid);
     if (mounted) {
       setState(() {
-        _user = user;
+        if (result.isSuccess) {
+          _user = result.data;
+        }
         _isLoading = false;
       });
     }

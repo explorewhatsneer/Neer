@@ -62,10 +62,10 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   void _fetchCurrentUser() async {
-    final user = await _service.getUser(currentUserId);
-    if (mounted && user != null) {
+    final result = await _service.getUser(currentUserId);
+    if (mounted && result.isSuccess) {
       setState(() {
-        _currentUser = user;
+        _currentUser = result.data;
       });
     }
   }
@@ -138,7 +138,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       // 🔥 2. MESAJI GÖNDER
       _messageController.clear();
 
-      await _service.sendMessage({
+      final sendResult = await _service.sendMessage({
         'group_id': widget.groupId,
         'sender_id': currentUserId,
         'message': msg,
@@ -146,6 +146,15 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         'sender_image': _currentUser!.profileImage,
         'created_at': DateTime.now().toIso8601String(),
       });
+
+      if (sendResult.isFailure) {
+        if (_messageController.text.isEmpty) {
+          _messageController.text = msg;
+        }
+        _showSnack("Mesaj gönderilemedi: ${sendResult.error.message}", Colors.red);
+        if (mounted) setState(() => _isSending = false);
+        return;
+      }
 
       // 🔥 3. Cooldown başlat (sunucudan dönen değerle)
       int cooldown = (rateCheck['cooldown'] ?? 3).toInt();

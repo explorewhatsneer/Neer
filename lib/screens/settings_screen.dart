@@ -65,16 +65,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // 1. Optimistic UI (Anında değişim)
     setState(() => _isPrivateAccount = value);
     
-    try {
-      final userId = _service.client.auth.currentUser?.id;
-      if (userId != null) {
-        await _service.updateProfile(userId, {'is_private': value});
-      }
-    } catch (e) {
-      // Hata olursa geri al
-      if (mounted) {
+    final userId = _service.client.auth.currentUser?.id;
+    if (userId != null) {
+      final result = await _service.updateProfile(userId, {'is_private': value});
+      if (result.isFailure && mounted) {
         setState(() => _isPrivateAccount = !value);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${AppStrings.error}: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${AppStrings.error}: ${result.error.message}")));
       }
     }
   }

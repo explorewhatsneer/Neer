@@ -67,9 +67,13 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
       String uid = user.id;
 
       // 1. Telefonu Veritabanına Kaydet (profiles tablosu)
-      await _service.updateProfile(uid, {
+      final updateResult = await _service.updateProfile(uid, {
         'phone': _phoneController.text.trim(),
       });
+
+      if (updateResult.isFailure) {
+        throw Exception(updateResult.error.message);
+      }
 
       // 2. E-posta İşlemleri (Auth Güncelleme)
       String newEmail = _emailController.text.trim();

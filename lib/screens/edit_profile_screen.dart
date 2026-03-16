@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
-import '../models/user_model.dart';
 
 // SERVİSLER
 import '../services/supabase_service.dart';
@@ -62,11 +61,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _loadUserData() async {
     setState(() => _isLoading = true);
 
-    try {
-      final userModel = await _service.getUser(_uid);
-      if (userModel == null) throw Exception('User not found');
-      UserModel user = userModel;
-      
+    final result = await _service.getUser(_uid);
+    if (result.isSuccess) {
+      final user = result.data;
       if (mounted) {
         setState(() {
           _nameController.text = user.name;
@@ -76,8 +73,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           _isLoading = false;
         });
       }
-    } catch (e) {
-      debugPrint("Kullanıcı verisi çekilemedi: $e");
+    } else {
+      debugPrint("Kullanıcı verisi çekilemedi: ${result.error.message}");
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -166,19 +163,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
 
       // Veritabanını güncelle
-      await _service.updateProfile(_uid, {
+      final updateResult = await _service.updateProfile(_uid, {
         'full_name': _nameController.text.trim(),
         'username': _usernameController.text.trim(),
         'bio': _bioController.text.trim(),
         'avatar_url': finalPhotoUrl,
       });
 
-      if (mounted) {
+      if (updateResult.isFailure) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Hata: ${updateResult.error.message}"), backgroundColor: Colors.redAccent)
+          );
+        }
+      } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: const Color(0xFF34C759), // Başarı Yeşili
             content: Text(
-              AppStrings.profileUpdated, 
+              AppStrings.profileUpdated,
               style: AppTextStyles.bodySmall.copyWith(color: Colors.white, fontWeight: FontWeight.bold)
             ),
             behavior: SnackBarBehavior.floating,

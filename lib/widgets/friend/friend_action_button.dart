@@ -85,9 +85,8 @@ class _FriendActionButtonState extends State<FriendActionButton> {
         setState(() => _status = 'requested');
         widget.onStatusChanged('requested');
         
-        try {
-          await _service.sendFollowRequest(widget.currentUserId, widget.targetUserId);
-        } catch (e) { _checkStatus(); }
+        final result = await _service.sendFollowRequest(widget.currentUserId, widget.targetUserId);
+        if (result.isFailure) { _checkStatus(); }
       } else {
         // AÇIK HESAP -> Direkt Takip Et (Followers tablosuna ekle)
         // Eğer 'follow_back' durumundaysak, ben de ekleyince 'friend' oluruz.
@@ -97,9 +96,8 @@ class _FriendActionButtonState extends State<FriendActionButton> {
         setState(() => _status = nextStatus);
         widget.onStatusChanged(nextStatus); // Ekranı Aç
         
-        try {
-          await _service.follow(widget.currentUserId, widget.targetUserId);
-        } catch (e) { _checkStatus(); }
+        final result = await _service.follow(widget.currentUserId, widget.targetUserId);
+        if (result.isFailure) { _checkStatus(); }
       }
     } 
     
@@ -128,9 +126,8 @@ class _FriendActionButtonState extends State<FriendActionButton> {
     setState(() => _status = nextStatus);
     widget.onStatusChanged(nextStatus); // Ekranı Kilitle (Eğer kural sadece takip edense)
 
-    try {
-      await _service.unfollow(widget.currentUserId, widget.targetUserId);
-    } catch (e) { _checkStatus(); }
+    final result = await _service.unfollow(widget.currentUserId, widget.targetUserId);
+    if (result.isFailure) { _checkStatus(); }
   }
 
   void _showUnfollowDialog() {

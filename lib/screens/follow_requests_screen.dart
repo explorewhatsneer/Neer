@@ -38,16 +38,12 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
       _hiddenRequestIds.add(requestId);
     });
 
-    try {
-      // 2. YENİ MANTIK: SupabaseService ile kabul et
-      await _service.acceptFollowRequest(requestId, senderId, _currentUserId);
+    // 2. YENİ MANTIK: SupabaseService ile kabul et
+    final result = await _service.acceptFollowRequest(requestId, senderId, _currentUserId);
 
-    } catch (e) {
-      // Hata olursa geri getir
-      if (mounted) {
-        setState(() => _hiddenRequestIds.remove(requestId));
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${AppStrings.error}: $e")));
-      }
+    if (result.isFailure && mounted) {
+      setState(() => _hiddenRequestIds.remove(requestId));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${AppStrings.error}: ${result.error.message}")));
     }
   }
 
@@ -60,11 +56,10 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
       _hiddenRequestIds.add(requestId);
     });
 
-    try {
-      // 2. Sadece isteği sil
-      await _service.declineFollowRequest(requestId);
-    } catch (e) {
-      if (mounted) setState(() => _hiddenRequestIds.remove(requestId));
+    // 2. Sadece isteği sil
+    final result = await _service.declineFollowRequest(requestId);
+    if (result.isFailure && mounted) {
+      setState(() => _hiddenRequestIds.remove(requestId));
     }
   }
 

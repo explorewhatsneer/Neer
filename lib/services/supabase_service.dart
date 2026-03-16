@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/app_exception.dart';
 import '../models/user_model.dart';
 import '../models/post_model.dart';
 
@@ -8,27 +10,29 @@ class SupabaseService {
   // ════════════════════════════════════════════
   // 1. KULLANICI BİLGİSİ
   // ════════════════════════════════════════════
-  Future<UserModel?> getUser(String uid) async {
+  Future<Result<UserModel>> getUser(String uid) async {
     try {
       final response = await _supabase.from('profiles').select().eq('id', uid).maybeSingle();
-      if (response == null) return null;
-      return UserModel.fromMap(response);
+      if (response == null) {
+        return Result.failure(const AppException('Kullanıcı bulunamadı.', code: 'NOT_FOUND'));
+      }
+      return Result.success(UserModel.fromMap(response));
     } catch (e) {
-      print("Hata (getUser): $e");
-      return null;
+      debugPrint("Hata (getUser): $e");
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
-  // Profil güncelleme
-  Future<void> updateProfile(String uid, Map<String, dynamic> data) async {
+  Future<Result<void>> updateProfile(String uid, Map<String, dynamic> data) async {
     try {
       await _supabase.from('profiles').update(data).eq('id', uid);
+      return const Result.success(null);
     } catch (e) {
-      print("Profil güncelleme hatası: $e");
+      debugPrint("Profil güncelleme hatası: $e");
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
-  // Profil stream (realtime)
   Stream<Map<String, dynamic>?> streamProfile(String uid) {
     return _supabase
         .from('profiles')
@@ -37,7 +41,6 @@ class SupabaseService {
         .map((data) => data.isNotEmpty ? data.first : null);
   }
 
-  // Birden fazla profil çek (inFilter)
   Future<List<Map<String, dynamic>>> getUsersByIds(List<String> ids) async {
     if (ids.isEmpty) return [];
     try {
@@ -49,7 +52,7 @@ class SupabaseService {
   }
 
   // ════════════════════════════════════════════
-  // 2. AKTİVİTE AKIŞI (Kullanıcının Gönderileri)
+  // 2. AKTİVİTE AKIŞI
   // ════════════════════════════════════════════
   Stream<List<PostModel>> getUserActivityFeed(String uid) {
     return _supabase
@@ -121,7 +124,7 @@ class SupabaseService {
       final response = await _supabase.rpc('get_top_places', params: {'target_uid': uid});
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      print("Sık Uğrananlar Hatası: $e");
+      debugPrint("Sık Uğrananlar Hatası: $e");
       return [];
     }
   }
@@ -144,11 +147,9 @@ class SupabaseService {
   }
 
   // ════════════════════════════════════════════
-  // 9. 🔥 CHECK-IN (YENİ — Sunucu tarafı geofence)
-  // Eski: client'ta mesafe hesaplayıp visits'e insert
-  // Yeni: Sunucuda mesafe + session + live_count güncelle
+  // 9. CHECK-IN (Sunucu tarafı geofence)
   // ════════════════════════════════════════════
-  Future<Map<String, dynamic>> checkIn({
+  Future<Result<Map<String, dynamic>>> checkIn({
     required String userId,
     required int placeId,
     required double userLat,
@@ -161,33 +162,32 @@ class SupabaseService {
         'p_user_lat': userLat,
         'p_user_lng': userLng,
       });
-      return Map<String, dynamic>.from(result);
+      return Result.success(Map<String, dynamic>.from(result));
     } catch (e) {
-      print("Check-in Hatası: $e");
-      return {'success': false, 'error': e.toString()};
+      debugPrint("Check-in Hatası: $e");
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
   // ════════════════════════════════════════════
-  // 10. 🔥 CHECK-OUT (YENİ — Sunucu tarafı)
+  // 10. CHECK-OUT (Sunucu tarafı)
   // ════════════════════════════════════════════
-  Future<Map<String, dynamic>> checkOut(String userId) async {
+  Future<Result<Map<String, dynamic>>> checkOut(String userId) async {
     try {
       final result = await _supabase.rpc('check_out_from_place', params: {
         'p_user_id': userId,
       });
-      return Map<String, dynamic>.from(result);
+      return Result.success(Map<String, dynamic>.from(result));
     } catch (e) {
-      print("Check-out Hatası: $e");
-      return {'success': false, 'error': e.toString()};
+      debugPrint("Check-out Hatası: $e");
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
   // ════════════════════════════════════════════
-  // 11. 🔥 ANKET GÖNDERME (YENİ — Sunucu tarafı doğrulama)
-  // Proof of Presence + Dwell Time kontrolü sunucuda yapılır
+  // 11. ANKET GÖNDERME (Sunucu tarafı doğrulama)
   // ════════════════════════════════════════════
-  Future<Map<String, dynamic>> submitReview({
+  Future<Result<Map<String, dynamic>>> submitReview({
     required String userId,
     required int placeId,
     required double rating,
@@ -208,16 +208,15 @@ class SupabaseService {
         'p_rating_price': ratingPrice,
         'p_comment': comment,
       });
-      return Map<String, dynamic>.from(result);
+      return Result.success(Map<String, dynamic>.from(result));
     } catch (e) {
-      print("Review Hatası: $e");
-      return {'success': false, 'error': e.toString()};
+      debugPrint("Review Hatası: $e");
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
   // ════════════════════════════════════════════
-  // 12. 🔥 MESAJ GÖNDERMEDEN ÖNCE KONTROL (Rate Limiting)
-  // Rapordaki cooldown kuralları sunucuda hesaplanır
+  // 12. MESAJ GÖNDERMEDEN ÖNCE KONTROL (Rate Limiting)
   // ════════════════════════════════════════════
   Future<Map<String, dynamic>> canSendMessage(String userId, String groupId) async {
     try {
@@ -227,40 +226,38 @@ class SupabaseService {
       });
       return Map<String, dynamic>.from(result);
     } catch (e) {
-      return {'allowed': true, 'cooldown': 3}; // Hata durumunda izin ver
+      return {'allowed': true, 'cooldown': 3};
     }
   }
 
   // ════════════════════════════════════════════
-  // 13. 🔥 ENGELLEME (YENİ — Sunucu tarafı)
-  // İki yönlü görünmezlik + arkadaşlık silme
+  // 13. ENGELLEME (Sunucu tarafı)
   // ════════════════════════════════════════════
-  Future<bool> blockUser(String blockerId, String blockedId) async {
+  Future<Result<bool>> blockUser(String blockerId, String blockedId) async {
     try {
       await _supabase.rpc('block_user', params: {
         'p_blocker': blockerId,
         'p_blocked': blockedId,
       });
-      return true;
+      return const Result.success(true);
     } catch (e) {
-      print("Engelleme Hatası: $e");
-      return false;
+      debugPrint("Engelleme Hatası: $e");
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
-  Future<bool> unblockUser(String blockerId, String blockedId) async {
+  Future<Result<bool>> unblockUser(String blockerId, String blockedId) async {
     try {
       await _supabase.rpc('unblock_user', params: {
         'p_blocker': blockerId,
         'p_blocked': blockedId,
       });
-      return true;
+      return const Result.success(true);
     } catch (e) {
-      return false;
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
-  // Engellenen kullanıcı listesi
   Future<List<Map<String, dynamic>>> getBlockedUsers(String userId) async {
     try {
       final response = await _supabase
@@ -274,7 +271,7 @@ class SupabaseService {
   }
 
   // ════════════════════════════════════════════
-  // 14. 🔥 BİLDİRİMLER (YENİ)
+  // 14. BİLDİRİMLER
   // ════════════════════════════════════════════
   Stream<List<Map<String, dynamic>>> getNotifications(String userId) {
     return _supabase
@@ -311,24 +308,24 @@ class SupabaseService {
   }
 
   // ════════════════════════════════════════════
-  // 15. 🔥 TRUST SCORE (YENİ — Sunucu tarafı)
+  // 15. TRUST SCORE (Sunucu tarafı)
   // ════════════════════════════════════════════
-  Future<double> updateTrustScore(String userId, int amount, String reason) async {
+  Future<Result<double>> updateTrustScore(String userId, int amount, String reason) async {
     try {
       final result = await _supabase.rpc('update_trust_score_v2', params: {
         'p_user_id': userId,
         'p_amount': amount,
         'p_reason': reason,
       });
-      return (result as num).toDouble();
+      return Result.success((result as num).toDouble());
     } catch (e) {
-      print("Trust Score Hatası: $e");
-      return 70.0;
+      debugPrint("Trust Score Hatası: $e");
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
   // ════════════════════════════════════════════
-  // 16. AKTİF OTURUMLAR (Kim nerede?)
+  // 16. AKTİF OTURUMLAR
   // ════════════════════════════════════════════
   Future<List<Map<String, dynamic>>> getActiveUsersAtPlace(int placeId) async {
     try {
@@ -343,7 +340,6 @@ class SupabaseService {
     }
   }
 
-  // Kullanıcının aktif oturumu var mı?
   Future<Map<String, dynamic>?> getActiveSession(String userId) async {
     try {
       final response = await _supabase
@@ -366,7 +362,7 @@ class SupabaseService {
       final response = await _supabase.rpc('get_user_recent_visits', params: {'target_uid': uid});
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      print("Ziyaretler çekilirken hata: $e");
+      debugPrint("Ziyaretler çekilirken hata: $e");
       return [];
     }
   }
@@ -374,11 +370,13 @@ class SupabaseService {
   // ════════════════════════════════════════════
   // 18. MESAJ İŞLEMLERİ
   // ════════════════════════════════════════════
-  Future<void> sendMessage(Map<String, dynamic> message) async {
+  Future<Result<void>> sendMessage(Map<String, dynamic> message) async {
     try {
       await _supabase.from('messages').insert(message);
+      return const Result.success(null);
     } catch (e) {
-      print("Mesaj gönderme hatası: $e");
+      debugPrint("Mesaj gönderme hatası: $e");
+      return Result.failure(AppException.fromSupabase(e));
     }
   }
 
@@ -476,21 +474,30 @@ class SupabaseService {
     }
   }
 
-  Future<void> follow(String followerId, String followingId) async {
-    await _supabase.from('followers').insert({
-      'follower_id': followerId,
-      'following_id': followingId,
-    });
+  Future<Result<void>> follow(String followerId, String followingId) async {
+    try {
+      await _supabase.from('followers').insert({
+        'follower_id': followerId,
+        'following_id': followingId,
+      });
+      return const Result.success(null);
+    } catch (e) {
+      return Result.failure(AppException.fromSupabase(e));
+    }
   }
 
-  Future<void> unfollow(String followerId, String followingId) async {
-    await _supabase
-        .from('followers')
-        .delete()
-        .match({'follower_id': followerId, 'following_id': followingId});
+  Future<Result<void>> unfollow(String followerId, String followingId) async {
+    try {
+      await _supabase
+          .from('followers')
+          .delete()
+          .match({'follower_id': followerId, 'following_id': followingId});
+      return const Result.success(null);
+    } catch (e) {
+      return Result.failure(AppException.fromSupabase(e));
+    }
   }
 
-  // Takip istekleri
   Stream<List<Map<String, dynamic>>> streamFollowRequests(String userId) {
     return _supabase
         .from('friend_requests')
@@ -499,23 +506,38 @@ class SupabaseService {
         .order('created_at', ascending: false);
   }
 
-  Future<void> sendFollowRequest(String senderId, String receiverId) async {
-    await _supabase.from('friend_requests').insert({
-      'sender_id': senderId,
-      'receiver_id': receiverId,
-    });
+  Future<Result<void>> sendFollowRequest(String senderId, String receiverId) async {
+    try {
+      await _supabase.from('friend_requests').insert({
+        'sender_id': senderId,
+        'receiver_id': receiverId,
+      });
+      return const Result.success(null);
+    } catch (e) {
+      return Result.failure(AppException.fromSupabase(e));
+    }
   }
 
-  Future<void> acceptFollowRequest(String requestId, String followerId, String followingId) async {
-    await _supabase.from('followers').insert({
-      'follower_id': followerId,
-      'following_id': followingId,
-    });
-    await _supabase.from('friend_requests').delete().eq('id', requestId);
+  Future<Result<void>> acceptFollowRequest(String requestId, String followerId, String followingId) async {
+    try {
+      await _supabase.from('followers').insert({
+        'follower_id': followerId,
+        'following_id': followingId,
+      });
+      await _supabase.from('friend_requests').delete().eq('id', requestId);
+      return const Result.success(null);
+    } catch (e) {
+      return Result.failure(AppException.fromSupabase(e));
+    }
   }
 
-  Future<void> declineFollowRequest(String requestId) async {
-    await _supabase.from('friend_requests').delete().eq('id', requestId);
+  Future<Result<void>> declineFollowRequest(String requestId) async {
+    try {
+      await _supabase.from('friend_requests').delete().eq('id', requestId);
+      return const Result.success(null);
+    } catch (e) {
+      return Result.failure(AppException.fromSupabase(e));
+    }
   }
 
   // ════════════════════════════════════════════
@@ -547,12 +569,10 @@ class SupabaseService {
     }
   }
 
-  // Bildirim silme
   Future<void> deleteNotification(dynamic notificationId) async {
     await _supabase.from('notifications').delete().eq('id', notificationId);
   }
 
-  // Bildirim stream (harita ekranı için)
   Stream<List<Map<String, dynamic>>> streamNotifications(String userId) {
     return _supabase
         .from('notifications')
@@ -565,10 +585,8 @@ class SupabaseService {
   // 23. YARDIMCI METODLAR
   // ════════════════════════════════════════════
 
-  /// Supabase client erişimi (auth işlemleri için)
   SupabaseClient get client => _supabase;
 
-  /// Tek profil alanı çek
   Future<Map<String, dynamic>?> getProfileSingle(String uid) async {
     try {
       final response = await _supabase.from('profiles').select().eq('id', uid).single();
@@ -578,7 +596,6 @@ class SupabaseService {
     }
   }
 
-  /// Belirli alanları çek
   Future<Map<String, dynamic>?> getProfileFields(String uid, String fields) async {
     try {
       final response = await _supabase.from('profiles').select(fields).eq('id', uid).single();
@@ -588,7 +605,6 @@ class SupabaseService {
     }
   }
 
-  /// Profil stream (liste döndürür)
   Stream<List<Map<String, dynamic>>> streamProfileAsList(String uid) {
     return _supabase
         .from('profiles')
@@ -596,12 +612,10 @@ class SupabaseService {
         .eq('id', uid);
   }
 
-  /// Profil sil
   Future<void> deleteProfile(String uid) async {
     await _supabase.from('profiles').delete().eq('id', uid);
   }
 
-  /// Mekan sohbet mesaj stream
   Stream<List<Map<String, dynamic>>> streamPlaceMessages(String groupId) {
     return _supabase
         .from('messages')
@@ -610,7 +624,6 @@ class SupabaseService {
         .order('created_at', ascending: false);
   }
 
-  /// Takip isteği kontrol (gelen)
   Future<Map<String, dynamic>?> getIncomingFollowRequest(String senderId, String receiverId) async {
     try {
       return await _supabase
@@ -624,7 +637,6 @@ class SupabaseService {
     }
   }
 
-  /// Gönderilen takip isteği kontrol
   Future<Map<String, dynamic>?> getSentFollowRequest(String senderId, String receiverId) async {
     try {
       return await _supabase
@@ -638,7 +650,6 @@ class SupabaseService {
     }
   }
 
-  /// Takip isteği sil (match ile)
   Future<void> deleteFollowRequestByMatch(String senderId, String receiverId) async {
     await _supabase.from('friend_requests').delete().match({
       'sender_id': senderId,
@@ -646,7 +657,6 @@ class SupabaseService {
     });
   }
 
-  /// Kullanıcı konumu güncelle
   Future<void> updateLocation(String uid, double lat, double lng) async {
     try {
       await _supabase.from('profiles').update({
@@ -655,11 +665,10 @@ class SupabaseService {
         'last_location_update': DateTime.now().toIso8601String(),
       }).eq('id', uid);
     } catch (e) {
-      print("Konum güncelleme hatası: $e");
+      debugPrint("Konum güncelleme hatası: $e");
     }
   }
 
-  /// Posts sorgusu (kullanıcıya ait, belirli alanlar ve filtre)
   Future<List<Map<String, dynamic>>> getUserPosts({
     required String userId,
     String? type,
@@ -676,7 +685,6 @@ class SupabaseService {
     }
   }
 
-  /// Posts sorgusu (null olmayan alan filtresi ile)
   Future<List<Map<String, dynamic>>> getUserPostsNotNull({
     required String userId,
     required String notNullField,

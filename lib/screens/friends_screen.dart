@@ -237,7 +237,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
           final data = await _service.getProfileFields(myUid, 'friends');
           List currentFriends = List.from(data?['friends'] ?? []);
           currentFriends.remove(uid);
-          await _service.updateProfile(myUid, {'friends': currentFriends});
+          final updateResult = await _service.updateProfile(myUid, {'friends': currentFriends});
+
+          if (updateResult.isFailure) return;
 
           if(mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

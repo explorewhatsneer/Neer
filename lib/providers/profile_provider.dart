@@ -20,8 +20,10 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
 
     // İlk yükleme
-    _service.getUser(userId).then((user) {
-      _profile = user;
+    _service.getUser(userId).then((result) {
+      if (result.isSuccess) {
+        _profile = result.data;
+      }
       _isLoading = false;
       notifyListeners();
     });

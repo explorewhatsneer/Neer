@@ -36,13 +36,25 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       blockedList.remove(targetUid);
 
       // 3. Güncel listeyi kaydet
-      await _service.updateProfile(myUid, {'blocked_users': blockedList});
+      final updateResult = await _service.updateProfile(myUid, {'blocked_users': blockedList});
+
+      if (updateResult.isFailure) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppStrings.cameraError),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            )
+          );
+        }
+        return;
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              "$targetName ${AppStrings.unblockedSuccess}", 
+              "$targetName ${AppStrings.unblockedSuccess}",
               style: AppTextStyles.bodySmall.copyWith(color: Colors.white, fontWeight: FontWeight.bold)
             ),
             backgroundColor: const Color(0xFF34C759), // Başarı Yeşili
@@ -55,7 +67,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppStrings.cameraError), 
+            content: Text(AppStrings.cameraError),
             backgroundColor: Theme.of(context).colorScheme.error,
           )
         );
