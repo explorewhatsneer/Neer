@@ -14,6 +14,7 @@ import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/common/animated_list_item.dart';
 import '../core/snackbar_helper.dart';
+import '../widgets/common/app_confirm_dialog.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -228,28 +229,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
         ),
         child: const Icon(Icons.person_remove_rounded, color: Colors.white, size: 28),
       ),
-      confirmDismiss: (direction) async {
-        HapticFeedback.mediumImpact();
-        return await showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            backgroundColor: theme.cardColor,
-            shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius24),
-            title: Text(AppStrings.deleteFriend, style: AppTextStyles.h3),
-            content: Text("$name ${AppStrings.deleteFriendConfirm}", style: AppTextStyles.bodySmall),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false), 
-                child: Text(AppStrings.cancel, style: AppTextStyles.button.copyWith(color: theme.disabledColor))
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(true), 
-                child: Text(AppStrings.delete, style: AppTextStyles.button.copyWith(color: Colors.redAccent))
-              ),
-            ],
-          ),
-        );
-      },
+      confirmDismiss: (direction) => AppConfirmDialog.show(
+        context: context,
+        title: AppStrings.deleteFriend,
+        content: "$name ${AppStrings.deleteFriendConfirm}",
+        confirmText: AppStrings.delete,
+        isDestructive: true,
+      ),
       onDismissed: (direction) async {
         String myUid = _service.client.auth.currentUser!.id;
         try {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 // CORE IMPORTLARI
 import '../core/theme_styles.dart';
@@ -13,6 +12,7 @@ import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/common/animated_list_item.dart';
 import '../core/snackbar_helper.dart';
+import '../widgets/common/app_confirm_dialog.dart';
 
 class BlockedUsersScreen extends StatefulWidget {
   const BlockedUsersScreen({super.key});
@@ -163,40 +163,12 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
         ),
         child: const Icon(Icons.lock_open_rounded, color: Colors.white, size: 28),
       ),
-      confirmDismiss: (direction) async {
-        HapticFeedback.lightImpact();
-        return await showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            backgroundColor: theme.cardColor,
-            shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius24),
-            title: Text(
-              AppStrings.unblockUser, 
-              style: AppTextStyles.h3
-            ),
-            content: Text(
-              "$name ${AppStrings.unblockConfirm}", 
-              style: AppTextStyles.bodySmall,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false), 
-                child: Text(
-                  AppStrings.cancel, 
-                  style: AppTextStyles.button.copyWith(color: theme.disabledColor)
-                )
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(true), 
-                child: Text(
-                  AppStrings.unblockUser, 
-                  style: AppTextStyles.button.copyWith(color: const Color(0xFF34C759), fontWeight: FontWeight.bold)
-                )
-              ),
-            ],
-          ),
-        );
-      },
+      confirmDismiss: (direction) => AppConfirmDialog.show(
+        context: context,
+        title: AppStrings.unblockUser,
+        content: "$name ${AppStrings.unblockConfirm}",
+        confirmText: AppStrings.unblockUser,
+      ),
       onDismissed: (direction) => _unblockUser(uid, name),
       
       // KART İÇERİĞİ

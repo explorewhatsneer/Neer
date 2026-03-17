@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/app_strings.dart';
-import '../../services/supabase_service.dart'; 
+import '../../services/supabase_service.dart';
+import '../common/app_confirm_dialog.dart';
 
 class FriendActionButton extends StatefulWidget {
   final String targetUserId;
@@ -130,29 +131,15 @@ class _FriendActionButtonState extends State<FriendActionButton> {
     if (result.isFailure) { _checkStatus(); }
   }
 
-  void _showUnfollowDialog() {
-    showDialog(
+  void _showUnfollowDialog() async {
+    final confirmed = await AppConfirmDialog.show(
       context: context,
-      builder: (c) => AlertDialog(
-        backgroundColor: Theme.of(context).cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(AppStrings.removeFriend, style: const TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text("Takipten çıkmak istediğine emin misin?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(c), 
-            child: Text(AppStrings.cancel, style: TextStyle(color: Theme.of(context).disabledColor))
-          ),
-          TextButton(
-            onPressed: () { 
-              Navigator.pop(c); 
-              _unfollow(); 
-            }, 
-            child: Text("Çıkar", style: TextStyle(color: Theme.of(context).colorScheme.error, fontWeight: FontWeight.bold))
-          ),
-        ],
-      )
+      title: AppStrings.removeFriend,
+      content: "Takipten çıkmak istediğine emin misin?",
+      confirmText: "Çıkar",
+      isDestructive: true,
     );
+    if (confirmed) _unfollow();
   }
 
   @override

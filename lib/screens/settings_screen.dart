@@ -11,6 +11,7 @@ import '../core/theme_manager.dart';
 import '../core/language_manager.dart';
 import '../core/app_router.dart';
 import '../core/snackbar_helper.dart';
+import '../widgets/common/app_confirm_dialog.dart';
 
 import '../services/supabase_service.dart';
 import '../providers/auth_provider.dart';
@@ -243,34 +244,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     AppSnackBar.info(context, AppStrings.backingUp);
   }
 
-  Future<bool?> _showConfirmationDialog(String title, String content, {bool isDestructive = false}) {
-    HapticFeedback.mediumImpact();
-    final theme = Theme.of(context);
-    
-    return showDialog<bool>(
+  Future<bool> _showConfirmationDialog(String title, String content, {bool isDestructive = false}) {
+    return AppConfirmDialog.show(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: theme.cardColor,
-        shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius24),
-        title: Text(title, style: AppTextStyles.h3),
-        content: Text(content, style: AppTextStyles.bodySmall),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false), 
-            child: Text(AppStrings.cancel, style: AppTextStyles.button.copyWith(color: theme.disabledColor))
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true), 
-            child: Text(
-              isDestructive ? AppStrings.delete : AppStrings.confirm, 
-              style: AppTextStyles.button.copyWith(
-                color: isDestructive ? Colors.redAccent : theme.primaryColor, 
-                fontWeight: FontWeight.bold
-              )
-            )
-          ),
-        ],
-      ),
+      title: title,
+      content: content,
+      confirmText: isDestructive ? AppStrings.delete : AppStrings.confirm,
+      isDestructive: isDestructive,
     );
   }
 

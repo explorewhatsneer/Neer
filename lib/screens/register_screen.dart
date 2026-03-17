@@ -5,12 +5,12 @@ import 'package:go_router/go_router.dart';
 import '../main.dart'; // 🔥 Global supabase client erişimi
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
 import '../core/snackbar_helper.dart';
 import '../widgets/common/loading_button.dart';
+import '../widgets/auth/auth_widgets.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -140,35 +140,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 30),
 
               // --- INPUTLAR ---
-              _buildPremiumInput(
-                context,
+              NeerAuthInput(
                 controller: _nameController,
-                hint: AppStrings.fullName, 
+                hint: AppStrings.fullName,
                 icon: Icons.person_outline_rounded,
                 inputType: TextInputType.name,
               ),
               const SizedBox(height: 16),
 
-              _buildPremiumInput(
-                context,
+              NeerAuthInput(
                 controller: _usernameController,
-                hint: AppStrings.username, 
+                hint: AppStrings.username,
                 icon: Icons.alternate_email_rounded,
-                inputType: TextInputType.text,
               ),
               const SizedBox(height: 16),
 
-              _buildPremiumInput(
-                context,
+              NeerAuthInput(
                 controller: _emailController,
                 hint: AppStrings.emailHint,
                 icon: Icons.email_outlined,
                 inputType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 16),
-              
-              _buildPremiumInput(
-                context,
+
+              NeerAuthInput(
                 controller: _passwordController,
                 hint: AppStrings.passwordHint,
                 icon: Icons.lock_outline_rounded,
@@ -219,51 +214,4 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // --- REUSABLE PREMIUM INPUT ---
-  Widget _buildPremiumInput(
-    BuildContext context, {
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-    TextInputType inputType = TextInputType.text,
-    bool isPassword = false,
-    bool isPasswordVisible = false,
-    VoidCallback? onVisibilityToggle,
-  }) {
-    final theme = Theme.of(context);
-    // ignore: unused_local_variable
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: AppThemeStyles.radius16,
-        boxShadow: theme.brightness == Brightness.dark ? [] : AppThemeStyles.shadowLow,
-        border: theme.brightness == Brightness.dark ? Border.all(color: Colors.white12, width: 1) : null,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: TextField(
-        controller: controller,
-        obscureText: isPassword && !isPasswordVisible,
-        keyboardType: inputType,
-        style: AppTextStyles.bodyLarge.copyWith(color: theme.textTheme.bodyLarge?.color),
-        cursorColor: theme.primaryColor,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor.withValues(alpha: 0.7)),
-          icon: Icon(icon, color: theme.primaryColor.withValues(alpha: 0.8)),
-          border: InputBorder.none,
-          suffixIcon: isPassword 
-            ? IconButton(
-                icon: Icon(
-                  isPasswordVisible ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                  color: theme.disabledColor,
-                ),
-                onPressed: onVisibilityToggle,
-              )
-            : null,
-        ),
-      ),
-    );
-  }
 }

@@ -14,6 +14,7 @@ import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/common/animated_list_item.dart';
+import '../widgets/common/app_confirm_dialog.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -343,36 +344,15 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
       ),
       
       // Onay Kutusu
-      confirmDismiss: (direction) async {
-        HapticFeedback.mediumImpact(); 
-        return await showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            backgroundColor: theme.cardColor,
-            shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius24),
-            title: Text(
-              isGroup ? AppStrings.leaveVenue : AppStrings.deleteChat, 
-              style: AppTextStyles.h3
-            ),
-            content: Text(
-              isGroup 
-                ? "$name ${AppStrings.leaveGroupConfirm}" 
-                : "$name ${AppStrings.deleteChatConfirm}",
-              style: AppTextStyles.bodySmall
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false), 
-                child: Text(AppStrings.cancel, style: AppTextStyles.button.copyWith(color: theme.disabledColor))
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(true), 
-                child: Text(AppStrings.delete, style: AppTextStyles.button.copyWith(color: Colors.redAccent))
-              ),
-            ],
-          ),
-        );
-      },
+      confirmDismiss: (direction) => AppConfirmDialog.show(
+        context: context,
+        title: isGroup ? AppStrings.leaveVenue : AppStrings.deleteChat,
+        content: isGroup
+            ? "$name ${AppStrings.leaveGroupConfirm}"
+            : "$name ${AppStrings.deleteChatConfirm}",
+        confirmText: AppStrings.delete,
+        isDestructive: true,
+      ),
       
       // Silme İşlemi 
       onDismissed: (direction) async {

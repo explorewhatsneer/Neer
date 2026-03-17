@@ -3,12 +3,12 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
 import '../core/snackbar_helper.dart';
 import '../widgets/common/loading_button.dart';
+import '../widgets/auth/auth_widgets.dart';
 
 import 'package:neer/services/auth_service.dart';
 
@@ -114,17 +114,15 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 30),
 
               // --- INPUTLAR ---
-              _buildPremiumInput(
-                context,
+              NeerAuthInput(
                 controller: _emailController,
                 hint: AppStrings.emailHint,
                 icon: Icons.alternate_email_rounded,
                 inputType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 20),
-              
-              _buildPremiumInput(
-                context,
+
+              NeerAuthInput(
                 controller: _passwordController,
                 hint: AppStrings.passwordHint,
                 icon: Icons.lock_outline_rounded,
@@ -194,50 +192,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // --- REUSABLE PREMIUM INPUT ---
-  Widget _buildPremiumInput(
-    BuildContext context, {
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-    TextInputType inputType = TextInputType.text,
-    bool isPassword = false,
-    bool isPasswordVisible = false,
-    VoidCallback? onVisibilityToggle,
-  }) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: AppThemeStyles.radius16,
-        boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
-        border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: TextField(
-        controller: controller,
-        obscureText: isPassword && !isPasswordVisible,
-        keyboardType: inputType,
-        style: AppTextStyles.bodyLarge.copyWith(color: theme.textTheme.bodyLarge?.color),
-        cursorColor: theme.primaryColor,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor.withValues(alpha: 0.7)),
-          icon: Icon(icon, color: theme.primaryColor.withValues(alpha: 0.8)),
-          border: InputBorder.none,
-          suffixIcon: isPassword 
-            ? IconButton(
-                icon: Icon(
-                  isPasswordVisible ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                  color: theme.disabledColor,
-                ),
-                onPressed: onVisibilityToggle,
-              )
-            : null,
-        ),
-      ),
-    );
-  }
 }
