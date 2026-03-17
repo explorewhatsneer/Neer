@@ -436,12 +436,13 @@ class SupabaseService {
   }) async {
     try {
       final response = await _supabase.rpc('get_nearby_places', params: {
-        'p_lat': lat,
-        'p_lng': lng,
-        'p_radius_km': radiusKm,
+        'lat': lat,
+        'long': lng,
+        'radius_meters': radiusKm * 1000, // km → metre dönüşümü
       });
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
+      debugPrint('getNearbyPlaces hatası: $e');
       return [];
     }
   }
