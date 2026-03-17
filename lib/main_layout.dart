@@ -20,23 +20,22 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  // Başlangıç sayfası: 2 (MapScreen - Ortadaki)
   int _currentIndex = 2;
+  int _previousIndex = 2;
 
-  // Sayfaların Listesi (Sıralama Navbar ikonlarıyla aynı olmalı)
-  // 0: Profil, 1: Sohbet, 2: Harita, 3: Akış, 4: Catch
-  final List<Widget> _screens = [
-    const ProfileScreen(),
-    const ChatListScreen(),
-    const MapScreen(),
-    const FeedScreen(),
-    const CatchScreen(),
+  final List<Widget> _screens = const [
+    ProfileScreen(),
+    ChatListScreen(),
+    MapScreen(),
+    FeedScreen(),
+    CatchScreen(),
   ];
 
   void _onTabChange(int index) {
     if (_currentIndex != index) {
       HapticFeedback.selectionClick();
       setState(() {
+        _previousIndex = _currentIndex;
         _currentIndex = index;
       });
     }
@@ -44,17 +43,42 @@ class _MainLayoutState extends State<MainLayout> {
 
   @override
   Widget build(BuildContext context) {
+    // Geçiş yönü: sola mı sağa mı kayıyor
+    final bool slideRight = _currentIndex > _previousIndex;
+
     return Scaffold(
       extendBody: true,
-      backgroundColor: Colors.transparent, // Global gradient main.dart builder'dan gelir
+      backgroundColor: Colors.transparent,
       resizeToAvoidBottomInset: false,
       body: OfflineAwareBody(
         child: Stack(
           children: [
-            IndexedStack(
-              index: _currentIndex,
-              children: _screens,
+            // Animasyonlu sayfa geçişi
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (child, animation) {
+                // Sadece yeni ekranı fade+slide ile getir
+                final slideOffset = Tween<Offset>(
+                  begin: Offset(slideRight ? 0.05 : -0.05, 0),
+                  end: Offset.zero,
+                );
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: slideOffset.animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: KeyedSubtree(
+                key: ValueKey<int>(_currentIndex),
+                child: _screens[_currentIndex],
+              ),
             ),
+
+            // Navbar
             Positioned(
               left: 0,
               right: 0,

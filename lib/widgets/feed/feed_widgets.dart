@@ -94,8 +94,8 @@ class StoryItem extends StatelessWidget {
                       Container(
                         decoration: BoxDecoration(
                           color: isDark
-                              ? Colors.black.withValues(alpha: 0.35)
-                              : Colors.white.withValues(alpha: 0.30),
+                              ? Colors.black.withValues(alpha: 0.20)
+                              : Colors.white.withValues(alpha: 0.15),
                         ),
                         child: Center(
                           child: Container(
@@ -330,7 +330,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
           decoration: BoxDecoration(
             color: isDark
@@ -343,13 +343,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                   : Colors.white.withValues(alpha: 0.70),
               width: 1,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: isDark ? 0.08 : 0.06),
-                blurRadius: 20,
-                offset: const Offset(0, 6),
-              ),
-            ],
+            boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -444,7 +438,7 @@ class _FeedReviewCardState extends State<FeedReviewCard> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
           decoration: BoxDecoration(
             color: isDark
@@ -457,13 +451,7 @@ class _FeedReviewCardState extends State<FeedReviewCard> {
                   : Colors.white.withValues(alpha: 0.70),
               width: 1,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: isDark ? 0.08 : 0.06),
-                blurRadius: 20,
-                offset: const Offset(0, 6),
-              ),
-            ],
+            boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

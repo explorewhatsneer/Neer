@@ -26,6 +26,7 @@ import '../widgets/feed/feed_widgets.dart';
 import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/animated_list_item.dart';
+import '../widgets/common/masonry_gallery.dart';
 
 class FriendProfileScreen extends StatefulWidget {
   final String targetUserId; 
@@ -434,22 +435,9 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
             builder: (context, snapshot) {
               if (!snapshot.hasData || snapshot.data!.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.only(top: 80), child: FriendEmptyCard(title: AppStrings.galleryEmpty, subtitle: AppStrings.galleryEmptyDesc, icon: Icons.photo_library_rounded)));
               var photos = snapshot.data!;
-              return SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3, 
-                    crossAxisSpacing: 10, 
-                    mainAxisSpacing: 10, 
-                    childAspectRatio: 1.0
-                  ),
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    return AppCachedImage.cover(
-                      imageUrl: photos[index],
-                      borderRadius: 12,
-                    );
-                  }, childCount: photos.length),
-                ),
+              return SliverMasonryGallery(
+                photos: photos,
+                padding: const EdgeInsets.all(12),
               );
             },
           ),

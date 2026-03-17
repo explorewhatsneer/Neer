@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../core/constants.dart';
-import '../core/text_styles.dart';
-import '../core/app_strings.dart';
 
 class CustomNavBar extends StatelessWidget {
   final int activeIndex;
@@ -16,101 +14,92 @@ class CustomNavBar extends StatelessWidget {
     required this.onTabChange,
   });
 
+  // Doğru ikon eşlemesi: 0=Profil, 1=Chat, 2=Map(pin), 3=Feed, 4=Catch
+  static const List<IconData> _icons = [
+    Icons.person_rounded,
+    Icons.chat_bubble_rounded,
+    Icons.pin_drop_rounded,       // Center — pin ikonu
+    Icons.dynamic_feed_rounded,
+    Icons.bolt_rounded,
+  ];
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomPad = MediaQuery.of(context).padding.bottom;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, bottomPad > 0 ? bottomPad : 16),
-      child: SizedBox(
-        height: 80,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          clipBehavior: Clip.none,
-          children: [
-            // ─── GLASS PILL BAR ───
-            ClipRRect(
-              borderRadius: BorderRadius.circular(32),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                child: Container(
-                  height: 68,
-                  decoration: BoxDecoration(
-                    gradient: isDark ? AppColors.darkNavBarGradient : AppColors.navBarGradient,
-                    borderRadius: BorderRadius.circular(32),
-                    border: Border.all(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.08)
-                          : Colors.white.withValues(alpha: 0.35),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: isDark ? 0.20 : 0.25),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
-                        spreadRadius: -5,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildNavItem(0, Icons.notifications_rounded, AppStrings.navProfile, isDark),
-                      _buildNavItem(1, Icons.chat_bubble_rounded, AppStrings.navChat, isDark),
-                      const SizedBox(width: 56), // Center FAB boşluğu
-                      _buildNavItem(3, Icons.person_rounded, AppStrings.navFeed, isDark),
-                      _buildNavItem(4, Icons.bolt_rounded, AppStrings.navCatch, isDark),
-                    ],
-                  ),
-                ),
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+        child: Container(
+          height: 72 + bottomPad,
+          padding: EdgeInsets.only(bottom: bottomPad),
+          decoration: BoxDecoration(
+            gradient: isDark ? AppColors.darkNavBarGradient : AppColors.navBarGradient,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            border: Border(
+              top: BorderSide(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.10)
+                    : Colors.white.withValues(alpha: 0.40),
+                width: 0.5,
               ),
             ),
-
-            // ─── CENTER FAB (+) BUTTON ───
-            Positioned(
-              top: 0,
-              child: GestureDetector(
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  onTabChange(2);
-                },
-                child: Container(
-                  width: 62,
-                  height: 62,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: AppColors.primaryGradient,
-                    border: Border.all(
-                      color: isDark
-                          ? AppColors.darkGradientStart
-                          : AppColors.gradientStart,
-                      width: 4,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.40),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    activeIndex == 2 ? Icons.location_on_rounded : Icons.add_rounded,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-              ),
-            ),
-          ],
+            boxShadow: isDark
+                ? [BoxShadow(color: Colors.black.withValues(alpha: 0.40), blurRadius: 20, offset: const Offset(0, -4))]
+                : [BoxShadow(color: AppColors.primary.withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, -4))],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(5, (index) {
+              // Center buton (pin) özel tasarım
+              if (index == 2) return _buildCenterButton(isDark);
+              return _buildNavItem(index, isDark);
+            }),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(int index, IconData icon, String label, bool isDark) {
+  Widget _buildCenterButton(bool isDark) {
+    final isActive = activeIndex == 2;
+
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        onTabChange(2);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: isActive ? AppColors.primaryGradient : null,
+          color: isActive ? null : Colors.white.withValues(alpha: isDark ? 0.10 : 0.25),
+          border: Border.all(
+            color: isActive
+                ? Colors.white.withValues(alpha: 0.30)
+                : Colors.white.withValues(alpha: isDark ? 0.08 : 0.20),
+            width: 1.5,
+          ),
+          boxShadow: isActive
+              ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4))]
+              : [],
+        ),
+        child: Icon(
+          Icons.pin_drop_rounded,
+          color: Colors.white,
+          size: isActive ? 26 : 22,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, bool isDark) {
     final isActive = index == activeIndex;
 
     return GestureDetector(
@@ -123,28 +112,26 @@ class CustomNavBar extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: 56,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isActive
-                    ? Colors.white.withValues(alpha: isDark ? 0.15 : 0.30)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(
-                icon,
-                color: isActive
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.55),
-                size: 22,
-              ),
+        height: 56,
+        child: Center(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: isActive
+                  ? Colors.white.withValues(alpha: isDark ? 0.15 : 0.28)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
             ),
-          ],
+            child: Icon(
+              _icons[index],
+              color: isActive
+                  ? Colors.white
+                  : Colors.white.withValues(alpha: 0.50),
+              size: 22,
+            ),
+          ),
         ),
       ),
     );

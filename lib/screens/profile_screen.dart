@@ -23,6 +23,7 @@ import '../widgets/common/glass_button.dart';
 import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/animated_list_item.dart';
+import '../widgets/common/masonry_gallery.dart';
 
 // Import Çakışmasını Önleme
 import '../widgets/friend/friend_profile_widgets.dart' show FriendEmptyCard;
@@ -464,22 +465,9 @@ Widget _buildProfileTab(ThemeData theme, dynamic _user) {
                 return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.only(top: 80), child: FriendEmptyCard(title: AppStrings.galleryEmpty, subtitle: AppStrings.galleryEmptyUser, icon: Icons.photo_library_rounded)));
               }
               var photos = snapshot.data!;
-              return SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3, 
-                    crossAxisSpacing: 10, 
-                    mainAxisSpacing: 10, 
-                    childAspectRatio: 1.0
-                  ),
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    return AppCachedImage.cover(
-                      imageUrl: photos[index],
-                      borderRadius: 12,
-                    );
-                  }, childCount: photos.length),
-                ),
+              return SliverMasonryGallery(
+                photos: photos,
+                padding: const EdgeInsets.all(12),
               );
             },
           ),

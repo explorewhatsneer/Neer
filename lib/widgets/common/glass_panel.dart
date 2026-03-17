@@ -29,7 +29,7 @@ class GlassPanel extends StatelessWidget {
     super.key,
     required this.child,
     this.borderRadius = const BorderRadius.all(Radius.circular(24)),
-    this.blurSigma = 25,
+    this.blurSigma = 30,
     this.padding,
     this.margin,
     this.width,

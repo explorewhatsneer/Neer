@@ -95,7 +95,7 @@ class ThemeManager with ChangeNotifier {
     brightness: Brightness.dark,
     primaryColor: AppColors.primary,
     scaffoldBackgroundColor: AppColors.darkBackground,
-    cardColor: AppColors.darkSurface.withValues(alpha: 0.55),
+    cardColor: AppColors.darkSurface.withValues(alpha: 0.65),
     dividerColor: AppColors.darkDivider,
 
     fontFamily: 'SFPro',

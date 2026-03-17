@@ -9,41 +9,41 @@ class AppColors {
 
   // --- GRADIENT RENKLERİ ---
   static const Color gradientStart = Color(0xFFF5D5E0);  // Soft Pink
-  static const Color gradientMiddle = Color(0xFFE8D5F0);  // Pink-Lavender
-  static const Color gradientEnd = Color(0xFFD5DEF5);     // Soft Blue-Lavender
+  static const Color gradientMiddle = Color(0xFFE8D5F0); // Pink-Lavender
+  static const Color gradientEnd = Color(0xFFD5DEF5);    // Soft Blue-Lavender
 
-  // --- DARK GRADIENT ---
-  static const Color darkGradientStart = Color(0xFF1A1020);  // Deep Purple-Black
-  static const Color darkGradientMiddle = Color(0xFF15101E); // Dark Purple
-  static const Color darkGradientEnd = Color(0xFF0D0F1A);    // Deep Navy-Black
+  // --- DARK GRADIENT (daha belirgin, daha derin) ---
+  static const Color darkGradientStart = Color(0xFF241835);  // Rich Purple
+  static const Color darkGradientMiddle = Color(0xFF1C1430); // Medium Purple
+  static const Color darkGradientEnd = Color(0xFF141228);     // Deep Indigo
 
   // --- AYDINLIK MOD (LIGHT) ---
-  static const Color lightBackground = Color(0xFFF8F0F5); // Warm pink-tinted white
+  static const Color lightBackground = Color(0xFFF8F0F5);
   static const Color lightSurface = Colors.white;
-  static const Color lightTextHeading = Color(0xFF2D2035); // Soft dark purple
-  static const Color lightTextBody = Color(0xFF4A3F52);    // Medium dark purple
-  static const Color lightTextSub = Color(0xFF9B8FA6);     // Muted lavender
-  static const Color lightDivider = Color(0xFFEDE5F0);     // Light lavender divider
+  static const Color lightTextHeading = Color(0xFF2D2035);
+  static const Color lightTextBody = Color(0xFF4A3F52);
+  static const Color lightTextSub = Color(0xFF9B8FA6);
+  static const Color lightDivider = Color(0xFFEDE5F0);
 
-  // --- KARANLIK MOD (DARK) ---
-  static const Color darkBackground = Color(0xFF0D0A12);   // Deep purple-black
-  static const Color darkSurface = Color(0xFF1A1520);      // Dark purple surface
-  static const Color darkTextHeading = Color(0xFFF5F0F8);  // Warm white
-  static const Color darkTextBody = Color(0xFFBEB5C8);     // Light lavender
-  static const Color darkTextSub = Color(0xFF6B5F78);      // Muted purple
-  static const Color darkDivider = Color(0xFF2A2035);      // Dark purple divider
+  // --- KARANLIK MOD (DARK) — daha kontrast ---
+  static const Color darkBackground = Color(0xFF120E1C);
+  static const Color darkSurface = Color(0xFF221A30);     // Daha belirgin surface
+  static const Color darkTextHeading = Color(0xFFF5F0F8);
+  static const Color darkTextBody = Color(0xFFCCC2D8);
+  static const Color darkTextSub = Color(0xFF7E7290);
+  static const Color darkDivider = Color(0xFF342A45);
 
   // --- CAM (GLASS) EFEKTLERİ ---
   static final Color shadow = Colors.black.withValues(alpha: 0.06);
   static final Color glassBorder = Colors.white.withValues(alpha: 0.25);
-  static const Color glassWhite = Color(0xCCFFFFFF);      // 80% white
-  static const Color glassDark = Color(0xB3151020);        // 70% dark purple
+  static const Color glassWhite = Color(0xCCFFFFFF);
+  static const Color glassDark = Color(0xB3221A30);
 
   // --- DURUM RENKLERİ ---
-  static const Color success = Color(0xFF7BC67E);   // Soft green
-  static const Color error = Color(0xFFE87B8A);     // Soft red/rose
-  static const Color warning = Color(0xFFE8C97B);   // Soft gold
-  static const Color info = Color(0xFF7BA8E8);       // Soft blue
+  static const Color success = Color(0xFF7BC67E);
+  static const Color error = Color(0xFFE87B8A);
+  static const Color warning = Color(0xFFE8C97B);
+  static const Color info = Color(0xFF7BA8E8);
 
   // --- GRADIENT HELPERS ---
   static const LinearGradient backgroundGradient = LinearGradient(
@@ -73,6 +73,21 @@ class AppColors {
   static const LinearGradient darkNavBarGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF2A1F35), Color(0xFF1F1828)],
+    colors: [Color(0xFF342845), Color(0xFF281E38)],
   );
+
+  // --- GÖLGE YARDIMCILARI ---
+  /// Light modda soft rose, dark modda siyah bazlı gölgeler
+  static List<BoxShadow> adaptiveShadow(bool isDark, {double blur = 16, double alpha = 0.08}) {
+    return [
+      BoxShadow(
+        color: isDark
+            ? Colors.black.withValues(alpha: alpha * 2.5)
+            : primary.withValues(alpha: alpha),
+        blurRadius: blur,
+        offset: const Offset(0, 4),
+        spreadRadius: -2,
+      ),
+    ];
+  }
 }
