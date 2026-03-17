@@ -16,6 +16,7 @@ import '../providers/catch_provider.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/common/animated_list_item.dart';
+import '../widgets/common/app_cached_image.dart';
 
 class CatchScreen extends StatefulWidget {
   const CatchScreen({super.key});
@@ -175,13 +176,7 @@ class _CatchScreenState extends State<CatchScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircleAvatar(
-                radius: 40,
-                backgroundImage: senderAvatar.isNotEmpty ? NetworkImage(senderAvatar) : null,
-                child: senderAvatar.isEmpty
-                    ? Text(senderName[0].toUpperCase(), style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold))
-                    : null,
-              ),
+              CachedAvatar(imageUrl: senderAvatar, name: senderName, radius: 40),
               const SizedBox(height: 16),
               Text(AppStrings.incomingCatch, style: AppTextStyles.h2),
               const SizedBox(height: 8),

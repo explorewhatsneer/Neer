@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // CORE IMPORTLARI
-import '../../core/text_styles.dart'; 
+import '../../core/text_styles.dart';
+import '../common/app_cached_image.dart';
 
 class GroupMessageBubble extends StatelessWidget {
   final String message;
@@ -55,20 +56,9 @@ class GroupMessageBubble extends StatelessWidget {
           
           // 🔥 BAŞKASIYSA: SOLDA AVATAR GÖSTER
           if (!isMe) ...[
-            Container(
-              margin: const EdgeInsets.only(right: 8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: isDark ? Border.all(color: Colors.white24) : null,
-              ),
-              child: CircleAvatar(
-                radius: 16,
-                backgroundImage: (senderImage.isNotEmpty) ? NetworkImage(senderImage) : null,
-                backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-                child: (senderImage.isEmpty) 
-                    ? Icon(Icons.person, size: 16, color: theme.disabledColor) 
-                    : null,
-              ),
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: CachedAvatar(imageUrl: senderImage, name: senderName, radius: 16),
             ),
           ],
 

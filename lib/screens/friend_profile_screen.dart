@@ -23,6 +23,7 @@ import '../widgets/friend/friend_profile_widgets.dart' show FriendEmptyCard, Mut
 // 🔥 YENİ TASARIM BİLEŞENLERİ (StackedCardCarousel, RankingPodium vb.)
 import '../widgets/profile/profile_components.dart'; 
 import '../widgets/feed/feed_widgets.dart';
+import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/animated_list_item.dart';
 
@@ -443,14 +444,9 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                     childAspectRatio: 1.0
                   ),
                   delegate: SliverChildBuilderDelegate((context, index) {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        photos[index], 
-                        fit: BoxFit.cover,
-                        loadingBuilder: (c, child, p) => p == null ? child : Container(color: theme.dividerColor.withValues(alpha: 0.1)),
-                        errorBuilder: (c, e, s) => Container(color: theme.dividerColor, child: const Icon(Icons.error_outline)),
-                      ),
+                    return AppCachedImage.cover(
+                      imageUrl: photos[index],
+                      borderRadius: 12,
                     );
                   }, childCount: photos.length),
                 ),

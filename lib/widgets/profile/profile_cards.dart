@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/text_styles.dart';
+import '../common/app_cached_image.dart';
 
 // --- BASE CARD ---
 class PremiumCard extends StatelessWidget {
@@ -48,7 +49,7 @@ class VerticalPlaceCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              ClipRRect(borderRadius: BorderRadius.circular(24), child: Image.network(imgUrl, fit: BoxFit.cover)),
+              AppCachedImage.cover(imageUrl: imgUrl, borderRadius: 24),
               Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(24), gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withValues(alpha: 0.8)], stops: const [0.6, 1.0]))),
               Positioned(bottom: 20, left: 16, right: 16, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)), child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.star_rounded, color: Colors.amber, size: 14), const SizedBox(width: 4), Text(rating, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))])), const SizedBox(height: 6), Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 20, height: 1.1), maxLines: 2, overflow: TextOverflow.ellipsis)])),
             ],
@@ -120,7 +121,7 @@ class VerticalNoteCard extends StatelessWidget {
               // Alt Kısım: Mekan ve Avatar
               Row(
                 children: [
-                  CircleAvatar(radius: 12, backgroundImage: NetworkImage(profileImg)),
+                  CachedAvatar(imageUrl: profileImg, name: '', radius: 12),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(

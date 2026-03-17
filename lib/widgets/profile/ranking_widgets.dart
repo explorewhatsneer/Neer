@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/text_styles.dart';
+import '../common/app_cached_image.dart';
 
 // ==========================================
 // 🏆 RANKING PODIUM (Avatar Only 3D Style)
@@ -128,7 +129,7 @@ class _RankAvatar extends StatelessWidget {
                   ],
                 ),
                 child: ClipOval(
-                  child: Image.network(img, fit: BoxFit.cover),
+                  child: AppCachedImage(imageUrl: img, fit: BoxFit.cover),
                 ),
               ),
               
@@ -220,9 +221,9 @@ class SimpleRankRow extends StatelessWidget {
         subtitle: Text("$count ziyaret", style: AppTextStyles.caption),
         
         // Resim
-        trailing: ClipRRect(
-          borderRadius: BorderRadius.circular(10), 
-          child: Image.network(imgUrl, width: 44, height: 44, fit: BoxFit.cover, errorBuilder: (c,e,s) => Container(width:44, height:44, color:Colors.grey.shade200))
+        trailing: SizedBox(
+          width: 44, height: 44,
+          child: AppCachedImage.cover(imageUrl: imgUrl, borderRadius: 10),
         ),
       ),
     );

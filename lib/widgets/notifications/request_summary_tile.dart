@@ -6,7 +6,8 @@ import '../../core/theme_styles.dart';
 import '../../core/text_styles.dart';
 import '../../core/app_strings.dart';
 
-import '../../services/supabase_service.dart'; 
+import '../../services/supabase_service.dart';
+import '../common/app_cached_image.dart';
 
 class RequestSummaryTile extends StatelessWidget {
   final List<Map<String, dynamic>> requests; // Supabase'den gelen ham veri
@@ -176,11 +177,7 @@ class RequestSummaryTile extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: theme.cardColor, width: 2.5),
       ),
-      child: CircleAvatar(
-        radius: radius,
-        backgroundColor: theme.scaffoldBackgroundColor,
-        backgroundImage: NetworkImage(imageUrl ?? "https://i.pravatar.cc/150"),
-      ),
+      child: CachedAvatar(imageUrl: imageUrl ?? '', name: '', radius: radius),
     );
   }
 }

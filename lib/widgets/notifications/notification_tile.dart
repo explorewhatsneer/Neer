@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 
 // CORE
-import '../../core/theme_styles.dart'; 
+import '../../core/theme_styles.dart';
 import '../../core/text_styles.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
+import '../common/app_cached_image.dart';
 
 class NotificationTile extends StatelessWidget {
   final dynamic id; // int veya String gelebilir
@@ -125,17 +126,7 @@ class NotificationTile extends StatelessWidget {
     // Resim varsa göster
     return Stack(
       children: [
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: theme.dividerColor.withValues(alpha: 0.2)),
-          ),
-          child: CircleAvatar(
-            radius: 24,
-            backgroundColor: theme.scaffoldBackgroundColor,
-            backgroundImage: NetworkImage(imageUrl!),
-          ),
-        ),
+        CachedAvatar(imageUrl: imageUrl!, name: '', radius: 24),
         // Sağ alt köşe ikonu (opsiyonel)
         Positioned(
           bottom: 0, right: 0,
