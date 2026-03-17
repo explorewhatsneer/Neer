@@ -10,6 +10,8 @@ import '../core/app_strings.dart';
 import '../services/supabase_service.dart';
 import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
+import '../widgets/common/empty_state.dart';
+import '../core/snackbar_helper.dart';
 
 class BlockedUsersScreen extends StatefulWidget {
   const BlockedUsersScreen({super.key});
@@ -20,6 +22,12 @@ class BlockedUsersScreen extends StatefulWidget {
 
 class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
   final _service = SupabaseService();
+  Key _refreshKey = UniqueKey();
+
+  Future<void> _refreshList() async {
+    HapticFeedback.lightImpact();
+    setState(() => _refreshKey = UniqueKey());
+  }
 
   // Engeli Kaldırma Fonksiyonu
   Future<void> _unblockUser(String targetUid, String targetName) async {
@@ -41,39 +49,15 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       final updateResult = await _service.updateProfile(myUid, {'blocked_users': blockedList});
 
       if (updateResult.isFailure) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppStrings.cameraError),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            )
-          );
-        }
+        if (mounted) AppSnackBar.error(context, AppStrings.cameraError);
         return;
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "$targetName ${AppStrings.unblockedSuccess}",
-              style: AppTextStyles.bodySmall.copyWith(color: Colors.white, fontWeight: FontWeight.bold)
-            ),
-            backgroundColor: const Color(0xFF34C759), // Başarı Yeşili
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-          )
-        );
+        AppSnackBar.success(context, "$targetName ${AppStrings.unblockedSuccess}");
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppStrings.cameraError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          )
-        );
-      }
+      if (mounted) AppSnackBar.error(context, AppStrings.cameraError);
     }
   }
 
@@ -99,44 +83,57 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
       ),
 
       // 1. Kendi profilimizi dinle (blocked_users listesi için)
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _service.streamProfileAsList(myUid),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const ShimmerList(itemCount: 5);
-          }
-          
-          if (snapshot.data!.isEmpty) return _buildEmptyState(theme);
+      body: RefreshIndicator(
+        onRefresh: _refreshList,
+        color: theme.primaryColor,
+        child: StreamBuilder<List<Map<String, dynamic>>>(
+          key: _refreshKey,
+          stream: _service.streamProfileAsList(myUid),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const ShimmerList(itemCount: 5);
+            }
 
-          var myData = snapshot.data!.first;
-          List<dynamic> blockedListRaw = myData['blocked_users'] ?? [];
-          List<String> blockedList = blockedListRaw.map((e) => e.toString()).toList();
-
-          if (blockedList.isEmpty) {
-            return _buildEmptyState(theme);
-          }
-
-          // 2. Engellenen kullanıcıların detaylarını çek (FutureBuilder)
-          // Not: Liste çok uzunsa pagination gerekebilir, şimdilik basit select
-          return FutureBuilder<List<Map<String, dynamic>>>(
-            future: _service.getUsersByIds(blockedList), // ID'si bu listede olanları getir
-            builder: (context, userSnapshot) {
-              if (!userSnapshot.hasData) return const ShimmerList(itemCount: 5);
-              
-              var users = userSnapshot.data!;
-
-              return ListView.builder(
-                padding: const EdgeInsets.all(20),
-                itemCount: users.length,
-                itemBuilder: (context, index) {
-                  var userData = users[index];
-                  String blockedUserId = userData['id'];
-                  return _buildBlockedUserCard(userData, blockedUserId, theme);
-                },
+            if (snapshot.data!.isEmpty) {
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [SizedBox(height: MediaQuery.of(context).size.height * 0.25), _buildEmptyState(theme)],
               );
-            },
-          );
-        },
+            }
+
+            var myData = snapshot.data!.first;
+            List<dynamic> blockedListRaw = myData['blocked_users'] ?? [];
+            List<String> blockedList = blockedListRaw.map((e) => e.toString()).toList();
+
+            if (blockedList.isEmpty) {
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [SizedBox(height: MediaQuery.of(context).size.height * 0.25), _buildEmptyState(theme)],
+              );
+            }
+
+            // 2. Engellenen kullanıcıların detaylarını çek (FutureBuilder)
+            return FutureBuilder<List<Map<String, dynamic>>>(
+              future: _service.getUsersByIds(blockedList),
+              builder: (context, userSnapshot) {
+                if (!userSnapshot.hasData) return const ShimmerList(itemCount: 5);
+
+                var users = userSnapshot.data!;
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(20),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    var userData = users[index];
+                    String blockedUserId = userData['id'];
+                    return _buildBlockedUserCard(userData, blockedUserId, theme);
+                  },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -256,23 +253,10 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
 
   // --- BOŞ DURUM ---
   Widget _buildEmptyState(ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.shield_moon_rounded, size: 80, color: theme.disabledColor.withValues(alpha: 0.3)),
-          const SizedBox(height: 24),
-          Text(
-            AppStrings.noBlockedUsers, 
-            style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold, color: theme.disabledColor)
-          ),
-          const SizedBox(height: 8),
-          Text(
-            AppStrings.listClean, 
-            style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor)
-          ),
-        ],
-      ),
+    return EmptyState(
+      icon: Icons.shield_moon_rounded,
+      title: AppStrings.noBlockedUsers,
+      description: AppStrings.listClean,
     );
   }
 }

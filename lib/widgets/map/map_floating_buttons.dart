@@ -3,8 +3,8 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:image_picker/image_picker.dart';
 
 // CORE IMPORTLARI
-import '../../core/text_styles.dart';
 import '../../core/app_strings.dart';
+import '../../core/snackbar_helper.dart';
 import '../common/glass_button.dart';
 
 class MapFloatingButtons extends StatelessWidget {
@@ -19,47 +19,16 @@ class MapFloatingButtons extends StatelessWidget {
 
   Future<void> _openCamera(BuildContext context) async {
     final ImagePicker picker = ImagePicker();
-    final theme = Theme.of(context);
-
     try {
       final XFile? photo = await picker.pickImage(source: ImageSource.camera);
       if (photo != null) {
         if(context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.check_circle_rounded, color: Colors.white),
-                  const SizedBox(width: 10),
-                  Text(
-                    AppStrings.photoCaptured, // 🔥 Core String
-                    // 🔥 Core Style
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white
-                    )
-                  ),
-                ],
-              ),
-              backgroundColor: const Color(0xFF34C759), // Başarı Yeşili
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
-          );
+          AppSnackBar.success(context, AppStrings.photoCaptured);
         }
       }
     } catch (e) {
       if(context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppStrings.cameraError, // 🔥 Core String
-              style: AppTextStyles.bodySmall.copyWith(color: Colors.white)
-            ), 
-            backgroundColor: theme.colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        AppSnackBar.error(context, AppStrings.cameraError);
       }
     }
   }

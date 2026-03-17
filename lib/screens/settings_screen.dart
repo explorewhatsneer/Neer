@@ -10,6 +10,7 @@ import '../core/app_strings.dart';
 import '../core/theme_manager.dart';
 import '../core/language_manager.dart';
 import '../core/app_router.dart';
+import '../core/snackbar_helper.dart';
 
 import '../services/supabase_service.dart';
 import '../providers/auth_provider.dart';
@@ -71,7 +72,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final result = await _service.updateProfile(userId, {'is_private': value});
       if (result.isFailure && mounted) {
         setState(() => _isPrivateAccount = !value);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${AppStrings.error}: ${result.error.message}")));
+        AppSnackBar.error(context, "${AppStrings.error}: ${result.error.message}");
       }
     }
   }
@@ -228,30 +229,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Hata: $e"), backgroundColor: Colors.red));
+      if (mounted) AppSnackBar.error(context, "Hata: $e");
     }
   }
 
   void _requestDataDownload() {
     HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppStrings.dataPreparing), 
-        backgroundColor: Theme.of(context).primaryColor,
-        behavior: SnackBarBehavior.floating,
-      )
-    );
+    AppSnackBar.info(context, AppStrings.dataPreparing);
   }
 
   void _backupData() {
     HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppStrings.backingUp), 
-        backgroundColor: Colors.teal,
-        behavior: SnackBarBehavior.floating,
-      )
-    );
+    AppSnackBar.info(context, AppStrings.backingUp);
   }
 
   Future<bool?> _showConfirmationDialog(String title, String content, {bool isDestructive = false}) {

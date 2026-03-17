@@ -9,6 +9,7 @@ import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import '../services/supabase_service.dart';
 import '../core/theme_styles.dart';
 import '../core/app_strings.dart';
+import '../core/snackbar_helper.dart';
 import '../core/constants.dart';
 
 import '../widgets/map/balloon_menu.dart';
@@ -85,9 +86,7 @@ class _MapScreenState extends State<MapScreen>
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppStrings.mapLocationPermission)),
-        );
+        AppSnackBar.warning(context, AppStrings.mapLocationPermission);
       }
       return;
     }

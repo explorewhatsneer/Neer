@@ -3,7 +3,8 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 import 'dart:ui'; // ImageFilter
 
 // CORE IMPORTLARI
-import '../core/app_strings.dart'; 
+import '../core/app_strings.dart';
+import '../core/snackbar_helper.dart'; 
 
 class PremiumScreen extends StatefulWidget {
   const PremiumScreen({super.key});
@@ -261,9 +262,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       child: ElevatedButton(
                         onPressed: () {
                           HapticFeedback.heavyImpact();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Ödeme sistemi hazırlanıyor... 💳"), backgroundColor: Color(0xFFFFA000))
-                          );
+                          AppSnackBar.info(context, "Ödeme sistemi hazırlanıyor...");
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,

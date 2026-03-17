@@ -7,6 +7,7 @@ import '../core/constants.dart';
 import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
+import '../core/snackbar_helper.dart';
 
 import '../services/supabase_service.dart';
 
@@ -56,14 +57,7 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
   // Bağlama/Koparma İşlemi (Mock)
   void _handleLinkAction(String provider) {
     HapticFeedback.lightImpact(); // Titreşim
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("$provider ${AppStrings.featureComingSoon}"), 
-        backgroundColor: Theme.of(context).primaryColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-      )
-    );
+    AppSnackBar.info(context, "$provider ${AppStrings.featureComingSoon}");
   }
 
   @override

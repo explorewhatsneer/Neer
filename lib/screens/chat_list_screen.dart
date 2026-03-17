@@ -12,6 +12,7 @@ import '../core/app_router.dart';
 import '../services/supabase_service.dart';
 import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
+import '../widgets/common/empty_state.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -24,15 +25,21 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
   final _service = SupabaseService();
   
   late TabController _tabController;
-  
+
   // Arama Kontrolcüsü
   final TextEditingController _searchController = TextEditingController();
   String _searchText = "";
+  Key _refreshKey = UniqueKey();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+  }
+
+  Future<void> _refreshChats() async {
+    HapticFeedback.lightImpact();
+    setState(() => _refreshKey = UniqueKey());
   }
 
   @override
@@ -153,8 +160,12 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
 
   // --- 1. BİREYSEL SOHBETLER ---
   Widget _buildPersonalChatsStream(String myUid, ThemeData theme) {
-    return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: _service.streamRecentMessages(),
+    return RefreshIndicator(
+      onRefresh: _refreshChats,
+      color: theme.primaryColor,
+      child: StreamBuilder<List<Map<String, dynamic>>>(
+        key: _refreshKey,
+        stream: _service.streamRecentMessages(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const ShimmerList(itemCount: 6);
 
@@ -194,30 +205,40 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
         }
 
         if (chats.isEmpty) {
-          return _buildEmptyState(
-            _searchText.isEmpty ? AppStrings.noMessages : AppStrings.noChatFound, 
-            Icons.chat_bubble_outline_rounded,
-            theme
+          return ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+              EmptyState(
+                icon: Icons.chat_bubble_outline_rounded,
+                title: _searchText.isEmpty ? AppStrings.noMessages : AppStrings.noChatFound,
+              ),
+            ],
           );
         }
 
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
-          physics: const BouncingScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           itemCount: chats.length,
           itemBuilder: (context, index) {
             var chatData = chats[index];
-            return _buildChatCard(chatData, chatData['friendId'], isGroup: false, myUid: myUid, theme: theme); 
+            return _buildChatCard(chatData, chatData['friendId'], isGroup: false, myUid: myUid, theme: theme);
           },
         );
       },
+      ),
     );
   }
 
   // --- 2. MEKAN (GRUP) SOHBETLERİ ---
   Widget _buildGroupChatsStream(String myUid, ThemeData theme) {
-    return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: _service.streamRecentMessages(),
+    return RefreshIndicator(
+      onRefresh: _refreshChats,
+      color: theme.primaryColor,
+      child: StreamBuilder<List<Map<String, dynamic>>>(
+        key: _refreshKey,
+        stream: _service.streamRecentMessages(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const ShimmerList(itemCount: 6);
         
@@ -250,23 +271,29 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
         }
 
         if (groups.isEmpty) {
-          return _buildEmptyState(
-            _searchText.isEmpty ? AppStrings.noCheckins : AppStrings.noPlaceFound, 
-            Icons.store_mall_directory_rounded,
-            theme
+          return ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+              EmptyState(
+                icon: Icons.store_mall_directory_rounded,
+                title: _searchText.isEmpty ? AppStrings.noCheckins : AppStrings.noPlaceFound,
+              ),
+            ],
           );
         }
 
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
-          physics: const BouncingScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           itemCount: groups.length,
           itemBuilder: (context, index) {
             var groupData = groups[index];
-            return _buildChatCard(groupData, groupData['groupId'], isGroup: true, myUid: myUid, theme: theme); 
+            return _buildChatCard(groupData, groupData['groupId'], isGroup: true, myUid: myUid, theme: theme);
           },
         );
       },
+      ),
     );
   }
 
@@ -419,20 +446,5 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
     );
   }
 
-  // --- BOŞ DURUM ---
-  Widget _buildEmptyState(String text, IconData icon, ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 70, color: theme.disabledColor.withValues(alpha: 0.3)),
-          const SizedBox(height: 20),
-          Text(
-            text, 
-            style: AppTextStyles.h3.copyWith(color: theme.disabledColor, fontSize: 18)
-          ),
-        ],
-      ),
-    );
-  }
+  // _buildEmptyState removed — now using EmptyState widget inline
 }

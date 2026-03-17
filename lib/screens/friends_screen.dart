@@ -11,6 +11,8 @@ import '../core/app_router.dart';
 import '../services/supabase_service.dart';
 import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
+import '../widgets/common/empty_state.dart';
+import '../core/snackbar_helper.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -21,9 +23,17 @@ class FriendsScreen extends StatefulWidget {
 
 class _FriendsScreenState extends State<FriendsScreen> {
   final _service = SupabaseService();
-  
+
   final TextEditingController _searchController = TextEditingController();
   String _searchText = "";
+
+  // Pull-to-refresh key for StreamBuilder rebuild
+  Key _refreshKey = UniqueKey();
+
+  Future<void> _refreshFriends() async {
+    HapticFeedback.lightImpact();
+    setState(() => _refreshKey = UniqueKey());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,17 +52,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
         child: FloatingActionButton.extended(
           onPressed: () {
             HapticFeedback.mediumImpact();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  AppStrings.findFriendsOnMapDesc, 
-                  style: AppTextStyles.bodySmall.copyWith(color: Colors.white, fontWeight: FontWeight.bold)
-                ), 
-                backgroundColor: theme.primaryColor,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-              )
-            );
+            AppSnackBar.info(context, AppStrings.findFriendsOnMapDesc);
           },
           backgroundColor: theme.primaryColor,
           elevation: 4,
@@ -118,73 +118,86 @@ class _FriendsScreenState extends State<FriendsScreen> {
       ),
 
       // 1. KENDİ PROFİLİNDEN ARKADAŞ LİSTESİNİ ÇEK (Stream)
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _service.streamProfileAsList(myUid),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return const ShimmerList(itemCount: 8);
-          if (snapshot.data!.isEmpty) return _bosArkadasEkrani(theme);
-
-          var userData = snapshot.data!.first;
-          List<dynamic> friendsList = userData['friends'] ?? [];
-
-          if (friendsList.isEmpty) {
-            return _bosArkadasEkrani(theme);
-          }
-
-          // Arkadaş ID'lerini String listesine çevir
-          List<String> friendIds = friendsList.map((e) => e.toString()).toList();
-
-          // 2. ARKADAŞLARIN DETAYLARINI ÇEK (FutureBuilder'a çevrildi)
-          // ⚠️ DÜZELTME: .inFilter Stream'de çalışmaz, .select() kullanıyoruz.
-          return FutureBuilder<List<Map<String, dynamic>>>(
-            future: _service.getUsersByIds(friendIds),
-            builder: (context, friendsSnapshot) {
-              if (friendsSnapshot.connectionState == ConnectionState.waiting) {
-                return const ShimmerList(itemCount: 8);
-              }
-
-              if (!friendsSnapshot.hasData || friendsSnapshot.data!.isEmpty) {
-                 // Veri yoksa veya hata varsa
-                 return Center(
-                  child: Text(
-                    AppStrings.noPersonFound, 
-                    style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor)
-                  )
-                );
-              }
-
-              var friends = friendsSnapshot.data!;
-
-              // Arama Filtresi
-              if (_searchText.isNotEmpty) {
-                friends = friends.where((user) {
-                  String name = (user['full_name'] ?? "").toString().toLowerCase();
-                  return name.contains(_searchText);
-                }).toList();
-              }
-
-              if (friends.isEmpty) {
-                return Center(
-                  child: Text(
-                    AppStrings.noPersonFound, 
-                    style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor, fontWeight: FontWeight.bold)
-                  )
-                );
-              }
-
-              return ListView.builder(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 100), 
-                physics: const BouncingScrollPhysics(),
-                itemCount: friends.length,
-                itemBuilder: (context, index) {
-                  var user = friends[index];
-                  String uid = user['id'];
-                  return _buildFriendCard(user, uid, theme);
-                },
+      body: RefreshIndicator(
+        onRefresh: _refreshFriends,
+        color: theme.primaryColor,
+        child: StreamBuilder<List<Map<String, dynamic>>>(
+          key: _refreshKey,
+          stream: _service.streamProfileAsList(myUid),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return const ShimmerList(itemCount: 8);
+            if (snapshot.data!.isEmpty) {
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [SizedBox(height: MediaQuery.of(context).size.height * 0.25), _bosArkadasEkrani(theme)],
               );
-            },
-          );
-        },
+            }
+
+            var userData = snapshot.data!.first;
+            List<dynamic> friendsList = userData['friends'] ?? [];
+
+            if (friendsList.isEmpty) {
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [SizedBox(height: MediaQuery.of(context).size.height * 0.25), _bosArkadasEkrani(theme)],
+              );
+            }
+
+            // Arkadaş ID'lerini String listesine çevir
+            List<String> friendIds = friendsList.map((e) => e.toString()).toList();
+
+            // 2. ARKADAŞLARIN DETAYLARINI ÇEK (FutureBuilder'a çevrildi)
+            return FutureBuilder<List<Map<String, dynamic>>>(
+              future: _service.getUsersByIds(friendIds),
+              builder: (context, friendsSnapshot) {
+                if (friendsSnapshot.connectionState == ConnectionState.waiting) {
+                  return const ShimmerList(itemCount: 8);
+                }
+
+                if (!friendsSnapshot.hasData || friendsSnapshot.data!.isEmpty) {
+                  return ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+                      EmptyState(icon: Icons.search_off_rounded, title: AppStrings.noPersonFound),
+                    ],
+                  );
+                }
+
+                var friends = friendsSnapshot.data!;
+
+                // Arama Filtresi
+                if (_searchText.isNotEmpty) {
+                  friends = friends.where((user) {
+                    String name = (user['full_name'] ?? "").toString().toLowerCase();
+                    return name.contains(_searchText);
+                  }).toList();
+                }
+
+                if (friends.isEmpty) {
+                  return ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+                      EmptyState(icon: Icons.search_off_rounded, title: AppStrings.noPersonFound),
+                    ],
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: friends.length,
+                  itemBuilder: (context, index) {
+                    var user = friends[index];
+                    String uid = user['id'];
+                    return _buildFriendCard(user, uid, theme);
+                  },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -243,14 +256,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
           if (updateResult.isFailure) return;
 
-          if(mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text("$name ${AppStrings.friendDeleted}"), 
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-              )
-            );
+          if (mounted) {
+            AppSnackBar.success(context, "$name ${AppStrings.friendDeleted}");
           }
         } catch (e) {
           // Hata yönetimi
@@ -334,23 +341,10 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
   // --- BOŞ DURUM ---
   Widget _bosArkadasEkrani(ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.group_off_rounded, size: 80, color: theme.disabledColor.withValues(alpha: 0.3)),
-          const SizedBox(height: 24),
-          Text(
-            AppStrings.noFriendsYet, 
-            style: AppTextStyles.h3.copyWith(color: theme.disabledColor, fontWeight: FontWeight.bold)
-          ),
-          const SizedBox(height: 8),
-          Text(
-            AppStrings.findFriendsDesc, 
-            style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor)
-          ),
-        ],
-      ),
+    return EmptyState(
+      icon: Icons.group_off_rounded,
+      title: AppStrings.noFriendsYet,
+      description: AppStrings.findFriendsDesc,
     );
   }
 }

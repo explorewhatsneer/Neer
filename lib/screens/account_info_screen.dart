@@ -7,6 +7,7 @@ import '../core/constants.dart';
 import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
+import '../core/snackbar_helper.dart';
 
 import '../services/supabase_service.dart';
 
@@ -85,36 +86,17 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
         );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                // "Doğrulama linki gönderildi" gibi bir mesaj daha doğru olur ama orijinali koruduk
-                "${AppStrings.reLoginRequired} (Lütfen yeni e-postanızı doğrulayın)", 
-                style: AppTextStyles.bodySmall.copyWith(color: Colors.white)
-              ),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-            )
-          );
+          AppSnackBar.info(context, "${AppStrings.reLoginRequired} (Lütfen yeni e-postanızı doğrulayın)");
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                AppStrings.infoUpdated, 
-                style: AppTextStyles.bodySmall.copyWith(color: Colors.white, fontWeight: FontWeight.bold)
-              ), 
-              backgroundColor: Colors.green
-            )
-          );
+          AppSnackBar.success(context, AppStrings.infoUpdated);
           Navigator.pop(context);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Hata: $e"), backgroundColor: Colors.redAccent)
-        );
+        AppSnackBar.error(context, "Hata: $e");
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

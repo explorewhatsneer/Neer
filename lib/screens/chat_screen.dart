@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 // CORE IMPORTLARI
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
+import '../core/snackbar_helper.dart';
 
 import '../services/supabase_service.dart';
 import '../widgets/chat/chat_input.dart';
@@ -85,7 +86,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     if (result.isFailure) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Mesaj gönderilemedi: ${result.error.message}")));
+        AppSnackBar.error(context, "Mesaj gönderilemedi: ${result.error.message}");
       }
       return;
     }

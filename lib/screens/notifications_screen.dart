@@ -11,6 +11,7 @@ import '../core/app_strings.dart';
 
 import '../services/supabase_service.dart';
 import '../widgets/common/shimmer_loading.dart';
+import '../widgets/common/empty_state.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -22,6 +23,7 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   final _service = SupabaseService();
   late String _uid;
+  Key _refreshKey = UniqueKey();
 
   @override
   void initState() {
@@ -31,6 +33,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     Future.delayed(const Duration(seconds: 2), () {
       _service.markAllNotificationsRead(_uid);
     });
+  }
+
+  Future<void> _refreshNotifications() async {
+    HapticFeedback.lightImpact();
+    setState(() => _refreshKey = UniqueKey());
   }
 
   // ════════════════════════════════════════════
@@ -153,45 +160,43 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           const SizedBox(width: 4),
         ],
       ),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _service.getNotifications(_uid),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Padding(
-              padding: EdgeInsets.only(top: kToolbarHeight + MediaQuery.of(context).padding.top + 12),
-              child: const ShimmerList(itemCount: 8),
-            );
-          }
+      body: RefreshIndicator(
+        onRefresh: _refreshNotifications,
+        color: theme.primaryColor,
+        child: StreamBuilder<List<Map<String, dynamic>>>(
+          key: _refreshKey,
+          stream: _service.getNotifications(_uid),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Padding(
+                padding: EdgeInsets.only(top: kToolbarHeight + MediaQuery.of(context).padding.top + 12),
+                child: const ShimmerList(itemCount: 8),
+              );
+            }
 
-          final notifications = snapshot.data ?? [];
+            final notifications = snapshot.data ?? [];
 
-          if (notifications.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+            if (notifications.isEmpty) {
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  Icon(Icons.notifications_off_rounded, size: 64, color: theme.disabledColor.withValues(alpha: 0.4)),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Henüz bildirim yok',
-                    style: AppTextStyles.bodyLarge.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Yeni etkileşimler burada görünecek.',
-                    style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),
+                  SizedBox(height: kToolbarHeight + MediaQuery.of(context).padding.top + 60),
+                  const EmptyState(
+                    icon: Icons.notifications_off_rounded,
+                    iconSize: 64,
+                    title: 'Henüz bildirim yok',
+                    description: 'Yeni etkileşimler burada görünecek.',
                   ),
                 ],
-              ),
-            );
-          }
+              );
+            }
 
-          return ListView.builder(
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.only(
-              top: kToolbarHeight + MediaQuery.of(context).padding.top + 12,
-              bottom: 100,
-            ),
+            return ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.only(
+                top: kToolbarHeight + MediaQuery.of(context).padding.top + 12,
+                bottom: 100,
+              ),
             itemCount: notifications.length,
             itemBuilder: (context, index) {
               final notif = notifications[index];
@@ -302,6 +307,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             },
           );
         },
+        ),
       ),
     );
   }

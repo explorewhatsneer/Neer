@@ -4,6 +4,7 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 // CORE IMPORTLARI
 import '../../core/text_styles.dart';
 import '../../core/app_strings.dart';
+import '../../core/snackbar_helper.dart';
 import '../common/glass_panel.dart'; 
 
 class RatingBottomSheet extends StatefulWidget {
@@ -180,16 +181,7 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
                           onPressed: () {
                             HapticFeedback.heavyImpact();
                             Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  AppStrings.ratingSubmitted,
-                                  style: AppTextStyles.bodySmall.copyWith(color: Colors.white, fontWeight: FontWeight.bold)
-                                ), 
-                                backgroundColor: const Color(0xFF34C759),
-                                behavior: SnackBarBehavior.floating,
-                              )
-                            );
+                            AppSnackBar.success(context, AppStrings.ratingSubmitted);
                           },
                           child: Text(
                             AppStrings.submitRating, 

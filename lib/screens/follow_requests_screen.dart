@@ -10,6 +10,8 @@ import '../core/app_strings.dart';
 import '../services/supabase_service.dart';
 import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
+import '../widgets/common/empty_state.dart';
+import '../core/snackbar_helper.dart';
 
 class FriendRequestsScreen extends StatefulWidget {
   const FriendRequestsScreen({super.key});
@@ -25,10 +27,17 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
   // Anlık gizleme listesi (Optimistic UI)
   final Set<String> _hiddenRequestIds = {};
 
+  Key _refreshKey = UniqueKey();
+
   @override
   void initState() {
     super.initState();
     _currentUserId = _service.client.auth.currentUser?.id ?? '';
+  }
+
+  Future<void> _refreshRequests() async {
+    HapticFeedback.lightImpact();
+    setState(() => _refreshKey = UniqueKey());
   }
 
   // --- İSTEK KABUL ETME ---
@@ -45,7 +54,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
 
     if (result.isFailure && mounted) {
       setState(() => _hiddenRequestIds.remove(requestId));
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${AppStrings.error}: ${result.error.message}")));
+      AppSnackBar.error(context, "${AppStrings.error}: ${result.error.message}");
     }
   }
 
@@ -87,60 +96,57 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
         ),
       ),
 
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _service.streamFollowRequests(_currentUserId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const ShimmerList(itemCount: 5);
-          }
+      body: RefreshIndicator(
+        onRefresh: _refreshRequests,
+        color: theme.primaryColor,
+        child: StreamBuilder<List<Map<String, dynamic>>>(
+          key: _refreshKey,
+          stream: _service.streamFollowRequests(_currentUserId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const ShimmerList(itemCount: 5);
+            }
 
-          final allRequests = snapshot.data ?? [];
+            final allRequests = snapshot.data ?? [];
 
-          // Gizlenenleri filtrele
-          final visibleRequests = allRequests.where((req) {
-            return !_hiddenRequestIds.contains(req['id'].toString());
-          }).toList();
+            // Gizlenenleri filtrele
+            final visibleRequests = allRequests.where((req) {
+              return !_hiddenRequestIds.contains(req['id'].toString());
+            }).toList();
 
-          if (visibleRequests.isEmpty) {
-            return _buildEmptyState(theme);
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            physics: const BouncingScrollPhysics(),
-            itemCount: visibleRequests.length,
-            itemBuilder: (context, index) {
-              final request = visibleRequests[index];
-              return _RequestCard(
-                key: ValueKey(request['id']),
-                senderId: request['sender_id'],
-                requestId: request['id'].toString(), 
-                onAccept: () => _acceptRequest(request['id'].toString(), request['sender_id']),
-                onDecline: () => _declineRequest(request['id'].toString()),
+            if (visibleRequests.isEmpty) {
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [SizedBox(height: MediaQuery.of(context).size.height * 0.25), _buildEmptyState(theme)],
               );
-            },
-          );
-        },
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: visibleRequests.length,
+              itemBuilder: (context, index) {
+                final request = visibleRequests[index];
+                return _RequestCard(
+                  key: ValueKey(request['id']),
+                  senderId: request['sender_id'],
+                  requestId: request['id'].toString(),
+                  onAccept: () => _acceptRequest(request['id'].toString(), request['sender_id']),
+                  onDecline: () => _declineRequest(request['id'].toString()),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
 
   Widget _buildEmptyState(ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(color: theme.cardColor, shape: BoxShape.circle, boxShadow: AppThemeStyles.shadowLow),
-            child: Icon(Icons.person_add_disabled_rounded, size: 50, color: theme.disabledColor),
-          ),
-          const SizedBox(height: 24),
-          Text(AppStrings.noRequests, style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold, color: theme.textTheme.bodyLarge?.color)),
-          const SizedBox(height: 8),
-          Text(AppStrings.noRequestsDesc, textAlign: TextAlign.center, style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor)),
-        ],
-      ),
+    return EmptyState(
+      icon: Icons.person_add_disabled_rounded,
+      title: AppStrings.noRequests,
+      description: AppStrings.noRequestsDesc,
     );
   }
 }

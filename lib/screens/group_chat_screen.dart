@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 // CORE IMPORTLARI
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
+import '../core/snackbar_helper.dart';
 
 import '../models/user_model.dart';
 import '../services/supabase_service.dart';
@@ -183,15 +184,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
   void _showSnack(String text, Color color) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(text, style: const TextStyle(fontWeight: FontWeight.w600)),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    if (color == Colors.red) {
+      AppSnackBar.error(context, text);
+    } else if (color == Colors.orange) {
+      AppSnackBar.warning(context, text);
+    } else {
+      AppSnackBar.info(context, text);
+    }
   }
 
   // Grup Üyelerini Göster

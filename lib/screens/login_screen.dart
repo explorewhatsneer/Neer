@@ -7,6 +7,7 @@ import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
+import '../core/snackbar_helper.dart';
 
 import 'package:neer/services/auth_service.dart';
 
@@ -31,17 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
     HapticFeedback.lightImpact();
 
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppStrings.fillAllFields, // 🔥 Core String
-            style: AppTextStyles.bodySmall.copyWith(color: Colors.white)
-          ),
-          backgroundColor: Theme.of(context).colorScheme.error,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-        )
-      );
+      AppSnackBar.error(context, AppStrings.fillAllFields);
       return;
     }
 
@@ -63,14 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         // Hata
         HapticFeedback.heavyImpact();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error, style: AppTextStyles.bodySmall.copyWith(color: Colors.white)), 
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-          )
-        );
+        AppSnackBar.error(context, error);
       }
     }
   }

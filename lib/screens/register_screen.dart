@@ -9,6 +9,7 @@ import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
+import '../core/snackbar_helper.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -47,17 +48,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _usernameController.text.isEmpty ||
         _emailController.text.isEmpty || 
         _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppStrings.fillAllFields, 
-            style: AppTextStyles.bodySmall.copyWith(color: Colors.white)
-          ),
-          backgroundColor: Theme.of(context).colorScheme.error,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-        )
-      );
+      AppSnackBar.error(context, AppStrings.fillAllFields);
       return;
     }
 
@@ -84,13 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           context.go(AppRoutes.home);
         } else {
           // E-posta onayı açıksa buraya düşebilir (Biz kapattık ama güvenlik önlemi)
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text("Kayıt başarılı! Lütfen giriş yapın."),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            )
-          );
+          AppSnackBar.success(context, "Kayıt başarılı! Lütfen giriş yapın.");
           Navigator.pop(context); // Login ekranına dön
         }
       }
@@ -99,24 +84,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
         HapticFeedback.heavyImpact();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.message, style: AppTextStyles.bodySmall.copyWith(color: Colors.white)), 
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-          )
-        );
+        AppSnackBar.error(context, e.message);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Bir hata oluştu: $e"), 
-            backgroundColor: Colors.red,
-          )
-        );
+        AppSnackBar.error(context, "Bir hata oluştu: $e");
       }
     }
   }

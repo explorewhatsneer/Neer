@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
+import '../core/snackbar_helper.dart';
 
 // SERVİSLER
 import '../services/supabase_service.dart';
@@ -137,15 +138,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     HapticFeedback.mediumImpact();
 
     if (_nameController.text.isEmpty || _usernameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppStrings.emptyFieldsError, 
-            style: AppTextStyles.bodySmall.copyWith(color: Colors.white)
-          ),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        )
-      );
+      AppSnackBar.error(context, AppStrings.emptyFieldsError);
       return;
     }
 
@@ -172,29 +165,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       if (updateResult.isFailure) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Hata: ${updateResult.error.message}"), backgroundColor: Colors.redAccent)
-          );
+          AppSnackBar.error(context, "Hata: ${updateResult.error.message}");
         }
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: const Color(0xFF34C759), // Başarı Yeşili
-            content: Text(
-              AppStrings.profileUpdated,
-              style: AppTextStyles.bodySmall.copyWith(color: Colors.white, fontWeight: FontWeight.bold)
-            ),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-          )
-        );
+        AppSnackBar.success(context, AppStrings.profileUpdated);
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Hata: $e"), backgroundColor: Colors.redAccent)
-        );
+        AppSnackBar.error(context, "Hata: $e");
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

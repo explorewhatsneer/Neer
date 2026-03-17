@@ -7,6 +7,7 @@ import '../core/constants.dart';
 import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
+import '../core/snackbar_helper.dart';
 
 import '../services/supabase_service.dart';
 
@@ -66,18 +67,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppStrings.passwordUpdated, 
-              style: AppTextStyles.bodySmall.copyWith(color: Colors.white, fontWeight: FontWeight.bold)
-            ), 
-            backgroundColor: const Color(0xFF34C759), // Başarı Yeşili
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-          )
-        );
-        Navigator.pop(context); 
+        AppSnackBar.success(context, AppStrings.passwordUpdated);
+        Navigator.pop(context);
       }
 
     } on AuthException catch (e) {
@@ -94,19 +85,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage, style: AppTextStyles.bodySmall.copyWith(color: Colors.white)), 
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-          )
-        );
+        AppSnackBar.error(context, errorMessage);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Hata: $e"), backgroundColor: Colors.red)
-        );
+        AppSnackBar.error(context, "Hata: $e");
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
