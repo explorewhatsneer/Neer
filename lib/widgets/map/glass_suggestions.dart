@@ -7,6 +7,7 @@ import '../../core/text_styles.dart';
 import '../../core/app_strings.dart';
 
 import '../../services/supabase_service.dart';
+import '../common/app_cached_image.dart';
 
 class GlassSuggestions extends StatelessWidget {
   final String query;
@@ -197,7 +198,7 @@ class GlassSuggestions extends StatelessWidget {
                   shape: type == 'user' ? BoxShape.circle : BoxShape.rectangle,
                 ),
                 child: type == 'user' && imageUrl != null && imageUrl.isNotEmpty
-                    ? ClipOval(child: Image.network(imageUrl, fit: BoxFit.cover))
+                    ? AppCachedImage.avatar(imageUrl: imageUrl, radius: 20)
                     : Icon(icon, size: 22, color: color),
               ),
               

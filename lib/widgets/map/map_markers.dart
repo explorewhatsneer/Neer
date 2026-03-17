@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../models/place_model.dart';
+import '../common/app_cached_image.dart';
 import 'map_styles.dart';
 import 'info_sheets.dart';
 
@@ -102,10 +103,10 @@ class FriendAvatarMarker extends StatelessWidget {
                 BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))
               ],
             ),
-            child: CircleAvatar(
+            child: CachedAvatar(
+              imageUrl: avatarUrl,
               radius: 22,
               backgroundColor: Colors.grey[900],
-              backgroundImage: avatarUrl.isNotEmpty ? NetworkImage(avatarUrl) : null,
             ),
           ),
           Positioned(
@@ -150,12 +151,10 @@ class MyLocationMarker extends StatelessWidget {
               BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 6, offset: const Offset(0, 3))
             ],
           ),
-          child: CircleAvatar(
+          child: CachedAvatar(
+            imageUrl: profileImage ?? '',
+            radius: 22,
             backgroundColor: Colors.grey[200],
-            backgroundImage: profileImage != null ? NetworkImage(profileImage!) : null,
-            child: profileImage == null
-                ? const Icon(Icons.person, color: Colors.grey)
-                : null,
           ),
         ),
       ],
@@ -194,11 +193,10 @@ class FloatingAvatarsCluster extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(1),
                 decoration: const BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
-                child: CircleAvatar(
+                child: CachedAvatar(
+                  imageUrl: imageUrls[index],
                   radius: 10,
                   backgroundColor: Colors.grey[300],
-                  backgroundImage: imageUrls[index].isNotEmpty ? NetworkImage(imageUrls[index]) : null,
-                  child: imageUrls[index].isEmpty ? const Icon(Icons.person, size: 12, color: Colors.grey) : null,
                 ),
               ),
             );

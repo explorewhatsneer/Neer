@@ -430,10 +430,10 @@ class _CatchScreenState extends State<CatchScreen> {
           children: [
             // ═══ BÜYÜK PROFİL FOTOĞRAFI ═══
             avatar.isNotEmpty
-                ? Image.network(
-                    avatar,
+                ? AppCachedImage(
+                    imageUrl: avatar,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _buildAvatarPlaceholder(name, theme),
+                    errorWidget: _buildAvatarPlaceholder(name, theme),
                   )
                 : _buildAvatarPlaceholder(name, theme),
 

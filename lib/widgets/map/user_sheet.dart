@@ -10,6 +10,7 @@ import '../../core/app_router.dart';
 
 // WIDGETS
 import '../common/glass_panel.dart';
+import '../common/app_cached_image.dart';
 
 // 🔥 Servis Importu
 import '../../services/supabase_service.dart';
@@ -61,15 +62,9 @@ class UserSheet {
                       alignment: Alignment.topCenter,
                       children: [
                         // 1. Kapak Resmi
-                        Container(
+                        AppCachedImage.cover(
+                          imageUrl: coverImage,
                           height: 200,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: NetworkImage(coverImage),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
                         ),
 
                         // 2. Gradient Overlay
@@ -115,10 +110,11 @@ class UserSheet {
                                       shape: BoxShape.circle,
                                       border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1),
                                     ),
-                                    child: CircleAvatar(
+                                    child: CachedAvatar(
+                                      imageUrl: profileImage,
+                                      name: displayName,
                                       radius: 55,
                                       backgroundColor: theme.cardColor,
-                                      backgroundImage: NetworkImage(profileImage),
                                     ),
                                   ),
                                   if (isOnline)
@@ -397,7 +393,7 @@ class UserSheet {
         border: Border.all(color: theme.cardColor, width: 2),
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4)]
       ),
-      child: CircleAvatar(radius: 16, backgroundImage: NetworkImage(url)),
+      child: CachedAvatar(imageUrl: url, radius: 16),
     );
   }
 
@@ -444,9 +440,10 @@ class UserSheet {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              child: Image.network(imgUrl, height: 80, width: double.infinity, fit: BoxFit.cover),
+            AppCachedImage.cover(
+              imageUrl: imgUrl,
+              height: 80,
+              borderRadius: 16,
             ),
             Padding(
               padding: const EdgeInsets.all(10),

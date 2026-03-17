@@ -11,6 +11,7 @@ import '../widgets/business/business_widgets.dart'; // venue klasörüne taşın
 import '../widgets/common/active_users_sheet.dart'; // venue klasörüne taşınmıştı (Check et) veya common
 import '../widgets/common/check_in_button.dart'; // venue klasörüne taşınmıştı
 import '../widgets/common/glass_button.dart';
+import '../widgets/common/app_cached_image.dart';
 
 class BusinessProfileScreen extends StatefulWidget {
   final String venueId;
@@ -158,7 +159,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.network(widget.imageUrl, fit: BoxFit.cover),
+                    AppCachedImage.cover(imageUrl: widget.imageUrl, height: 300),
                     // Gradyan Gölge (Yazı Okunurluğu İçin)
                     Container(
                       decoration: BoxDecoration(
@@ -356,7 +357,6 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
   }
 
   Widget _buildPhotoGrid({required bool isUser, required ThemeData theme}) {
-    bool isDark = theme.brightness == Brightness.dark;
     return GridView.builder(
       padding: const EdgeInsets.all(15),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -367,15 +367,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
       ),
       itemCount: 15,
       itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            color: isDark ? Colors.white10 : Colors.grey[300],
-            image: DecorationImage(
-              image: NetworkImage("https://picsum.photos/300?random=${isUser ? index + 50 : index}"),
-              fit: BoxFit.cover,
-            ),
-          ),
+        return AppCachedImage.cover(
+          imageUrl: "https://picsum.photos/300?random=${isUser ? index + 50 : index}",
+          borderRadius: 15,
         );
       },
     );

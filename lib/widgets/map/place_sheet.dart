@@ -9,6 +9,7 @@ import '../../core/app_strings.dart';
 
 import '../../widgets/common/check_in_button.dart';
 import '../../widgets/common/glass_panel.dart';
+import '../../widgets/common/app_cached_image.dart';
 
 class PlaceSheet {
   static void show(BuildContext context, Map<String, dynamic> placeData, String placeId) {
@@ -64,16 +65,9 @@ class PlaceSheet {
                   Stack(
                     children: [
                       // 🔥 Gerçek Resim
-                      Container(
+                      AppCachedImage.cover(
+                        imageUrl: placeImageUrl,
                         height: 220,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: theme.cardColor,
-                          image: DecorationImage(
-                            image: NetworkImage(placeImageUrl), 
-                            fit: BoxFit.cover,
-                          ),
-                        ),
                       ),
                       // Gradient Overlay
                       Container(
@@ -239,10 +233,10 @@ class PlaceSheet {
                                     border: Border.all(color: theme.scaffoldBackgroundColor, width: 2.5),
                                     boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 5)]
                                   ),
-                                  child: CircleAvatar(
+                                  child: CachedAvatar(
+                                    imageUrl: 'https://i.pravatar.cc/150?img=${index + 20}',
                                     radius: 22,
                                     backgroundColor: theme.cardColor,
-                                    backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=${index + 20}'),
                                   ),
                                 ),
                               );
@@ -290,10 +284,10 @@ class PlaceSheet {
                                     border: Border.all(color: theme.scaffoldBackgroundColor, width: 2.5),
                                     boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 5)]
                                   ),
-                                  child: CircleAvatar(
+                                  child: CachedAvatar(
+                                    imageUrl: 'https://i.pravatar.cc/150?img=${index + 50}',
                                     radius: 22,
                                     backgroundColor: theme.cardColor,
-                                    backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=${index + 50}'),
                                   ),
                                 ),
                               );

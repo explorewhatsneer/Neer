@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart'; 
+import '../../core/theme_styles.dart';
 import '../../core/text_styles.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
+import '../common/app_cached_image.dart'; 
 
 // 1. BÖLÜM BAŞLIĞI
 class SectionHeader extends StatelessWidget {
@@ -262,7 +263,7 @@ class VenueLeaderboard extends StatelessWidget {
           )
         ),
         const SizedBox(width: 15),
-        CircleAvatar(backgroundImage: NetworkImage(img), radius: 18),
+        CachedAvatar(imageUrl: img, name: name, radius: 18),
         const SizedBox(width: 10),
         Expanded(
           child: Text("@$name", 
@@ -330,9 +331,10 @@ class FriendNoteBubble extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: theme.scaffoldBackgroundColor, width: 2)
             ),
-            child: const CircleAvatar(
-              radius: 20, 
-              backgroundImage: NetworkImage("https://i.pravatar.cc/150?u=ece"), 
+            child: const CachedAvatar(
+              imageUrl: "https://i.pravatar.cc/150?u=ece",
+              name: "Ece",
+              radius: 20,
             ),
           ),
         )

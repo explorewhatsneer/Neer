@@ -15,6 +15,7 @@ import '../widgets/chat/group_message_bubble.dart';
 import '../widgets/common/active_users_sheet.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/empty_state.dart';
+import '../widgets/common/app_cached_image.dart';
 
 class GroupChatScreen extends StatefulWidget {
   final String groupId;
@@ -244,21 +245,10 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         titleSpacing: 0,
         title: Row(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: theme.dividerColor, width: 1),
-              ),
-              child: CircleAvatar(
-                radius: 18,
-                backgroundColor: isDark ? Colors.white10 : Colors.grey[200],
-                backgroundImage: (widget.groupImage.isNotEmpty && widget.groupImage.startsWith('http'))
-                    ? NetworkImage(widget.groupImage)
-                    : null,
-                child: (widget.groupImage.isEmpty || !widget.groupImage.startsWith('http'))
-                    ? Icon(Icons.store_mall_directory_rounded, color: theme.primaryColor, size: 20)
-                    : null,
-              ),
+            CachedAvatar(
+              imageUrl: widget.groupImage,
+              radius: 18,
+              backgroundColor: isDark ? Colors.white10 : Colors.grey[200],
             ),
             const SizedBox(width: 12),
             Expanded(
