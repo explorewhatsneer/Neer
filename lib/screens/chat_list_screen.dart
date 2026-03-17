@@ -137,7 +137,7 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
                   labelStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w800, fontSize: 13),
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
-                  overlayColor: MaterialStateProperty.all(Colors.transparent), 
+                  overlayColor: WidgetStateProperty.all(Colors.transparent), 
                   onTap: (index) => HapticFeedback.selectionClick(), 
                   tabs: [
                     Tab(text: AppStrings.chatsTab), 
@@ -309,7 +309,6 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
   Widget _buildChatCard(Map<String, dynamic> data, String docId, {required bool isGroup, required String myUid, required ThemeData theme}) {
     String name = isGroup ? (data['groupName'] ?? "Mekan") : (data['friendName'] ?? "Kişi");
     String image = isGroup ? (data['groupImage'] ?? "") : (data['friendAvatar'] ?? "");
-    bool hasValidImage = image.isNotEmpty && image.startsWith('http');
     bool isDark = theme.brightness == Brightness.dark;
 
     String lastMsg = data['lastMessage'] ?? "Sohbet başladı.";

@@ -183,7 +183,7 @@ class GlassSuggestions extends StatelessWidget {
           // Seçilen veriyi geri döndür
           onItemSelected(data, id, type);
         },
-        overlayColor: MaterialStateProperty.all(theme.primaryColor.withValues(alpha: 0.1)),
+        overlayColor: WidgetStateProperty.all(theme.primaryColor.withValues(alpha: 0.1)),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(

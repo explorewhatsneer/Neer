@@ -194,7 +194,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                         unselectedLabelColor: theme.disabledColor, 
                         labelStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w800, fontSize: 13),
                         unselectedLabelStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600, fontSize: 13),
-                        overlayColor: MaterialStateProperty.all(Colors.transparent),
+                        overlayColor: WidgetStateProperty.all(Colors.transparent),
                         onTap: (index) => HapticFeedback.selectionClick(),
                         tabs: [
                           Tab(text: AppStrings.profileTab), 

@@ -44,8 +44,7 @@ class StoryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isMe = index == 0;
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    
+
     // Auth kullanıcısı resmini al
     final user = SupabaseService().client.auth.currentUser;
     final userImage = user?.userMetadata?['avatar_url'] ?? "https://i.pravatar.cc/150?img=1";

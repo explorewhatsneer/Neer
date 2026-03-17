@@ -72,7 +72,6 @@ class _LoadingButtonState extends State<LoadingButton> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final bg = widget.backgroundColor ?? theme.primaryColor;
     final fg = widget.foregroundColor ?? Colors.white;
     final radius = widget.borderRadius ?? AppThemeStyles.radius16;

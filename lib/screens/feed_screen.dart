@@ -96,7 +96,7 @@ class _FeedScreenState extends State<FeedScreen> {
       ],
     ).then((value) {
       if (value != null) {
-        _onFilterChanged(value as String);
+        _onFilterChanged(value);
       }
     });
   }

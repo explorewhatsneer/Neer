@@ -93,7 +93,6 @@ class _CheckInButtonState extends State<CheckInButton> {
           widget.onCheckInSuccess?.call();
 
           final liveCount = result['live_count'] ?? 0;
-          final distance = result['distance'] ?? 0;
 
           CheckInDialog.show(
             context,

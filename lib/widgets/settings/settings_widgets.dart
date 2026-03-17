@@ -189,7 +189,7 @@ class SettingsSwitch extends StatelessWidget {
             HapticFeedback.selectionClick(); // Switch titreşimi
             onChanged(val);
           },
-          activeColor: theme.primaryColor,
+          activeThumbColor: theme.primaryColor,
           inactiveThumbColor: theme.disabledColor,
           inactiveTrackColor: theme.dividerColor.withValues(alpha: 0.3),
         ),

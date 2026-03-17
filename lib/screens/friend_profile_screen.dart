@@ -51,12 +51,6 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
   String _incomingRequestName = ""; 
   String _targetUserName = ""; 
   
-  // İstatistikler (Canlı)
-  int _followersCount = 0;
-  int _followingCount = 0;
-  int _friendsCount = 0;
-  double _trustScore = 5.0;
-
   // Streams & Futures
   late Stream<List<Map<String, dynamic>>> _favoritesStream;
   late Stream<List<Map<String, dynamic>>> _notesStream;
@@ -95,10 +89,6 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
         setState(() {
           _isTargetPrivate = profileData['is_private'] ?? false;
           _targetUserName = profileData['full_name'] ?? "Kullanıcı";
-          _followersCount = profileData['followers_count'] ?? 0;
-          _followingCount = profileData['following_count'] ?? 0;
-          _friendsCount = profileData['friends_count'] ?? 0; 
-          _trustScore = (profileData['trust_score'] ?? 5.0).toDouble();
         });
       }
 
@@ -545,7 +535,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                               unselectedLabelColor: theme.disabledColor, 
                               labelStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w800, fontSize: 13),
                               unselectedLabelStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600, fontSize: 13),
-                              overlayColor: MaterialStateProperty.all(Colors.transparent),
+                              overlayColor: WidgetStateProperty.all(Colors.transparent),
                               tabs: [Tab(text: AppStrings.navProfile), Tab(text: AppStrings.activity), Tab(text: AppStrings.gallery)],
                             ),
                           ),
