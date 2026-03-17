@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 // CORE IMPORTLARI
 import '../../core/theme_styles.dart';
 import '../../core/text_styles.dart';
-import '../../core/app_strings.dart';
 import '../../core/constants.dart'; // AppColors için
 import '../../core/app_router.dart';
 

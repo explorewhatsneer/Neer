@@ -13,6 +13,8 @@ import '../services/supabase_service.dart';
 import '../widgets/chat/chat_input.dart';
 import '../widgets/chat/group_message_bubble.dart';
 import '../widgets/common/active_users_sheet.dart';
+import '../widgets/common/shimmer_loading.dart';
+import '../widgets/common/empty_state.dart';
 
 class GroupChatScreen extends StatefulWidget {
   final String groupId;
@@ -294,16 +296,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
               stream: _service.streamGroupMessages(widget.groupId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+                  return const ShimmerList(itemCount: 8);
                 }
 
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                    child: Text(
-                      AppStrings.beFirstToMessage,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),
-                    ),
+                  return EmptyState(
+                    icon: Icons.forum_outlined,
+                    title: AppStrings.beFirstToMessage,
                   );
                 }
 

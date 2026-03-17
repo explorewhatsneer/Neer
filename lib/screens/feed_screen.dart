@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // CORE IMPORTLARI
-import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 
 // MODELLER

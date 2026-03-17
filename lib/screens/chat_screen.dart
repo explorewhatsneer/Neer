@@ -10,6 +10,8 @@ import '../services/supabase_service.dart';
 import '../widgets/chat/chat_input.dart';
 import '../widgets/chat/message_bubble.dart';
 import '../widgets/common/app_cached_image.dart';
+import '../widgets/common/shimmer_loading.dart';
+import '../widgets/common/empty_state.dart';
 import '../models/user_model.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -175,11 +177,18 @@ class _ChatScreenState extends State<ChatScreen> {
               stream: _service.streamDMMessages(chatRoomId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+                  return const ShimmerList(itemCount: 8);
                 }
-                
-                // Mesaj yoksa boş liste döndür, hata verme
+
                 final messages = snapshot.data ?? [];
+
+                if (messages.isEmpty) {
+                  return EmptyState(
+                    icon: Icons.chat_bubble_outline_rounded,
+                    title: AppStrings.noMessages,
+                    description: 'İlk mesajı gönder!',
+                  );
+                }
 
                 return ListView.builder(
                   controller: _scrollController,

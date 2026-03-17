@@ -4,9 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../core/constants.dart';
 import '../core/text_styles.dart';
-import '../core/theme_styles.dart';
 import '../core/app_strings.dart';
 
 import '../services/supabase_service.dart';

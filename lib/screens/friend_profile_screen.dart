@@ -7,10 +7,8 @@ import '../widgets/common/glass_button.dart';
 import '../services/supabase_service.dart';
 
 // CORE
-import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
-import '../core/constants.dart';
 import '../core/app_router.dart';
 
 // MODELS & SCREENS

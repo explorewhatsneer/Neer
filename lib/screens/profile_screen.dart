@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../main.dart'; // supabase nesnesi için
 
 // CORE
-import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';

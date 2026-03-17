@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:neer/core/connectivity_service.dart';
-import 'package:neer/core/language_manager.dart';
-import 'package:neer/core/theme_manager.dart';
-import 'package:neer/main.dart' show themeManager, languageManager;
 import 'package:neer/widgets/common/offline_banner.dart';
 
 void main() {
