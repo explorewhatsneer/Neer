@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 // CORE IMPORTLARI
 import '../../core/theme_styles.dart'; 
 import '../../core/text_styles.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
+import '../common/app_cached_image.dart';
 
 // ==========================================
 // 1. MODERN ARAMA ÇUBUĞU
@@ -110,11 +111,10 @@ class PersonResultCard extends StatelessWidget {
                     shape: BoxShape.circle, 
                     border: Border.all(color: theme.dividerColor.withValues(alpha: 0.2), width: 1),
                   ),
-                  child: CircleAvatar(
-                    radius: 24, // Biraz küçültüldü
-                    backgroundColor: theme.scaffoldBackgroundColor,
-                    foregroundImage: hasValidUrl ? NetworkImage(imageUrl) : null,
-                    child: Icon(Icons.person_rounded, color: theme.disabledColor, size: 24),
+                  child: CachedAvatar(
+                    imageUrl: hasValidUrl ? imageUrl : '',
+                    name: name,
+                    radius: 24,
                   ),
                 ),
                 

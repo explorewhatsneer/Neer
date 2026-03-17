@@ -10,6 +10,7 @@ import '../core/theme_styles.dart';
 import '../core/app_strings.dart';
 
 import '../services/supabase_service.dart';
+import '../widgets/common/shimmer_loading.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -156,7 +157,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         stream: _service.getNotifications(_uid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+            return Padding(
+              padding: EdgeInsets.only(top: kToolbarHeight + MediaQuery.of(context).padding.top + 12),
+              child: const ShimmerList(itemCount: 8),
+            );
           }
 
           final notifications = snapshot.data ?? [];

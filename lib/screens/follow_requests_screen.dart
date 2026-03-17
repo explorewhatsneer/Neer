@@ -8,6 +8,8 @@ import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 
 import '../services/supabase_service.dart';
+import '../widgets/common/app_cached_image.dart';
+import '../widgets/common/shimmer_loading.dart';
 
 class FriendRequestsScreen extends StatefulWidget {
   const FriendRequestsScreen({super.key});
@@ -89,7 +91,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
         stream: _service.streamFollowRequests(_currentUserId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+            return const ShimmerList(itemCount: 5);
           }
 
           final allRequests = snapshot.data ?? [];
@@ -167,7 +169,7 @@ class _RequestCard extends StatelessWidget {
       future: service.getProfileSingle(senderId),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Container(height: 70, margin: const EdgeInsets.only(bottom: 12), child: const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))));
+          return const Padding(padding: EdgeInsets.only(bottom: 12), child: ShimmerProfileCard());
         }
 
         final user = snapshot.data!;
@@ -190,7 +192,7 @@ class _RequestCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                CircleAvatar(radius: 24, backgroundImage: NetworkImage(avatar), backgroundColor: theme.dividerColor),
+                CachedAvatar(imageUrl: avatar, name: name, radius: 24),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(

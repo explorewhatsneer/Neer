@@ -8,6 +8,8 @@ import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 
 import '../services/supabase_service.dart';
+import '../widgets/common/app_cached_image.dart';
+import '../widgets/common/shimmer_loading.dart';
 
 class BlockedUsersScreen extends StatefulWidget {
   const BlockedUsersScreen({super.key});
@@ -101,7 +103,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
         stream: _service.streamProfileAsList(myUid),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+            return const ShimmerList(itemCount: 5);
           }
           
           if (snapshot.data!.isEmpty) return _buildEmptyState(theme);
@@ -119,7 +121,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
           return FutureBuilder<List<Map<String, dynamic>>>(
             future: _service.getUsersByIds(blockedList), // ID'si bu listede olanları getir
             builder: (context, userSnapshot) {
-              if (!userSnapshot.hasData) return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+              if (!userSnapshot.hasData) return const ShimmerList(itemCount: 5);
               
               var users = userSnapshot.data!;
 
@@ -209,14 +211,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
         child: Row(
           children: [
             // Avatar
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: theme.scaffoldBackgroundColor,
-              backgroundImage: (image.isNotEmpty) ? NetworkImage(image) : null,
-              child: (image.isEmpty)
-                ? Icon(Icons.person, color: theme.disabledColor, size: 28)
-                : null,
-            ),
+            CachedAvatar(imageUrl: image, name: name, radius: 28),
             const SizedBox(width: 16),
             
             // Bilgiler

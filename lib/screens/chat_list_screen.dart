@@ -10,6 +10,8 @@ import '../core/app_strings.dart';
 import '../core/app_router.dart';
 
 import '../services/supabase_service.dart';
+import '../widgets/common/app_cached_image.dart';
+import '../widgets/common/shimmer_loading.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -154,7 +156,7 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
     return StreamBuilder<List<Map<String, dynamic>>>(
       stream: _service.streamRecentMessages(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+        if (!snapshot.hasData) return const ShimmerList(itemCount: 6);
 
         final allMessages = snapshot.data!;
 
@@ -217,7 +219,7 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
     return StreamBuilder<List<Map<String, dynamic>>>(
       stream: _service.streamRecentMessages(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+        if (!snapshot.hasData) return const ShimmerList(itemCount: 6);
         
         // 🔥 Dart tarafında 'group_id' si null olmayanları alıyoruz
         final allMessages = snapshot.data!.where((m) => m['group_id'] != null).toList();
@@ -366,35 +368,13 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
           child: Row(
             children: [
               // Avatar
-              Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle, 
-                      border: Border.all(color: theme.dividerColor, width: 1)
-                    ),
-                    child: CircleAvatar(
-                      radius: 28,
-                      backgroundColor: isGroup ? theme.primaryColor.withValues(alpha: 0.1) : theme.scaffoldBackgroundColor,
-                      backgroundImage: hasValidImage ? NetworkImage(image) : null,
-                      child: !hasValidImage
-                          ? Icon(isGroup ? Icons.store : Icons.person, color: isGroup ? theme.primaryColor : theme.disabledColor)
-                          : null,
-                    ),
-                  ),
-                  if (!isGroup) 
-                    Positioned(
-                      bottom: 2, right: 2,
-                      child: Container(
-                        width: 14, height: 14, 
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF34C759), // Online Yeşili
-                          shape: BoxShape.circle, 
-                          border: Border.all(color: theme.cardColor, width: 2.5) 
-                        )
-                      ),
-                    )
-                ],
+              CachedAvatar(
+                imageUrl: image,
+                name: name,
+                radius: 28,
+                showOnlineIndicator: !isGroup,
+                isOnline: !isGroup,
+                backgroundColor: isGroup ? theme.primaryColor.withValues(alpha: 0.1) : null,
               ),
               const SizedBox(width: 16),
               

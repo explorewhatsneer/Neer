@@ -9,6 +9,8 @@ import '../core/app_strings.dart';
 import '../core/app_router.dart';
 
 import '../services/supabase_service.dart';
+import '../widgets/common/app_cached_image.dart';
+import '../widgets/common/shimmer_loading.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -119,7 +121,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: _service.streamProfileAsList(myUid),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+          if (!snapshot.hasData) return const ShimmerList(itemCount: 8);
           if (snapshot.data!.isEmpty) return _bosArkadasEkrani(theme);
 
           var userData = snapshot.data!.first;
@@ -138,7 +140,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
             future: _service.getUsersByIds(friendIds),
             builder: (context, friendsSnapshot) {
               if (friendsSnapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+                return const ShimmerList(itemCount: 8);
               }
 
               if (!friendsSnapshot.hasData || friendsSnapshot.data!.isEmpty) {
@@ -273,37 +275,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
           child: Row(
             children: [
               // Avatar ve Online Durumu
-              Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: theme.dividerColor, width: 1),
-                    ),
-                    child: CircleAvatar(
-                      radius: 30,
-                      backgroundColor: theme.scaffoldBackgroundColor,
-                      backgroundImage: (image.isNotEmpty) ? NetworkImage(image) : null,
-                      child: (image.isEmpty)
-                        ? Text(name.isNotEmpty ? name[0].toUpperCase() : "?", style: TextStyle(fontWeight: FontWeight.w800, color: theme.disabledColor, fontSize: 22))
-                        : null,
-                    ),
-                  ),
-                  
-                  // 🔥 ARTIK SARI YANMAYACAK
-                  if (isOnline)
-                    Positioned(
-                      bottom: 0, right: 0,
-                      child: Container(
-                        width: 16, height: 16,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF34C759), // Online Yeşil
-                          shape: BoxShape.circle, 
-                          border: Border.all(color: theme.cardColor, width: 2.5)
-                        ),
-                      ),
-                    )
-                ],
+              CachedAvatar(
+                imageUrl: image,
+                name: name,
+                radius: 30,
+                showOnlineIndicator: true,
+                isOnline: isOnline,
+                heroTag: 'avatar_$uid',
               ),
               const SizedBox(width: 16),
               

@@ -10,6 +10,7 @@ import '../models/post_model.dart';
 
 // SERVİSLER
 import '../services/supabase_service.dart';
+import '../widgets/common/shimmer_loading.dart';
 
 // WIDGETLAR
 import '../widgets/feed/feed_widgets.dart';
@@ -177,7 +178,7 @@ class _FeedScreenState extends State<FeedScreen> {
         builder: (context, snapshot) {
           
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+            return const ShimmerList(itemCount: 6);
           }
 
           // BOŞ DURUM

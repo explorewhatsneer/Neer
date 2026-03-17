@@ -4,7 +4,8 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 // CORE IMPORTLARI
 import '../../core/theme_styles.dart'; 
 import '../../core/text_styles.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
+import '../common/app_cached_image.dart';
 
 class ReviewCard extends StatelessWidget {
   final String placeName;
@@ -56,7 +57,7 @@ class ReviewCard extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.network(imageUrl, width: 70, height: 70, fit: BoxFit.cover),
+                  child: AppCachedImage(imageUrl: imageUrl, width: 70, height: 70),
                 ),
               ),
               const SizedBox(width: 16),

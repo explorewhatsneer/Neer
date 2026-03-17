@@ -7,6 +7,7 @@ import '../../core/theme_styles.dart';
 import '../../core/text_styles.dart';
 import '../../core/constants.dart';
 import '../../core/app_strings.dart';
+import 'app_cached_image.dart';
 
 import '../../services/supabase_service.dart';
 import 'glass_panel.dart';
@@ -182,34 +183,12 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
         child: Row(
           children: [
             // 1. AVATAR & ONLINE NOKTASI
-            Stack(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: theme.dividerColor.withValues(alpha: 0.3)),
-                  ),
-                  child: CircleAvatar(
-                    radius: 24,
-                    backgroundColor: theme.scaffoldBackgroundColor,
-                    backgroundImage: NetworkImage(user['avatar_url'] ?? "https://i.pravatar.cc/150?u=$userId"),
-                  ),
-                ),
-                if (isOnline)
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      width: 14,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF34C759), 
-                        shape: BoxShape.circle,
-                        border: Border.all(color: theme.cardColor, width: 2.5),
-                      ),
-                    ),
-                  ),
-              ],
+            CachedAvatar(
+              imageUrl: user['avatar_url'] ?? '',
+              name: user['full_name'] ?? '',
+              radius: 24,
+              showOnlineIndicator: true,
+              isOnline: isOnline,
             ),
             
             const SizedBox(width: 16),

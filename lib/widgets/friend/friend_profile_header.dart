@@ -1,9 +1,9 @@
-import 'dart:ui'; 
+import 'dart:ui';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
 
 // CORE IMPORTLARI
-import '../../core/text_styles.dart'; 
+import '../../core/text_styles.dart';
 import '../../core/app_strings.dart';  
 
 class FriendProfileHeader extends StatelessWidget {
@@ -46,11 +46,14 @@ class FriendProfileHeader extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // 1. ARKA PLAN RESMİ
-        Image.network(
-          imageUrl.isNotEmpty ? imageUrl : "https://i.pravatar.cc/300", 
+        // 1. ARKA PLAN RESMİ (cache'li)
+        CachedNetworkImage(
+          imageUrl: imageUrl.isNotEmpty ? imageUrl : "https://i.pravatar.cc/300",
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF1C1C1E)),
+          width: double.infinity,
+          height: double.infinity,
+          placeholder: (_, __) => Container(color: const Color(0xFF1C1C1E)),
+          errorWidget: (_, __, ___) => Container(color: const Color(0xFF1C1C1E)),
         ),
         
         // 2. GELİŞMİŞ BLUR VE GRADIENT
@@ -101,16 +104,25 @@ class FriendProfileHeader extends StatelessWidget {
                             border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
                           ),
                         ),
-                        // İç Avatar
+                        // İç Avatar (cache'li + Hero)
                         Container(
-                          margin: const EdgeInsets.all(4), 
+                          margin: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            image: DecorationImage(
-                              image: NetworkImage(imageUrl.isNotEmpty ? imageUrl : "https://i.pravatar.cc/300"),
-                              fit: BoxFit.cover,
-                            ),
                             boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 5)],
+                          ),
+                          child: ClipOval(
+                            child: CachedNetworkImage(
+                              imageUrl: imageUrl.isNotEmpty ? imageUrl : "https://i.pravatar.cc/300",
+                              fit: BoxFit.cover,
+                              width: componentSize - 8,
+                              height: componentSize - 8,
+                              placeholder: (_, __) => Container(color: Colors.grey.shade800),
+                              errorWidget: (_, __, ___) => Container(
+                                color: Colors.grey.shade800,
+                                child: const Icon(Icons.person, color: Colors.white54),
+                              ),
+                            ),
                           ),
                         ),
                         if (isOnline)

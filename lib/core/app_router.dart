@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'page_transitions.dart';
+
 import '../main_layout.dart';
 import '../screens/login_screen.dart';
 import '../screens/register_screen.dart';
@@ -57,113 +59,127 @@ final GoRouter appRouter = GoRouter(
   },
 
   routes: [
-    // ═══ AUTH ═══
+    // ═══ AUTH (fade geçiş) ═══
     GoRoute(
       path: AppRoutes.login,
-      builder: (context, state) => const LoginScreen(),
+      pageBuilder: (context, state) => buildFadeTransition(context, state, const LoginScreen()),
     ),
     GoRoute(
       path: AppRoutes.register,
-      builder: (context, state) => const RegisterScreen(),
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const RegisterScreen()),
     ),
 
-    // ═══ ANA SAYFA (Tab navigation) ═══
+    // ═══ ANA SAYFA (fade geçiş — login'den gelince yumuşak) ═══
     GoRoute(
       path: '/',
-      builder: (context, state) => const MainLayout(),
+      pageBuilder: (context, state) => buildFadeTransition(context, state, const MainLayout()),
     ),
 
-    // ═══ AYARLAR ═══
+    // ═══ AYARLAR (iOS sağdan kayma) ═══
     GoRoute(
       path: AppRoutes.settings,
-      builder: (context, state) => const SettingsScreen(),
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const SettingsScreen()),
     ),
     GoRoute(
       path: AppRoutes.accountInfo,
-      builder: (context, state) => const AccountInfoScreen(),
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const AccountInfoScreen()),
     ),
     GoRoute(
       path: AppRoutes.changePassword,
-      builder: (context, state) => const ChangePasswordScreen(),
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const ChangePasswordScreen()),
     ),
     GoRoute(
       path: AppRoutes.loginMethods,
-      builder: (context, state) => const LoginMethodsScreen(),
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const LoginMethodsScreen()),
     ),
     GoRoute(
       path: AppRoutes.premium,
-      builder: (context, state) => const PremiumScreen(),
+      pageBuilder: (context, state) => buildModalTransition(context, state, const PremiumScreen()),
     ),
     GoRoute(
       path: AppRoutes.blockedUsers,
-      builder: (context, state) => const BlockedUsersScreen(),
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const BlockedUsersScreen()),
     ),
 
-    // ═══ PROFİL ═══
+    // ═══ PROFİL (iOS sağdan kayma) ═══
     GoRoute(
       path: AppRoutes.editProfile,
-      builder: (context, state) => const EditProfileScreen(),
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const EditProfileScreen()),
     ),
 
-    // ═══ BİLDİRİMLER ═══
+    // ═══ BİLDİRİMLER (iOS sağdan kayma) ═══
     GoRoute(
       path: AppRoutes.notifications,
-      builder: (context, state) => const NotificationsScreen(),
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const NotificationsScreen()),
     ),
     GoRoute(
       path: AppRoutes.followRequests,
-      builder: (context, state) => const FriendRequestsScreen(),
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const FriendRequestsScreen()),
     ),
 
-    // ═══ ANKETLER ═══
+    // ═══ ANKETLER (modal alttan yukarı) ═══
     GoRoute(
       path: AppRoutes.polls,
-      builder: (context, state) => const PollsScreen(),
+      pageBuilder: (context, state) => buildModalTransition(context, state, const PollsScreen()),
     ),
 
-    // ═══ CHAT ═══
+    // ═══ CHAT (iOS sağdan kayma) ═══
     GoRoute(
       path: AppRoutes.chat,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final extra = state.extra as Map<String, dynamic>? ?? {};
-        return ChatScreen(
-          userId: extra['userId'] ?? '',
-          userName: extra['userName'] ?? '',
-          userImage: extra['userImage'],
+        return buildSlideTransition(
+          context,
+          state,
+          ChatScreen(
+            userId: extra['userId'] ?? '',
+            userName: extra['userName'] ?? '',
+            userImage: extra['userImage'],
+          ),
         );
       },
     ),
     GoRoute(
       path: AppRoutes.groupChat,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final extra = state.extra as Map<String, dynamic>? ?? {};
-        return GroupChatScreen(
-          groupId: extra['groupId'] ?? '',
-          groupName: extra['groupName'] ?? '',
-          groupImage: extra['groupImage'],
+        return buildSlideTransition(
+          context,
+          state,
+          GroupChatScreen(
+            groupId: extra['groupId'] ?? '',
+            groupName: extra['groupName'] ?? '',
+            groupImage: extra['groupImage'],
+          ),
         );
       },
     ),
 
-    // ═══ FRIEND PROFILE ═══
+    // ═══ FRIEND PROFILE (iOS sağdan kayma) ═══
     GoRoute(
       path: '/profile/:userId',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final userId = state.pathParameters['userId']!;
-        return FriendProfileScreen(targetUserId: userId);
+        return buildSlideTransition(
+          context, state, FriendProfileScreen(targetUserId: userId),
+        );
       },
     ),
 
-    // ═══ BUSINESS PROFILE ═══
+    // ═══ BUSINESS PROFILE (modal alttan yukarı) ═══
     GoRoute(
       path: '/venue/:venueId',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final extra = state.extra as Map<String, dynamic>? ?? {};
         final venueId = state.pathParameters['venueId'] ?? '';
-        return BusinessProfileScreen(
-          venueId: venueId,
-          venueName: extra['venueName'] ?? '',
-          imageUrl: extra['imageUrl'] ?? '',
+        return buildModalTransition(
+          context,
+          state,
+          BusinessProfileScreen(
+            venueId: venueId,
+            venueName: extra['venueName'] ?? '',
+            imageUrl: extra['imageUrl'] ?? '',
+          ),
         );
       },
     ),

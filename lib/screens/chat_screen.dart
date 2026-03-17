@@ -8,6 +8,7 @@ import '../core/app_strings.dart';
 import '../services/supabase_service.dart';
 import '../widgets/chat/chat_input.dart';
 import '../widgets/chat/message_bubble.dart';
+import '../widgets/common/app_cached_image.dart';
 import '../models/user_model.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -129,15 +130,10 @@ class _ChatScreenState extends State<ChatScreen> {
         titleSpacing: 0,
         title: Row(
           children: [
-            CircleAvatar(
+            CachedAvatar(
+              imageUrl: widget.userImage ?? '',
+              name: widget.userName,
               radius: 18,
-              backgroundColor: theme.scaffoldBackgroundColor,
-              backgroundImage: (widget.userImage != null && widget.userImage!.isNotEmpty) 
-                  ? NetworkImage(widget.userImage!) 
-                  : null,
-              child: (widget.userImage == null || widget.userImage!.isEmpty) 
-                  ? Text(widget.userName.isNotEmpty ? widget.userName[0].toUpperCase() : "?", style: TextStyle(color: theme.primaryColor, fontWeight: FontWeight.bold)) 
-                  : null,
             ),
             const SizedBox(width: 12),
             Column(

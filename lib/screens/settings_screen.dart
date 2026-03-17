@@ -13,6 +13,7 @@ import '../core/app_router.dart';
 
 import '../services/supabase_service.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/common/app_cached_image.dart';
 
 // WIDGETLAR
 import '../widgets/settings/settings_widgets.dart';
@@ -350,10 +351,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Container(
                   padding: const EdgeInsets.all(3),
                   decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  child: CircleAvatar(
+                  child: CachedAvatar(
+                    imageUrl: userImage,
+                    name: userName,
                     radius: 32,
-                    backgroundImage: NetworkImage(userImage),
-                    backgroundColor: Colors.grey[200],
                   ),
                 ),
                 const SizedBox(width: 16),

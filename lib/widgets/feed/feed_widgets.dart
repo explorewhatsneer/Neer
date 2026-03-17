@@ -10,6 +10,7 @@ import '../../core/app_strings.dart';
 
 import '../../models/post_model.dart';
 import '../../services/supabase_service.dart';
+import '../common/app_cached_image.dart';
 
 // ==========================================
 // YARDIMCI: AKILLI ZAMAN FORMATLAYICI ⏰
@@ -80,9 +81,9 @@ class StoryItem extends StatelessWidget {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(2.0),
-                      child: CircleAvatar(
-                        backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
-                        backgroundImage: NetworkImage(isMe ? userImage : "https://i.pravatar.cc/150?img=${index + 15}"),
+                      child: AppCachedImage.avatar(
+                        imageUrl: isMe ? userImage : "https://i.pravatar.cc/150?img=${index + 15}",
+                        radius: 35,
                       ),
                     ),
                   ),
@@ -217,10 +218,10 @@ class FeedCardHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 20, 
-            backgroundImage: NetworkImage(avatarUrl.isNotEmpty ? avatarUrl : "https://i.pravatar.cc/150"),
-            backgroundColor: theme.cardColor,
+          CachedAvatar(
+            imageUrl: avatarUrl,
+            name: userName,
+            radius: 20,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -308,8 +309,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
           time: timeAgo
         ),
         
-        // Görsel
-        Image.network(displayImage, height: 400, width: double.infinity, fit: BoxFit.cover),
+        // Görsel (cache'li)
+        AppCachedImage.cover(imageUrl: displayImage, height: 400),
 
         FeedActionRow(
           likes: "${widget.post.likeCount + (isLiked && !widget.post.likes.contains(currentUid) ? 1 : 0)}", 
