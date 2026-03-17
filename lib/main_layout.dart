@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Haptic Feedback
+import 'package:flutter/services.dart';
 
 // WIDGETLAR
 import 'screens/custom_navbar.dart';
@@ -35,7 +35,6 @@ class _MainLayoutState extends State<MainLayout> {
 
   void _onTabChange(int index) {
     if (_currentIndex != index) {
-      // Sekme değişirken hafif titreşim ver
       HapticFeedback.selectionClick();
       setState(() {
         _currentIndex = index;
@@ -45,26 +44,17 @@ class _MainLayoutState extends State<MainLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
-      extendBody: true, // Navbar'ın arkasına içerik uzanabilsin (Glass effect ve yuvarlak kavis için şart)
-      backgroundColor: theme.scaffoldBackgroundColor, // Dinamik zemin rengi
-      
-      // Klavye açıldığında Navbar'ın yukarı zıplamasını engellemek için false yapıyoruz.
-      // (Chat ekranı gibi sayfalar kendi içlerinde Scaffold kullanarak klavyeyi yönetir)
-      resizeToAvoidBottomInset: false, 
-      
+      extendBody: true,
+      backgroundColor: Colors.transparent, // Global gradient main.dart builder'dan gelir
+      resizeToAvoidBottomInset: false,
       body: OfflineAwareBody(
         child: Stack(
           children: [
-            // 1. EKRANLAR (IndexedStack ile durum korunur)
             IndexedStack(
               index: _currentIndex,
               children: _screens,
             ),
-
-            // 2. SABİT NAVBAR (En Üst Katman)
             Positioned(
               left: 0,
               right: 0,

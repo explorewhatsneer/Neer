@@ -46,7 +46,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
     String myUid = _service.client.auth.currentUser?.id ?? "";
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       
       // --- FLOATING ACTION BUTTON ---
       floatingActionButton: Padding(
@@ -67,7 +67,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
       ),
 
       appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor, 
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: Padding(
           padding: const EdgeInsets.only(top: 10),

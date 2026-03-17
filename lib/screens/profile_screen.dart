@@ -103,7 +103,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     final _user = profileProvider.profile;
 
     if (profileProvider.isLoading) {
-      return Scaffold(backgroundColor: theme.scaffoldBackgroundColor, body: const ShimmerList(itemCount: 5));
+      return Scaffold(backgroundColor: Colors.transparent, body: const ShimmerList(itemCount: 5));
     }
 
     final String displayImage = (_user?.profileImage != null && _user!.profileImage.isNotEmpty)
@@ -111,7 +111,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         : "https://i.pravatar.cc/150?img=60";
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       body: NestedScrollView(
         controller: _scrollController,
         headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -121,9 +121,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               sliver: SliverAppBar(
                 expandedHeight: 300.0,
                 pinned: true,
-                backgroundColor: theme.scaffoldBackgroundColor,
+                backgroundColor: Colors.transparent,
                 elevation: 0,
-                automaticallyImplyLeading: false, 
+                automaticallyImplyLeading: false,
                 
                 actions: [
                   Center(
@@ -172,9 +172,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   child: Container(
                     height: 60,
                     decoration: BoxDecoration(
-                      color: theme.scaffoldBackgroundColor, 
+                      color: Colors.transparent,
                       borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                      boxShadow: [BoxShadow(color: Colors.transparent, blurRadius: 0)], 
+                      boxShadow: [BoxShadow(color: Colors.transparent, blurRadius: 0)],
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Container(

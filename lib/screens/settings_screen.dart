@@ -277,10 +277,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     String currentLangName = lm.locale.languageCode == 'tr' ? "Türkçe (TR)" : "English (US)";
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      
+      backgroundColor: Colors.transparent,
+
       appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         title: Text(

@@ -123,10 +123,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: theme.cardColor.withValues(alpha: 0.8),
+        backgroundColor: isDark
+            ? Colors.black.withValues(alpha: 0.30)
+            : Colors.white.withValues(alpha: 0.40),
         elevation: 0,
         scrolledUnderElevation: 0,
         flexibleSpace: ClipRect(

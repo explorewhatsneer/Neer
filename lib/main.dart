@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
+import 'core/constants.dart';
 import 'core/theme_manager.dart';
 import 'core/language_manager.dart';
 import 'core/app_router.dart';
@@ -73,6 +74,19 @@ class MyApp extends StatelessWidget {
               Locale('en', 'US'),
             ],
             routerConfig: appRouter,
+            builder: (context, child) {
+              // Global gradient arka plan — tüm ekranlar bu gradient'i devralır
+              final brightness = Theme.of(context).brightness;
+              final isDark = brightness == Brightness.dark;
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: isDark
+                      ? AppColors.darkBackgroundGradient
+                      : AppColors.backgroundGradient,
+                ),
+                child: child,
+              );
+            },
           );
         },
       ),

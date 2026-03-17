@@ -1,5 +1,6 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Haptic Feedback
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 // CORE IMPORTLARI
@@ -16,7 +17,7 @@ import '../common/app_cached_image.dart';
 // YARDIMCI: AKILLI ZAMAN FORMATLAYICI ⏰
 // ==========================================
 String _formatTimeAgo(DateTime date) {
-  final localDate = date.toLocal(); 
+  final localDate = date.toLocal();
   final now = DateTime.now();
   final difference = now.difference(localDate);
 
@@ -29,12 +30,12 @@ String _formatTimeAgo(DateTime date) {
   } else if (difference.inDays < 7) {
     return "${difference.inDays} ${AppStrings.dayAgo}";
   } else {
-    return DateFormat('dd MMM').format(localDate); 
+    return DateFormat('dd MMM').format(localDate);
   }
 }
 
 // ==========================================
-// 1. STORY WIDGET (PREMIUM)
+// 1. STORY WIDGET (Glass Morphism - Rounded Square)
 // ==========================================
 class StoryItem extends StatelessWidget {
   final int index;
@@ -44,79 +45,94 @@ class StoryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isMe = index == 0;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    // Auth kullanıcısı resmini al
     final user = SupabaseService().client.auth.currentUser;
     final userImage = user?.userMetadata?['avatar_url'] ?? "https://i.pravatar.cc/150?img=1";
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8), 
+      margin: const EdgeInsets.symmetric(horizontal: 6),
       child: Column(
-        mainAxisSize: MainAxisSize.min, 
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              // Dış Halka (Gradient)
-              Container(
-                width: 80, height: 80,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: isMe 
-                    ? null 
-                    : const LinearGradient(
-                        colors: [AppColors.primary, AppColors.primaryDark], 
-                        begin: Alignment.bottomLeft,
-                        end: Alignment.topRight,
-                      ),
-                  border: isMe ? Border.all(color: theme.dividerColor.withValues(alpha: 0.2), width: 1.5) : null,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(2.5), 
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: theme.scaffoldBackgroundColor, 
-                      shape: BoxShape.circle
+          // Glass Story Container (Rounded Square)
+          Container(
+            width: 76,
+            height: 76,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              // Dashed border effect via gradient border
+              gradient: isMe
+                  ? null
+                  : const LinearGradient(
+                      colors: [AppColors.primary, AppColors.accent],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: AppCachedImage.avatar(
-                        imageUrl: isMe ? userImage : "https://i.pravatar.cc/150?img=${index + 15}",
-                        radius: 35,
-                      ),
+              border: isMe
+                  ? Border.all(
+                      color: isDark ? Colors.white.withValues(alpha: 0.15) : AppColors.primary.withValues(alpha: 0.25),
+                      width: 2,
+                      strokeAlign: BorderSide.strokeAlignOutside,
+                    )
+                  : null,
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(isMe ? 0 : 2.5),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(isMe ? 22 : 19),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Avatar Image
+                    AppCachedImage.cover(
+                      imageUrl: isMe ? userImage : "https://i.pravatar.cc/150?img=${index + 15}",
+                      borderRadius: 0,
                     ),
-                  ),
+                    // Glass overlay for "add" story
+                    if (isMe)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Colors.black.withValues(alpha: 0.35)
+                              : Colors.white.withValues(alpha: 0.30),
+                        ),
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: theme.primaryColor,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: theme.primaryColor.withValues(alpha: 0.40),
+                                  blurRadius: 8,
+                                ),
+                              ],
+                            ),
+                            child: const Icon(Icons.add_rounded, size: 18, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              
-              // Ekle Butonu (+)
-              if (isMe)
-                Positioned(
-                  bottom: 2,
-                  right: 2,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: theme.primaryColor, 
-                      shape: BoxShape.circle,
-                      border: Border.all(color: theme.scaffoldBackgroundColor, width: 2.5), 
-                    ),
-                    child: const Icon(Icons.add_rounded, size: 14, color: Colors.white),
-                  ),
-                ),
-            ],
+            ),
           ),
-          const SizedBox(height: 6), 
-          
+          const SizedBox(height: 8),
+
           // İsim
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 74),
             child: Text(
               isMe ? AppStrings.yourStory : "${AppStrings.user} $index",
-              maxLines: 1, 
-              overflow: TextOverflow.ellipsis, 
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+              style: AppTextStyles.caption.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
             ),
           )
         ],
@@ -126,7 +142,7 @@ class StoryItem extends StatelessWidget {
 }
 
 // ==========================================
-// 2. ORTAK AKSİYON SATIRI (Like, Comment, Share)
+// 2. ORTAK AKSİYON SATIRI (Glass Style)
 // ==========================================
 class FeedActionRow extends StatelessWidget {
   final String likes;
@@ -135,11 +151,11 @@ class FeedActionRow extends StatelessWidget {
   final Function(String) onAction;
 
   const FeedActionRow({
-    super.key, 
-    required this.likes, 
+    super.key,
+    required this.likes,
     required this.comments,
     required this.isLiked,
-    required this.onAction
+    required this.onAction,
   });
 
   @override
@@ -147,23 +163,40 @@ class FeedActionRow extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start, 
         children: [
           _buildButton(
             context,
-            isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded, 
-            likes, 
+            isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+            likes,
             () => onAction("like"),
-            color: isLiked ? Colors.redAccent : theme.iconTheme.color!
+            color: isLiked ? AppColors.error : theme.textTheme.bodyLarge?.color ?? Colors.grey,
           ),
-          const SizedBox(width: 24),
-          _buildButton(context, Icons.chat_bubble_outline_rounded, comments, () => onAction("comment"), color: theme.iconTheme.color!),
-          const SizedBox(width: 24),
-          _buildButton(context, Icons.send_rounded, null, () => onAction("share"), color: theme.iconTheme.color!), 
-          const Spacer(), 
-          _buildButton(context, Icons.bookmark_border_rounded, null, () => onAction("save"), color: theme.iconTheme.color!),
+          const SizedBox(width: 20),
+          _buildButton(
+            context,
+            Icons.chat_bubble_outline_rounded,
+            comments,
+            () => onAction("comment"),
+            color: theme.textTheme.bodyLarge?.color ?? Colors.grey,
+          ),
+          const SizedBox(width: 20),
+          _buildButton(
+            context,
+            Icons.send_rounded,
+            null,
+            () => onAction("share"),
+            color: theme.textTheme.bodyLarge?.color ?? Colors.grey,
+          ),
+          const Spacer(),
+          _buildButton(
+            context,
+            Icons.bookmark_border_rounded,
+            null,
+            () => onAction("save"),
+            color: theme.textTheme.bodyLarge?.color ?? Colors.grey,
+          ),
         ],
       ),
     );
@@ -172,16 +205,19 @@ class FeedActionRow extends StatelessWidget {
   Widget _buildButton(BuildContext context, IconData icon, String? label, VoidCallback onTap, {required Color color}) {
     return GestureDetector(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque, 
+      behavior: HitTestBehavior.opaque,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 26, color: color), 
+          Icon(icon, size: 24, color: color),
           if (label != null) ...[
-            const SizedBox(width: 6),
+            const SizedBox(width: 5),
             Text(
-              label, 
-              style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w700)
+              label,
+              style: AppTextStyles.caption.copyWith(
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
             ),
           ]
         ],
@@ -191,7 +227,7 @@ class FeedActionRow extends StatelessWidget {
 }
 
 // ==========================================
-// 3. KART BAŞLIĞI (Header)
+// 3. KART BAŞLIĞI (Glass Header)
 // ==========================================
 class FeedCardHeader extends StatelessWidget {
   final String avatarUrl;
@@ -214,44 +250,38 @@ class FeedCardHeader extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
       child: Row(
         children: [
-          CachedAvatar(
-            imageUrl: avatarUrl,
-            name: userName,
-            radius: 20,
-          ),
-          const SizedBox(width: 12),
+          CachedAvatar(imageUrl: avatarUrl, name: userName, radius: 20),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                RichText(
-                  maxLines: 2, 
-                  overflow: TextOverflow.ellipsis, 
-                  text: TextSpan(
-                    style: AppTextStyles.bodySmall.copyWith(
-                        color: theme.textTheme.bodyLarge?.color 
-                    ),
-                    children: [
-                      TextSpan(text: userName, style: const TextStyle(fontWeight: FontWeight.w700)), // Bold
-                      TextSpan(text: " $actionText ", style: TextStyle(color: theme.disabledColor)),
-                      if (venueName.isNotEmpty)
-                        TextSpan(text: venueName, style: TextStyle(fontWeight: FontWeight.w700, color: theme.primaryColor)),
-                    ],
-                  ),
+                Text(
+                  userName,
+                  style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  time, 
-                  style: AppTextStyles.caption.copyWith(color: theme.disabledColor)
+                  time,
+                  style: AppTextStyles.caption.copyWith(
+                    color: theme.disabledColor,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          Icon(Icons.more_horiz_rounded, color: theme.disabledColor),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(Icons.more_horiz_rounded, color: theme.disabledColor, size: 18),
+          ),
         ],
       ),
     );
@@ -259,10 +289,10 @@ class FeedCardHeader extends StatelessWidget {
 }
 
 // ==========================================
-// 4. 🔥 AKILLI POST KARTI (CHECK-IN)
+// 4. 🔥 GLASS POST KARTI (CHECK-IN)
 // ==========================================
 class FeedPostCard extends StatefulWidget {
-  final PostModel post; 
+  final PostModel post;
 
   const FeedPostCard({super.key, required this.post});
 
@@ -282,70 +312,101 @@ class _FeedPostCardState extends State<FeedPostCard> {
 
   void _onAction(String type) {
     if (type == "like") {
-      HapticFeedback.lightImpact(); 
+      HapticFeedback.lightImpact();
       setState(() => isLiked = !isLiked);
-      // TODO: SQL 'likes' update eklenecek
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     String timeAgo = _formatTimeAgo(widget.post.createdAt);
-    
-    String displayImage = (widget.post.imageUrl != null && widget.post.imageUrl!.isNotEmpty) 
-        ? widget.post.imageUrl! 
+
+    String displayImage = (widget.post.imageUrl != null && widget.post.imageUrl!.isNotEmpty)
+        ? widget.post.imageUrl!
         : "https://picsum.photos/600/400?blur=2";
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FeedCardHeader(
-          avatarUrl: widget.post.userImage, 
-          userName: widget.post.userName, 
-          actionText: AppStrings.checkedInAction, 
-          venueName: widget.post.locationName, 
-          time: timeAgo
-        ),
-        
-        // Görsel (cache'li)
-        AppCachedImage.cover(imageUrl: displayImage, height: 400),
-
-        FeedActionRow(
-          likes: "${widget.post.likeCount + (isLiked && !widget.post.likes.contains(currentUid) ? 1 : 0)}", 
-          comments: "${widget.post.commentCount}", 
-          isLiked: isLiked, 
-          onAction: _onAction
-        ),
-
-        if (widget.post.content.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: RichText(
-              maxLines: 3, 
-              overflow: TextOverflow.ellipsis,
-              text: TextSpan(
-                style: AppTextStyles.bodyLarge.copyWith(
-                  height: 1.4, 
-                  color: theme.textTheme.bodyLarge?.color
-                ),
-                children: [
-                  TextSpan(text: widget.post.userName, style: const TextStyle(fontWeight: FontWeight.w700)),
-                  const TextSpan(text: " "),
-                  TextSpan(text: widget.post.content),
-                ],
-              ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppColors.darkSurface.withValues(alpha: 0.50)
+                : Colors.white.withValues(alpha: 0.65),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.06)
+                  : Colors.white.withValues(alpha: 0.70),
+              width: 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: isDark ? 0.08 : 0.06),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FeedCardHeader(
+                avatarUrl: widget.post.userImage,
+                userName: widget.post.userName,
+                actionText: AppStrings.checkedInAction,
+                venueName: widget.post.locationName,
+                time: timeAgo,
+              ),
 
-        Divider(height: 1, thickness: 0.5, color: theme.dividerColor.withValues(alpha: 0.2)),
-      ],
+              // Görsel (Rounded)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: AppCachedImage.cover(imageUrl: displayImage, height: 280, borderRadius: 0),
+                ),
+              ),
+
+              FeedActionRow(
+                likes: "${widget.post.likeCount + (isLiked && !widget.post.likes.contains(currentUid) ? 1 : 0)}",
+                comments: "${widget.post.commentCount}",
+                isLiked: isLiked,
+                onAction: _onAction,
+              ),
+
+              if (widget.post.content.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                  child: RichText(
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    text: TextSpan(
+                      style: AppTextStyles.bodySmall.copyWith(
+                        height: 1.4,
+                        color: theme.textTheme.bodyLarge?.color,
+                      ),
+                      children: [
+                        TextSpan(text: widget.post.userName, style: const TextStyle(fontWeight: FontWeight.w700)),
+                        const TextSpan(text: " "),
+                        TextSpan(text: widget.post.content),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
 
 // ==========================================
-// 5. 🔥 AKILLI REVIEW KARTI (DEĞERLENDİRME)
+// 5. 🔥 GLASS REVIEW KARTI (DEĞERLENDİRME)
 // ==========================================
 class FeedReviewCard extends StatefulWidget {
   final PostModel post;
@@ -370,7 +431,6 @@ class _FeedReviewCardState extends State<FeedReviewCard> {
     if (type == "like") {
       HapticFeedback.lightImpact();
       setState(() => isLiked = !isLiked);
-      // TODO: SQL 'likes' update eklenecek
     }
   }
 
@@ -381,57 +441,91 @@ class _FeedReviewCardState extends State<FeedReviewCard> {
     String timeAgo = _formatTimeAgo(widget.post.createdAt);
     int rating = (widget.post.rating ?? 0).toInt();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FeedCardHeader(
-          avatarUrl: widget.post.userImage, 
-          userName: widget.post.userName, 
-          actionText: AppStrings.reviewedAction, 
-          venueName: widget.post.locationName,
-          time: timeAgo
-        ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppColors.darkSurface.withValues(alpha: 0.50)
+                : Colors.white.withValues(alpha: 0.65),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.06)
+                  : Colors.white.withValues(alpha: 0.70),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: isDark ? 0.08 : 0.06),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FeedCardHeader(
+                avatarUrl: widget.post.userImage,
+                userName: widget.post.userName,
+                actionText: AppStrings.reviewedAction,
+                venueName: widget.post.locationName,
+                time: timeAgo,
+              ),
 
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: theme.cardColor, 
-              borderRadius: BorderRadius.circular(16),
-              border: isDark ? Border.all(color: Colors.white12) : null,
-              boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: List.generate(5, (index) => Icon(
-                    Icons.star_rounded, 
-                    color: index < rating ? const Color(0xFFFFB400) : theme.disabledColor.withValues(alpha: 0.3), 
-                    size: 22
-                  )),
+              // Review Container (Glass içinde glass)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : AppColors.gradientStart.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.white.withValues(alpha: 0.50),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: List.generate(5, (index) => Padding(
+                          padding: const EdgeInsets.only(right: 2),
+                          child: Icon(
+                            Icons.star_rounded,
+                            color: index < rating ? AppColors.warning : theme.disabledColor.withValues(alpha: 0.2),
+                            size: 20,
+                          ),
+                        )),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        widget.post.reviewComment ?? AppStrings.noComment,
+                        style: AppTextStyles.bodySmall.copyWith(height: 1.5),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  widget.post.reviewComment ?? AppStrings.noComment, 
-                  style: AppTextStyles.bodyLarge.copyWith(height: 1.4)
-                ),
-              ],
-            ),
+              ),
+
+              FeedActionRow(
+                likes: "${widget.post.likeCount + (isLiked && !widget.post.likes.contains(currentUid) ? 1 : 0)}",
+                comments: "${widget.post.commentCount}",
+                isLiked: isLiked,
+                onAction: _onAction,
+              ),
+            ],
           ),
         ),
-
-        FeedActionRow(
-          likes: "${widget.post.likeCount + (isLiked && !widget.post.likes.contains(currentUid) ? 1 : 0)}", 
-          comments: "${widget.post.commentCount}", 
-          isLiked: isLiked, 
-          onAction: _onAction
-        ),
-
-        Divider(height: 1, thickness: 0.5, color: theme.dividerColor.withValues(alpha: 0.2)),
-      ],
+      ),
     );
   }
 }

@@ -1,7 +1,10 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // CORE IMPORTLARI
+import '../core/constants.dart';
+import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 
 // MODELLER
@@ -25,11 +28,9 @@ class FeedScreen extends StatefulWidget {
 
 class _FeedScreenState extends State<FeedScreen> {
   final _service = SupabaseService();
-  
+
   Future<List<PostModel>>? _feedFuture;
-  
-  // 🔥 FİLTRE DURUMU: 'all' (Takip Edilenler) veya 'friends' (Sadece Arkadaşlar)
-  String _selectedFilter = 'all'; 
+  String _selectedFilter = 'all';
 
   @override
   void initState() {
@@ -53,18 +54,15 @@ class _FeedScreenState extends State<FeedScreen> {
     }
   }
 
-  // Filtre Değişince
   void _onFilterChanged(String newFilter) {
-    if (_selectedFilter == newFilter) return; // Aynıysa işlem yapma
-
+    if (_selectedFilter == newFilter) return;
     HapticFeedback.mediumImpact();
     setState(() {
       _selectedFilter = newFilter;
-      _feedFuture = _fetchFeed(); // Listeyi yenile
+      _feedFuture = _fetchFeed();
     });
   }
 
-  // Yenileme (Pull to Refresh)
   Future<void> _refreshFeed() async {
     HapticFeedback.lightImpact();
     setState(() {
@@ -72,18 +70,21 @@ class _FeedScreenState extends State<FeedScreen> {
     });
   }
 
-  // 🔥 FİLTRE MENÜSÜNÜ GÖSTER
   void _showFilterMenu(BuildContext context, Offset offset) async {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final double left = offset.dx;
-    final double top = offset.dy + 10; // Biraz aşağıda açılması için
+    final double top = offset.dy + 10;
 
     await showMenu(
       context: context,
       position: RelativeRect.fromLTRB(left, top, left + 100, top + 100),
-      color: theme.cardColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 8,
+      color: isDark
+          ? AppColors.darkSurface.withValues(alpha: 0.90)
+          : Colors.white.withValues(alpha: 0.92),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      elevation: 0,
+      shadowColor: AppColors.primary.withValues(alpha: 0.15),
       items: [
         PopupMenuItem(
           value: 'all',
@@ -95,9 +96,7 @@ class _FeedScreenState extends State<FeedScreen> {
         ),
       ],
     ).then((value) {
-      if (value != null) {
-        _onFilterChanged(value);
-      }
+      if (value != null) _onFilterChanged(value);
     });
   }
 
@@ -124,52 +123,50 @@ class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    // initState çalışmazsa diye güvenlik
     _feedFuture ??= _fetchFeed();
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor, 
-      
-      // --- HEADER (GÜNCELLENDİ) ---
-      appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor, 
-        surfaceTintColor: Colors.transparent, 
-        elevation: 0,
-        centerTitle: false,
-        titleSpacing: 16, // Sol boşluk
-        
-        // 🔥 LOGO + FİLTRE OKU
-        title: GestureDetector(
-          onTapDown: (details) => _showFilterMenu(context, details.globalPosition),
-          child: Row(
-            mainAxisSize: MainAxisSize.min, // Sadece içerik kadar yer kapla
-            children: [
-              Text(
-                AppStrings.appName, 
-                style: TextStyle(
-                  fontFamily: 'Visby', 
-                  color: theme.primaryColor, 
-                  fontWeight: FontWeight.w900, 
-                  fontSize: 32, 
-                  letterSpacing: -1.5,
-                  height: 1.0,
+      backgroundColor: Colors.transparent, // Gradient arka plan MainLayout'tan gelir
+
+      // --- GLASS HEADER ---
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: AppBar(
+              backgroundColor: isDark
+                  ? Colors.black.withValues(alpha: 0.30)
+                  : Colors.white.withValues(alpha: 0.40),
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              centerTitle: false,
+              titleSpacing: 20,
+              title: GestureDetector(
+                onTapDown: (details) => _showFilterMenu(context, details.globalPosition),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      AppStrings.appName,
+                      style: TextStyle(
+                        fontFamily: 'Visby',
+                        color: theme.primaryColor,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 30,
+                        letterSpacing: -1.5,
+                        height: 1.0,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.keyboard_arrow_down_rounded, color: theme.primaryColor, size: 22),
+                  ],
                 ),
               ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.keyboard_arrow_down_rounded, 
-                color: theme.primaryColor, 
-                size: 24
-              ),
-            ],
+            ),
           ),
-        ),
-        
-        // Sağ taraftaki butonu kaldırdık (actions: [])
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: theme.dividerColor.withValues(alpha: 0.1), height: 1.0), 
         ),
       ),
 
@@ -177,12 +174,10 @@ class _FeedScreenState extends State<FeedScreen> {
       body: FutureBuilder<List<PostModel>>(
         future: _feedFuture,
         builder: (context, snapshot) {
-          
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const ShimmerList(itemCount: 6);
           }
 
-          // BOŞ DURUM
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return RefreshIndicator(
               onRefresh: _refreshFeed,
@@ -190,7 +185,7 @@ class _FeedScreenState extends State<FeedScreen> {
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  _buildStoryArea(theme),
+                  _buildStoryArea(theme, isDark),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                   EmptyState(
                     icon: _selectedFilter == 'friends' ? Icons.star_border_rounded : Icons.diversity_1_rounded,
@@ -206,34 +201,30 @@ class _FeedScreenState extends State<FeedScreen> {
             );
           }
 
-          // VERİ VAR
           List<PostModel> posts = snapshot.data!;
 
           return RefreshIndicator(
             onRefresh: _refreshFeed,
             color: theme.primaryColor,
             child: ListView.builder(
-              padding: const EdgeInsets.only(bottom: 100), 
-              itemCount: posts.length + 1, 
-              physics: const BouncingScrollPhysics(), 
+              padding: const EdgeInsets.only(bottom: 120),
+              itemCount: posts.length + 1,
+              physics: const BouncingScrollPhysics(),
               itemBuilder: (context, index) {
-                
                 if (index == 0) {
-                  return Column(
-                    children: [
-                      _buildStoryArea(theme),
-                      Divider(height: 1, thickness: 0.5, color: theme.dividerColor.withValues(alpha: 0.1)),
-                    ],
-                  );
+                  return _buildStoryArea(theme, isDark);
                 }
 
                 PostModel post = posts[index - 1];
 
                 return AnimatedListItem(
                   index: index - 1,
-                  child: post.type == 'review'
-                      ? FeedReviewCard(post: post)
-                      : FeedPostCard(post: post),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    child: post.type == 'review'
+                        ? FeedReviewCard(post: post)
+                        : FeedPostCard(post: post),
+                  ),
                 );
               },
             ),
@@ -243,19 +234,18 @@ class _FeedScreenState extends State<FeedScreen> {
     );
   }
 
-  Widget _buildStoryArea(ThemeData theme) {
+  Widget _buildStoryArea(ThemeData theme, bool isDark) {
     return Container(
-      height: 128, 
+      height: 128,
       width: double.infinity,
-      color: theme.scaffoldBackgroundColor,
       padding: const EdgeInsets.only(top: 12, bottom: 8),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        itemCount: 1, 
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: 1,
         physics: const BouncingScrollPhysics(),
         itemBuilder: (context, index) {
-          return StoryItem(index: index); 
+          return StoryItem(index: index);
         },
       ),
     );
