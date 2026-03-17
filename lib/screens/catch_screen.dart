@@ -14,6 +14,8 @@ import '../core/app_router.dart';
 import '../core/snackbar_helper.dart';
 import '../providers/catch_provider.dart';
 import '../widgets/common/shimmer_loading.dart';
+import '../widgets/common/empty_state.dart';
+import '../widgets/common/animated_list_item.dart';
 
 class CatchScreen extends StatefulWidget {
   const CatchScreen({super.key});
@@ -385,7 +387,10 @@ class _CatchScreenState extends State<CatchScreen> {
         childAspectRatio: 0.75,
       ),
       itemCount: sorted.length,
-      itemBuilder: (context, index) => _buildFriendCard(sorted[index], theme, isDark, provider),
+      itemBuilder: (context, index) => AnimatedListItem(
+        index: index,
+        child: _buildFriendCard(sorted[index], theme, isDark, provider),
+      ),
     );
   }
 
@@ -655,23 +660,10 @@ class _CatchScreenState extends State<CatchScreen> {
   // ═══════════════════════════════════════════
 
   Widget _buildEmptyState(ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.people_outline_rounded, size: 80, color: theme.disabledColor.withValues(alpha: 0.3)),
-          const SizedBox(height: 24),
-          Text(
-            AppStrings.noFriendsForCatch,
-            style: AppTextStyles.h3.copyWith(color: theme.disabledColor, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            AppStrings.noFriendsForCatchDesc,
-            style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),
-          ),
-        ],
-      ),
+    return EmptyState(
+      icon: Icons.people_outline_rounded,
+      title: AppStrings.noFriendsForCatch,
+      description: AppStrings.noFriendsForCatchDesc,
     );
   }
 }

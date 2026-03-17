@@ -24,7 +24,9 @@ import '../widgets/friend/friend_profile_widgets.dart' show FriendEmptyCard, Mut
 
 // 🔥 YENİ TASARIM BİLEŞENLERİ (StackedCardCarousel, RankingPodium vb.)
 import '../widgets/profile/profile_components.dart'; 
-import '../widgets/feed/feed_widgets.dart'; 
+import '../widgets/feed/feed_widgets.dart';
+import '../widgets/common/shimmer_loading.dart';
+import '../widgets/common/animated_list_item.dart';
 
 class FriendProfileScreen extends StatefulWidget {
   final String targetUserId; 
@@ -405,7 +407,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
           StreamBuilder<List<PostModel>>(
             stream: _activityStream,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) return SliverToBoxAdapter(child: Center(child: Padding(padding: const EdgeInsets.all(20), child: CircularProgressIndicator(color: theme.primaryColor))));
+              if (snapshot.connectionState == ConnectionState.waiting) return const SliverToBoxAdapter(child: ShimmerList(itemCount: 4));
               if (!snapshot.hasData || snapshot.data!.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.only(top: 80), child: FriendEmptyCard(title: AppStrings.noActivity, subtitle: AppStrings.noActivityDesc, icon: Icons.local_activity_rounded)));
               var posts = snapshot.data!;
               return SliverPadding(
@@ -413,9 +415,12 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {
                     var post = posts[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: post.type == 'review' ? FeedReviewCard(post: post) : FeedPostCard(post: post),
+                    return AnimatedListItem(
+                      index: index,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: post.type == 'review' ? FeedReviewCard(post: post) : FeedPostCard(post: post),
+                      ),
                     );
                   }, childCount: posts.length),
                 ),
@@ -484,7 +489,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
             stream: _service.streamProfileAsList(widget.targetUserId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
+                return const ShimmerList(itemCount: 5);
               }
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return const Center(child: Text("Kullanıcı bulunamadı"));

@@ -11,6 +11,8 @@ import '../models/post_model.dart';
 // SERVİSLER
 import '../services/supabase_service.dart';
 import '../widgets/common/shimmer_loading.dart';
+import '../widgets/common/empty_state.dart';
+import '../widgets/common/animated_list_item.dart';
 
 // WIDGETLAR
 import '../widgets/feed/feed_widgets.dart';
@@ -189,29 +191,16 @@ class _FeedScreenState extends State<FeedScreen> {
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  _buildStoryArea(theme), 
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-                  
-                  Icon(
-                    _selectedFilter == 'friends' ? Icons.star_border_rounded : Icons.diversity_1_rounded, 
-                    size: 80, 
-                    color: theme.disabledColor.withValues(alpha: 0.3)
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
-                    child: Text(
-                      _selectedFilter == 'friends' 
-                        ? "Henüz karşılıklı takipleştiğin\narkadaşın yok veya paylaşım yapmamışlar."
-                        : "Akışın çok sessiz!\nArkadaşlarını takip ederek başla.", 
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: theme.disabledColor, 
-                        height: 1.5,
-                        fontWeight: FontWeight.w500
-                      )
-                    ),
+                  _buildStoryArea(theme),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                  EmptyState(
+                    icon: _selectedFilter == 'friends' ? Icons.star_border_rounded : Icons.diversity_1_rounded,
+                    title: _selectedFilter == 'friends'
+                        ? "Henüz karşılıklı takipleştiğin arkadaşın yok"
+                        : "Akışın çok sessiz!",
+                    description: _selectedFilter == 'friends'
+                        ? "Arkadaşların paylaşım yapmamışlar."
+                        : "Arkadaşlarını takip ederek başla.",
                   ),
                 ],
               ),
@@ -241,11 +230,12 @@ class _FeedScreenState extends State<FeedScreen> {
 
                 PostModel post = posts[index - 1];
 
-                if (post.type == 'review') {
-                  return FeedReviewCard(post: post);
-                } else {
-                  return FeedPostCard(post: post);
-                }
+                return AnimatedListItem(
+                  index: index - 1,
+                  child: post.type == 'review'
+                      ? FeedReviewCard(post: post)
+                      : FeedPostCard(post: post),
+                );
               },
             ),
           );

@@ -3,7 +3,9 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 
 // CORE IMPORTLARI 
 import '../core/text_styles.dart';
-import '../core/app_strings.dart'; 
+import '../core/app_strings.dart';
+import '../widgets/common/empty_state.dart';
+import '../widgets/common/animated_list_item.dart';
 
 // 🔥 MODÜLER WIDGETLAR
 import '../widgets/polls/review_card.dart';
@@ -154,21 +156,10 @@ class _PollsScreenState extends State<PollsScreen> with SingleTickerProviderStat
     List data = isPending ? _pendingReviews : _completedReviews;
     
     if (data.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.check_circle_outline_rounded, size: 80, color: theme.disabledColor.withValues(alpha: 0.3)),
-            const SizedBox(height: 16),
-            Text(
-              AppStrings.listEmpty, // 🔥 Core String
-              style: AppTextStyles.h2.copyWith(
-                color: theme.disabledColor, 
-                fontWeight: FontWeight.bold
-              )
-            ),
-          ],
-        ),
+      return EmptyState(
+        icon: isPending ? Icons.rate_review_outlined : Icons.check_circle_outline_rounded,
+        title: AppStrings.listEmpty,
+        description: isPending ? "Değerlendirme bekleyen mekan yok." : "Henüz değerlendirme yapmadın.",
       );
     }
 
@@ -178,8 +169,10 @@ class _PollsScreenState extends State<PollsScreen> with SingleTickerProviderStat
       itemCount: data.length,
       itemBuilder: (context, index) {
         var item = data[index];
-        
-        return ReviewCard(
+
+        return AnimatedListItem(
+          index: index,
+          child: ReviewCard(
           placeName: item['placeName'],
           imageUrl: item['image'],
           date: item['date'],
@@ -188,6 +181,7 @@ class _PollsScreenState extends State<PollsScreen> with SingleTickerProviderStat
           rating: isPending ? null : item['rating'],
           isCompleted: !isPending,
           onTap: isPending ? () => _openRatingSheet(context, item['placeName']) : null,
+        ),
         );
       },
     );

@@ -21,6 +21,8 @@ import '../widgets/profile/profile_components.dart';
 import '../widgets/profile/profile_header.dart';
 import '../widgets/feed/feed_widgets.dart';
 import '../widgets/common/glass_button.dart';
+import '../widgets/common/shimmer_loading.dart';
+import '../widgets/common/animated_list_item.dart';
 
 // Import Çakışmasını Önleme
 import '../widgets/friend/friend_profile_widgets.dart' show FriendEmptyCard;
@@ -101,7 +103,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     final _user = profileProvider.profile;
 
     if (profileProvider.isLoading) {
-      return Scaffold(backgroundColor: theme.scaffoldBackgroundColor, body: Center(child: CircularProgressIndicator(color: theme.primaryColor)));
+      return Scaffold(backgroundColor: theme.scaffoldBackgroundColor, body: const ShimmerList(itemCount: 5));
     }
 
     final String displayImage = (_user?.profileImage != null && _user!.profileImage.isNotEmpty)
@@ -419,7 +421,7 @@ Widget _buildProfileTab(ThemeData theme, dynamic _user) {
           StreamBuilder<List<PostModel>>(
             stream: _activityStream,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) return SliverToBoxAdapter(child: Center(child: Padding(padding: const EdgeInsets.all(20), child: CircularProgressIndicator(color: theme.primaryColor))));
+              if (snapshot.connectionState == ConnectionState.waiting) return const SliverToBoxAdapter(child: ShimmerList(itemCount: 4));
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.only(top: 80), child: FriendEmptyCard(title: AppStrings.noActivity, subtitle: AppStrings.noActivityUser, icon: Icons.local_activity_rounded)));
               }
@@ -429,9 +431,12 @@ Widget _buildProfileTab(ThemeData theme, dynamic _user) {
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {
                     var post = posts[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: post.type == 'review' ? FeedReviewCard(post: post) : FeedPostCard(post: post),
+                    return AnimatedListItem(
+                      index: index,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: post.type == 'review' ? FeedReviewCard(post: post) : FeedPostCard(post: post),
+                      ),
                     );
                   }, childCount: posts.length),
                 ),
