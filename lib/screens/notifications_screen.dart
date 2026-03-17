@@ -12,6 +12,7 @@ import '../core/app_strings.dart';
 import '../services/supabase_service.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/empty_state.dart';
+import '../widgets/common/animated_list_item.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -203,7 +204,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               final style = _getStyle(notif['type'] ?? '');
               final bool isRead = notif['is_read'] ?? false;
 
-              return Dismissible(
+              return AnimatedListItem(
+                index: index,
+                child: Dismissible(
                 key: Key(notif['id'].toString()),
                 direction: DismissDirection.endToStart,
                 background: Container(
@@ -303,6 +306,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     ),
                   ),
                 ),
+              ),
               );
             },
           );

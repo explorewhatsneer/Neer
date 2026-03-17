@@ -12,6 +12,7 @@ import '../services/supabase_service.dart';
 import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/empty_state.dart';
+import '../widgets/common/animated_list_item.dart';
 import '../core/snackbar_helper.dart';
 
 class FriendsScreen extends StatefulWidget {
@@ -191,7 +192,10 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   itemBuilder: (context, index) {
                     var user = friends[index];
                     String uid = user['id'];
-                    return _buildFriendCard(user, uid, theme);
+                    return AnimatedListItem(
+                      index: index,
+                      child: _buildFriendCard(user, uid, theme),
+                    );
                   },
                 );
               },

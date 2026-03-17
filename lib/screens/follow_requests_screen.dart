@@ -11,6 +11,7 @@ import '../services/supabase_service.dart';
 import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/empty_state.dart';
+import '../widgets/common/animated_list_item.dart';
 import '../core/snackbar_helper.dart';
 
 class FriendRequestsScreen extends StatefulWidget {
@@ -127,12 +128,15 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
               itemCount: visibleRequests.length,
               itemBuilder: (context, index) {
                 final request = visibleRequests[index];
-                return _RequestCard(
-                  key: ValueKey(request['id']),
-                  senderId: request['sender_id'],
-                  requestId: request['id'].toString(),
-                  onAccept: () => _acceptRequest(request['id'].toString(), request['sender_id']),
-                  onDecline: () => _declineRequest(request['id'].toString()),
+                return AnimatedListItem(
+                  index: index,
+                  child: _RequestCard(
+                    key: ValueKey(request['id']),
+                    senderId: request['sender_id'],
+                    requestId: request['id'].toString(),
+                    onAccept: () => _acceptRequest(request['id'].toString(), request['sender_id']),
+                    onDecline: () => _declineRequest(request['id'].toString()),
+                  ),
                 );
               },
             );

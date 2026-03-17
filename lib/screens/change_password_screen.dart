@@ -10,6 +10,7 @@ import '../core/app_strings.dart';
 import '../core/snackbar_helper.dart';
 
 import '../services/supabase_service.dart';
+import '../widgets/common/loading_button.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -26,8 +27,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _newPassController = TextEditingController();
   final _confirmPassController = TextEditingController();
 
-  bool _isLoading = false;
-  
   // Şifrelerin görünürlüğünü kontrol eden değişkenler
   bool _obscureCurrent = true;
   bool _obscureNew = true;
@@ -40,8 +39,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     HapticFeedback.mediumImpact(); 
 
     if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
 
     try {
       final user = _service.client.auth.currentUser;
@@ -91,8 +88,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       if (mounted) {
         AppSnackBar.error(context, "Hata: $e");
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -187,25 +182,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               const SizedBox(height: 40),
 
               // Kaydet Butonu
-              SizedBox(
-                width: double.infinity,
+              LoadingButton(
+                onPressed: _changePassword,
+                label: AppStrings.updatePasswordBtn,
                 height: 56,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _changePassword,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.primaryColor,
-                    foregroundColor: Colors.white,
-                    elevation: _isLoading ? 0 : 8,
-                    shadowColor: theme.primaryColor.withValues(alpha: 0.4),
-                    shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-                  ),
-                  child: _isLoading 
-                    ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
-                    : Text(
-                        AppStrings.updatePasswordBtn, 
-                        style: AppTextStyles.button.copyWith(fontSize: 16)
-                      ),
-                ),
               ),
             ],
           ),

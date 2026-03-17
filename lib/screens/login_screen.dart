@@ -8,6 +8,7 @@ import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
 import '../core/snackbar_helper.dart';
+import '../widgets/common/loading_button.dart';
 
 import 'package:neer/services/auth_service.dart';
 
@@ -23,20 +24,16 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   
-  bool _isLoading = false;
   bool _isPasswordVisible = false;
 
-  void _login() async {
-    // Klavyeyi kapat ve titreşim ver
+  Future<void> _login() async {
+    // Klavyeyi kapat
     FocusScope.of(context).unfocus();
-    HapticFeedback.lightImpact();
 
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       AppSnackBar.error(context, AppStrings.fillAllFields);
       return;
     }
-
-    setState(() => _isLoading = true);
 
     // Servis Kullanımı
     String? error = await _authService.login(
@@ -45,8 +42,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (mounted) {
-      setState(() => _isLoading = false);
-      
       if (error == null) {
         // Başarılı Giriş
         HapticFeedback.mediumImpact();
@@ -160,24 +155,10 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 20),
 
               // --- GİRİŞ BUTONU ---
-              SizedBox(
+              LoadingButton(
+                onPressed: _login,
+                label: AppStrings.loginTitle,
                 height: 56,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.primaryColor,
-                    foregroundColor: Colors.white,
-                    elevation: _isLoading ? 0 : 8,
-                    shadowColor: theme.primaryColor.withValues(alpha: 0.4),
-                    shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-                  ),
-                  child: _isLoading 
-                    ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
-                    : Text(
-                        AppStrings.loginTitle, // "Giriş Yap"
-                        style: AppTextStyles.button.copyWith(fontSize: 16)
-                      ),
-                ),
               ),
 
               const SizedBox(height: 40),

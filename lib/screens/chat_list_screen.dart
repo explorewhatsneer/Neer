@@ -13,6 +13,7 @@ import '../services/supabase_service.dart';
 import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/empty_state.dart';
+import '../widgets/common/animated_list_item.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -223,7 +224,10 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
           itemCount: chats.length,
           itemBuilder: (context, index) {
             var chatData = chats[index];
-            return _buildChatCard(chatData, chatData['friendId'], isGroup: false, myUid: myUid, theme: theme);
+            return AnimatedListItem(
+              index: index,
+              child: _buildChatCard(chatData, chatData['friendId'], isGroup: false, myUid: myUid, theme: theme),
+            );
           },
         );
       },
@@ -289,7 +293,10 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
           itemCount: groups.length,
           itemBuilder: (context, index) {
             var groupData = groups[index];
-            return _buildChatCard(groupData, groupData['groupId'], isGroup: true, myUid: myUid, theme: theme);
+            return AnimatedListItem(
+              index: index,
+              child: _buildChatCard(groupData, groupData['groupId'], isGroup: true, myUid: myUid, theme: theme),
+            );
           },
         );
       },

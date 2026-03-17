@@ -10,6 +10,7 @@ import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
 import '../core/snackbar_helper.dart';
+import '../widgets/common/loading_button.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -25,7 +26,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  bool _isLoading = false;
   bool _isPasswordVisible = false;
 
   @override
@@ -38,28 +38,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // --- KAYIT OLMA İŞLEMİ ---
-  void _register() async {
-    // Klavyeyi kapat ve titreşim ver
+  Future<void> _register() async {
+    // Klavyeyi kapat
     FocusScope.of(context).unfocus();
-    HapticFeedback.lightImpact();
 
     // 1. Basit Validasyon
-    if (_nameController.text.isEmpty || 
+    if (_nameController.text.isEmpty ||
         _usernameController.text.isEmpty ||
-        _emailController.text.isEmpty || 
+        _emailController.text.isEmpty ||
         _passwordController.text.isEmpty) {
       AppSnackBar.error(context, AppStrings.fillAllFields);
       return;
     }
-
-    setState(() => _isLoading = true);
 
     try {
       // 2. Supabase Kayıt İsteği
       final AuthResponse res = await supabase.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
-        // 🔥 KRİTİK NOKTA: Trigger'ın çalışması için bu verileri gönderiyoruz
         data: {
           'full_name': _nameController.text.trim(),
           'username': _usernameController.text.trim(),
@@ -67,28 +63,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       if (mounted) {
-        setState(() => _isLoading = false);
-
-        // Kayıt başarılıysa (Session varsa)
         if (res.session != null) {
           HapticFeedback.mediumImpact();
           context.go(AppRoutes.home);
         } else {
-          // E-posta onayı açıksa buraya düşebilir (Biz kapattık ama güvenlik önlemi)
           AppSnackBar.success(context, "Kayıt başarılı! Lütfen giriş yapın.");
-          Navigator.pop(context); // Login ekranına dön
+          Navigator.pop(context);
         }
       }
 
     } on AuthException catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
         HapticFeedback.heavyImpact();
         AppSnackBar.error(context, e.message);
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
         AppSnackBar.error(context, "Bir hata oluştu: $e");
       }
     }
@@ -190,24 +180,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 40),
 
               // --- KAYIT OL BUTONU ---
-              SizedBox(
+              LoadingButton(
+                onPressed: _register,
+                label: AppStrings.registerTitle,
                 height: 56,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _register,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.primaryColor,
-                    foregroundColor: Colors.white,
-                    elevation: _isLoading ? 0 : 8,
-                    shadowColor: theme.primaryColor.withValues(alpha: 0.4),
-                    shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-                  ),
-                  child: _isLoading 
-                    ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
-                    : Text(
-                        AppStrings.registerTitle, 
-                        style: AppTextStyles.button.copyWith(fontSize: 16)
-                      ),
-                ),
               ),
 
               const SizedBox(height: 40),

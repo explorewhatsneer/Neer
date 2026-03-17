@@ -11,6 +11,7 @@ import '../services/supabase_service.dart';
 import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/empty_state.dart';
+import '../widgets/common/animated_list_item.dart';
 import '../core/snackbar_helper.dart';
 
 class BlockedUsersScreen extends StatefulWidget {
@@ -127,7 +128,10 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                   itemBuilder: (context, index) {
                     var userData = users[index];
                     String blockedUserId = userData['id'];
-                    return _buildBlockedUserCard(userData, blockedUserId, theme);
+                    return AnimatedListItem(
+                      index: index,
+                      child: _buildBlockedUserCard(userData, blockedUserId, theme),
+                    );
                   },
                 );
               },
