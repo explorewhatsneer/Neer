@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 // CORE IMPORTLARI
+import '../core/constants.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 import '../core/snackbar_helper.dart';
@@ -108,12 +109,14 @@ class _ChatScreenState extends State<ChatScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      extendBodyBehindAppBar: true, 
-      backgroundColor: theme.scaffoldBackgroundColor, 
-      
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
+
       // --- APP BAR ---
       appBar: AppBar(
-        backgroundColor: theme.cardColor.withValues(alpha: 0.75), // Yarısaydam
+        backgroundColor: isDark
+            ? Colors.black.withValues(alpha: 0.35)
+            : Colors.white.withValues(alpha: 0.45),
         elevation: 0,
         scrolledUnderElevation: 0,
         flexibleSpace: ClipRect(

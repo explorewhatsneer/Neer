@@ -123,7 +123,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
 
       // SABİT ALT AKSİYON BARI (DOCK)
       bottomNavigationBar: Container(
@@ -174,7 +174,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
               expandedHeight: 300.0,
               pinned: true,
               stretch: true,
-              backgroundColor: theme.scaffoldBackgroundColor,
+              backgroundColor: Colors.transparent,
               elevation: 0,
               systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
               leading: Center(

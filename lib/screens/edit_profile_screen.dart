@@ -185,7 +185,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       body: _isLoading && _nameController.text.isEmpty
           ? Center(child: CircularProgressIndicator(color: theme.primaryColor))
           : CustomScrollView(
@@ -196,7 +196,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   expandedHeight: 280.0,
                   pinned: true,
                   stretch: true,
-                  backgroundColor: theme.scaffoldBackgroundColor,
+                  backgroundColor: Colors.transparent,
                   elevation: 0,
                   
                   // Geri Butonu (Yuvarlak)

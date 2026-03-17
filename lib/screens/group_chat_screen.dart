@@ -221,11 +221,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
 
       // --- APP BAR ---
       appBar: AppBar(
-        backgroundColor: theme.cardColor.withValues(alpha: 0.8),
+        backgroundColor: isDark
+            ? Colors.black.withValues(alpha: 0.35)
+            : Colors.white.withValues(alpha: 0.45),
         elevation: 0,
         scrolledUnderElevation: 0,
         flexibleSpace: ClipRect(

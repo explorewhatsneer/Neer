@@ -466,7 +466,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           StreamBuilder<List<Map<String, dynamic>>>(
@@ -490,7 +490,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                     sliver: SliverAppBar(
                       expandedHeight: 300.0,
                       pinned: true,
-                      backgroundColor: theme.scaffoldBackgroundColor,
+                      backgroundColor: Colors.transparent,
                       automaticallyImplyLeading: false, 
                       
                       leading: Center(child: GlassButton.appBar(icon: Icons.arrow_back, onTap: () => Navigator.pop(context))),

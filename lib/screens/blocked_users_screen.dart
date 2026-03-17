@@ -70,7 +70,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
     if (myUid == null) return const SizedBox();
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(
           AppStrings.blockedUsersTitle,

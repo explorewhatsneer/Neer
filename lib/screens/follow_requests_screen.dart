@@ -80,10 +80,10 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       
       appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
         title: Text(AppStrings.followRequestsTitle, style: AppTextStyles.h2.copyWith(fontSize: 24)),

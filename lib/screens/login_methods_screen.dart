@@ -66,7 +66,7 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       
       appBar: AppBar(
         title: Text(
@@ -74,7 +74,7 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
           style: AppTextStyles.h3.copyWith(fontSize: 20)
         ),
         centerTitle: true,
-        backgroundColor: theme.scaffoldBackgroundColor,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.iconTheme.color, size: 20),

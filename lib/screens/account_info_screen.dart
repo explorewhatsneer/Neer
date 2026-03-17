@@ -110,7 +110,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       
       appBar: AppBar(
         title: Text(
