@@ -492,6 +492,13 @@ class AppStrings {
   static String get nameless => lang == 'tr' ? "İsimsiz" : "Untitled";
   static String get generalPlace => lang == 'tr' ? "Genel Mekan" : "General Place";
 
+  // --- MEKAN DETAY ---
+  static String get comingSoon => lang == 'tr' ? "Yakında" : "Soon";
+  static String get noEventsYet => lang == 'tr' ? "Henüz etkinlik planlanmadı." : "No events planned yet.";
+  static String get noDataYet => lang == 'tr' ? "Henüz veri yok." : "No data yet.";
+  static String get noReviewsYet => lang == 'tr' ? "Henüz yorum yok." : "No reviews yet.";
+  static String get noRatingsYet => lang == 'tr' ? "Henüz puan yok." : "No ratings yet.";
+
 // --- KAMERA & HARİTA ---
   static String get photoCaptured => lang == 'tr' ? "Fotoğraf çekildi! " : "Photo captured! ";
   static String get cameraError => lang == 'tr' ? "Kamera açılamadı." : "Camera could not be opened.";

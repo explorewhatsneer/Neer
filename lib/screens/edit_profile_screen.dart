@@ -183,7 +183,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -216,9 +215,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   
                   title: Text(
-                    AppStrings.editProfileTitle, 
+                    AppStrings.editProfileTitle,
                     style: AppTextStyles.h3.copyWith(
-                      color: isDark ? Colors.white : Colors.black, 
+                      color: theme.textTheme.bodyLarge?.color,
                     )
                   ),
                   centerTitle: true,

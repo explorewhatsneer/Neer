@@ -733,4 +733,140 @@ class SupabaseService {
       return [];
     }
   }
+
+  // ════════════════════════════════════════════
+  // 30. MEKAN DETAY METODLARI
+  // ════════════════════════════════════════════
+
+  /// Tek bir mekanın detay bilgilerini getirir
+  Future<Map<String, dynamic>?> getPlaceById(String placeId) async {
+    try {
+      final id = int.tryParse(placeId);
+      if (id == null) return null;
+      final response = await _supabase
+          .from('places')
+          .select()
+          .eq('id', id)
+          .maybeSingle();
+      return response;
+    } catch (e) {
+      debugPrint("getPlaceById hatası: $e");
+      return null;
+    }
+  }
+
+  /// Bir mekana ait review'ları getirir (en yeni önce)
+  Future<List<Map<String, dynamic>>> getPlaceReviews(String placeId, {int limit = 20}) async {
+    try {
+      final id = int.tryParse(placeId);
+      if (id == null) return [];
+      final response = await _supabase
+          .from('posts')
+          .select('*, profiles(full_name, username, avatar_url)')
+          .eq('place_id', id)
+          .eq('type', 'review')
+          .order('created_at', ascending: false)
+          .limit(limit);
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      debugPrint("getPlaceReviews hatası: $e");
+      return [];
+    }
+  }
+
+  /// Bir mekanın ortalama detaylı puanlarını hesaplar
+  Future<Map<String, double>> getPlaceRatingStats(String placeId) async {
+    try {
+      final reviews = await getPlaceReviews(placeId, limit: 100);
+      if (reviews.isEmpty) {
+        return {'taste': 0, 'service': 0, 'ambiance': 0, 'price': 0};
+      }
+
+      double sumTaste = 0, sumService = 0, sumAmbiance = 0, sumPrice = 0;
+      int count = 0;
+
+      for (final r in reviews) {
+        final taste = (r['rating_taste'] as num?)?.toDouble() ?? 0;
+        final service = (r['rating_service'] as num?)?.toDouble() ?? 0;
+        final ambiance = (r['rating_ambiance'] as num?)?.toDouble() ?? 0;
+        final price = (r['rating_price'] as num?)?.toDouble() ?? 0;
+        if (taste > 0 || service > 0 || ambiance > 0 || price > 0) {
+          sumTaste += taste;
+          sumService += service;
+          sumAmbiance += ambiance;
+          sumPrice += price;
+          count++;
+        }
+      }
+
+      if (count == 0) return {'taste': 0, 'service': 0, 'ambiance': 0, 'price': 0};
+
+      return {
+        'taste': sumTaste / count,
+        'service': sumService / count,
+        'ambiance': sumAmbiance / count,
+        'price': sumPrice / count,
+      };
+    } catch (e) {
+      debugPrint("getPlaceRatingStats hatası: $e");
+      return {'taste': 0, 'service': 0, 'ambiance': 0, 'price': 0};
+    }
+  }
+
+  /// Bir mekanın en çok ziyaret eden kullanıcılarını getirir
+  Future<List<Map<String, dynamic>>> getPlaceTopVisitors(String placeId, {int limit = 3}) async {
+    try {
+      final id = int.tryParse(placeId);
+      if (id == null) return [];
+      // visits tablosundan user_id'ye göre grupla, say, sırala
+      final response = await _supabase
+          .from('visits')
+          .select('user_id, profiles(full_name, username, avatar_url)')
+          .eq('place_id', id);
+
+      // Client-side gruplama (Supabase group by RPC yoksa)
+      final Map<String, Map<String, dynamic>> grouped = {};
+      for (final visit in List<Map<String, dynamic>>.from(response)) {
+        final uid = visit['user_id'] as String;
+        if (!grouped.containsKey(uid)) {
+          grouped[uid] = {
+            'user_id': uid,
+            'profiles': visit['profiles'],
+            'visit_count': 0,
+          };
+        }
+        grouped[uid]!['visit_count'] = (grouped[uid]!['visit_count'] as int) + 1;
+      }
+
+      final sorted = grouped.values.toList()
+        ..sort((a, b) => (b['visit_count'] as int).compareTo(a['visit_count'] as int));
+
+      return sorted.take(limit).toList();
+    } catch (e) {
+      debugPrint("getPlaceTopVisitors hatası: $e");
+      return [];
+    }
+  }
+
+  /// Bir mekanın fotoğraflarını getirir (posts tablosundan)
+  Future<List<String>> getPlacePhotos(String placeId, {int limit = 15}) async {
+    try {
+      final id = int.tryParse(placeId);
+      if (id == null) return [];
+      final response = await _supabase
+          .from('posts')
+          .select('image_url')
+          .eq('place_id', id)
+          .not('image_url', 'is', null)
+          .order('created_at', ascending: false)
+          .limit(limit);
+      return List<Map<String, dynamic>>.from(response)
+          .map((e) => e['image_url'] as String)
+          .where((url) => url.isNotEmpty)
+          .toList();
+    } catch (e) {
+      debugPrint("getPlacePhotos hatası: $e");
+      return [];
+    }
+  }
 }

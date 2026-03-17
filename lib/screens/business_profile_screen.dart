@@ -2,16 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart'; 
-import '../core/text_styles.dart'; 
-import '../core/app_strings.dart'; 
+import '../core/theme_styles.dart';
+import '../core/text_styles.dart';
+import '../core/app_strings.dart';
+
+// SERVİSLER
+import '../services/supabase_service.dart';
 
 // WIDGETLAR
-import '../widgets/business/business_widgets.dart'; // venue klasörüne taşınmıştı
-import '../widgets/common/active_users_sheet.dart'; // venue klasörüne taşınmıştı (Check et) veya common
-import '../widgets/common/check_in_button.dart'; // venue klasörüne taşınmıştı
+import '../widgets/business/business_widgets.dart';
+import '../widgets/common/active_users_sheet.dart';
+import '../widgets/common/check_in_button.dart';
 import '../widgets/common/glass_button.dart';
 import '../widgets/common/app_cached_image.dart';
+import '../widgets/common/shimmer_loading.dart';
+import '../widgets/common/empty_state.dart';
 
 class BusinessProfileScreen extends StatefulWidget {
   final String venueId;
@@ -19,7 +24,7 @@ class BusinessProfileScreen extends StatefulWidget {
   final String imageUrl;
 
   const BusinessProfileScreen({
-    super.key, 
+    super.key,
     required this.venueId,
     required this.venueName,
     required this.imageUrl,
@@ -30,11 +35,22 @@ class BusinessProfileScreen extends StatefulWidget {
 }
 
 class _BusinessProfileScreenState extends State<BusinessProfileScreen> with TickerProviderStateMixin {
+  final _service = SupabaseService();
+
   bool isFavorite = false;
   late TabController _mainTabController;
   late TabController _mediaTabController;
   final ScrollController _scrollController = ScrollController();
   late String safeVenueId;
+
+  // Gerçek veriler
+  Map<String, dynamic>? _placeData;
+  List<Map<String, dynamic>> _reviews = [];
+  List<Map<String, dynamic>> _topVisitors = [];
+  Map<String, double> _ratingStats = {};
+  List<String> _placePhotos = [];
+  int _liveUserCount = 0;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -42,6 +58,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
     _mainTabController = TabController(length: 2, vsync: this);
     _mediaTabController = TabController(length: 2, vsync: this);
     safeVenueId = widget.venueId.isNotEmpty ? widget.venueId : "unknown_venue_123";
+    _loadPlaceData();
   }
 
   @override
@@ -52,6 +69,54 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
     super.dispose();
   }
 
+  Future<void> _loadPlaceData() async {
+    final results = await Future.wait([
+      _service.getPlaceById(safeVenueId),
+      _service.getPlaceReviews(safeVenueId),
+      _service.getPlaceTopVisitors(safeVenueId),
+      _service.getPlaceRatingStats(safeVenueId),
+      _service.getPlacePhotos(safeVenueId),
+      _loadLiveUsers(),
+    ]);
+
+    if (!mounted) return;
+    setState(() {
+      _placeData = results[0] as Map<String, dynamic>?;
+      _reviews = results[1] as List<Map<String, dynamic>>;
+      _topVisitors = results[2] as List<Map<String, dynamic>>;
+      _ratingStats = results[3] as Map<String, double>;
+      _placePhotos = results[4] as List<String>;
+      _isLoading = false;
+    });
+  }
+
+  Future<int> _loadLiveUsers() async {
+    try {
+      final id = int.tryParse(safeVenueId);
+      if (id == null) return 0;
+      final users = await _service.getActiveUsersAtPlace(id);
+      _liveUserCount = users.length;
+      return _liveUserCount;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  // Veri alanlarına güvenli erişim
+  double get _rating => (_placeData?['average_rating'] as num?)?.toDouble() ?? 0.0;
+  String get _category => _placeData?['category'] ?? '';
+  double? get _latitude => (_placeData?['latitude'] as num?)?.toDouble();
+  double? get _longitude => (_placeData?['longitude'] as num?)?.toDouble();
+
+  // İlk review'ı bul (arkadaş notu olarak göster)
+  Map<String, dynamic>? get _firstReviewWithComment {
+    for (final r in _reviews) {
+      final comment = r['comment'] ?? r['content'] ?? '';
+      if (comment.toString().isNotEmpty) return r;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -59,7 +124,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      
+
       // SABİT ALT AKSİYON BARI (DOCK)
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
@@ -67,8 +132,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
           color: theme.cardColor,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05), 
-              blurRadius: 20, 
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+              blurRadius: 20,
               offset: const Offset(0, -5)
             )
           ],
@@ -76,26 +141,22 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
         ),
         child: Row(
           children: [
-            // Yol Tarifi Butonu
             Container(
               decoration: BoxDecoration(
-                color: isDark ? Colors.white10 : Colors.grey[100], 
+                color: theme.dividerColor.withValues(alpha: 0.1),
                 borderRadius: AppThemeStyles.radius16
               ),
               child: IconButton(
-                icon: Icon(Icons.navigation_rounded, color: theme.iconTheme.color), 
+                icon: Icon(Icons.navigation_rounded, color: theme.iconTheme.color),
                 onPressed: () {
                   HapticFeedback.mediumImpact();
-                  // Navigasyon başlat
                 }
               ),
             ),
             const SizedBox(width: 16),
-            
-            // CHECK-IN BUTONU
             Expanded(
               child: CheckInButton(
-                venueId: safeVenueId, 
+                venueId: safeVenueId,
                 venueName: widget.venueName,
                 venueImage: widget.imageUrl,
                 onCheckInSuccess: () {},
@@ -116,16 +177,12 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
               backgroundColor: theme.scaffoldBackgroundColor,
               elevation: 0,
               systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
-              
-              // Geri Butonu (Glass)
               leading: Center(
                 child: GlassButton.medium(
                   icon: Icons.arrow_back_ios_new_rounded,
                   onTap: () => Navigator.pop(context),
                 ),
               ),
-
-              // Sağ Aksiyonlar (Glass)
               actions: [
                 GlassButton.medium(
                   icon: Icons.groups_rounded,
@@ -136,9 +193,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                       context: context,
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
-                      builder: (context) => ActiveUsersSheet(
-                        chatId: widget.venueId,
-                      ),
+                      builder: (context) => ActiveUsersSheet(chatId: widget.venueId),
                     );
                   },
                 ),
@@ -153,14 +208,12 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                 ),
                 const SizedBox(width: 16),
               ],
-
               flexibleSpace: FlexibleSpaceBar(
                 stretchModes: const [StretchMode.zoomBackground],
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
                     AppCachedImage.cover(imageUrl: widget.imageUrl, height: 300),
-                    // Gradyan Gölge (Yazı Okunurluğu İçin)
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -176,62 +229,63 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                         ),
                       ),
                     ),
-                    
-                    // İçerik
                     Positioned(
-                      bottom: 70, 
+                      bottom: 70,
                       left: 20, right: 20,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: theme.primaryColor, 
-                              borderRadius: BorderRadius.circular(8)
+                          if (_category.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: theme.primaryColor,
+                                borderRadius: BorderRadius.circular(8)
+                              ),
+                              child: Text(
+                                _category,
+                                style: AppTextStyles.caption.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5
+                                )
+                              ),
                             ),
-                            child: Text(
-                              AppStrings.popular, // 🔥 Core String
-                              style: AppTextStyles.caption.copyWith(
-                                color: Colors.white, 
-                                fontWeight: FontWeight.bold, 
-                                letterSpacing: 0.5
-                              )
-                            ),
-                          ),
                           const SizedBox(height: 8),
                           Text(
-                            widget.venueName, 
-                            // 🔥 Core Style: H1/H2 (White)
+                            widget.venueName,
                             style: AppTextStyles.h2.copyWith(
-                              color: Colors.white, 
-                              fontSize: 32, 
-                              fontWeight: FontWeight.w900, 
+                              color: Colors.white,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
                               height: 1.1
                             )
                           ),
-                          const SizedBox(height: 8),
-                          const Row(
-                            children: [
-                              Icon(Icons.location_on, color: Colors.white70, size: 16),
-                              SizedBox(width: 4),
-                              Text("Koşuyolu, İstanbul", style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500)),
-                            ],
-                          ),
+                          if (_liveUserCount > 0) ...[
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.people_alt_rounded, color: Colors.white70, size: 16),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "$_liveUserCount ${AppStrings.peopleCount}",
+                                  style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
                       ),
                     ),
                   ],
                 ),
               ),
-              
-              // TAB BAR
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(60),
                 child: Container(
                   height: 60,
                   decoration: BoxDecoration(
-                    color: theme.scaffoldBackgroundColor, // Dinamik arka plan
+                    color: theme.scaffoldBackgroundColor,
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
                   ),
                   child: Center(
@@ -243,12 +297,11 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                       indicatorWeight: 3,
                       indicatorSize: TabBarIndicatorSize.label,
                       indicatorPadding: const EdgeInsets.only(bottom: 10),
-                      // 🔥 Core Style: BodyMedium (Bold)
                       labelStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w800, fontSize: 15),
                       dividerColor: Colors.transparent,
                       tabs: [
-                        Tab(text: AppStrings.overview), // 🔥 Core String
-                        Tab(text: AppStrings.mediaGallery), // 🔥 Core String
+                        Tab(text: AppStrings.overview),
+                        Tab(text: AppStrings.mediaGallery),
                       ],
                       onTap: (_) => HapticFeedback.selectionClick(),
                     ),
@@ -269,38 +322,57 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
     );
   }
 
-
   // --- TAB 1: GENEL BAKIŞ ---
   Widget _buildGeneralTab(ThemeData theme) {
+    if (_isLoading) {
+      return const ShimmerList(itemCount: 5);
+    }
+
+    final review = _firstReviewWithComment;
+    final reviewProfiles = review?['profiles'];
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const PlaceStatsRow(),
+          PlaceStatsRow(
+            rating: _rating,
+            reviewCount: _reviews.length,
+            liveUserCount: _liveUserCount,
+            category: _category,
+          ),
           SectionHeader(title: AppStrings.upcomingEvents, icon: Icons.event_available_rounded),
           const EventTicketCard(),
           const SizedBox(height: 30),
           SectionHeader(title: AppStrings.historyWithPlace, icon: Icons.insights_rounded),
-          const InteractionStatsGrid(),
+          InteractionStatsGrid(
+            visitCount: 0, // Kullanıcıya özel — gelecekte eklenecek
+            photoCount: _placePhotos.length,
+            reviewCount: _reviews.length,
+          ),
           const SizedBox(height: 30),
           SectionHeader(title: AppStrings.regulars, icon: Icons.emoji_events_rounded),
-          const VenueLeaderboard(),
+          VenueLeaderboard(topVisitors: _topVisitors),
           const SizedBox(height: 30),
           SectionHeader(title: AppStrings.friendsSay, icon: Icons.chat_bubble_rounded),
-          const FriendNoteBubble(),
+          FriendNoteBubble(
+            comment: review != null ? (review['comment'] ?? review['content'] ?? '').toString() : null,
+            authorName: reviewProfiles is Map ? (reviewProfiles['full_name'] ?? reviewProfiles['username']) : null,
+            authorAvatar: reviewProfiles is Map ? reviewProfiles['avatar_url'] : null,
+          ),
           const SizedBox(height: 30),
           SectionHeader(title: AppStrings.detailedRatings, icon: Icons.tune_rounded),
-          const DetailedRatingBars(),
+          DetailedRatingBars(ratings: _ratingStats),
           const SizedBox(height: 30),
-          const LocationQrRow(),
+          LocationQrRow(latitude: _latitude, longitude: _longitude),
           const SizedBox(height: 20),
-          
+
           Center(
             child: TextButton.icon(
-              onPressed: (){
+              onPressed: () {
                 HapticFeedback.lightImpact();
-              }, 
+              },
               icon: Icon(Icons.flag_rounded, color: theme.disabledColor, size: 18),
               label: Text(AppStrings.reportIssue, style: TextStyle(color: theme.disabledColor)),
             ),
@@ -313,7 +385,6 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
 
   // --- TAB 2: MEDYA ---
   Widget _buildMediaTab(ThemeData theme) {
-    bool isDark = theme.brightness == Brightness.dark;
     return Column(
       children: [
         Container(
@@ -321,13 +392,13 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
           height: 45,
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: isDark ? Colors.white10 : Colors.grey[200], // Dinamik renk
+            color: theme.dividerColor.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(25),
           ),
           child: TabBar(
             controller: _mediaTabController,
             indicator: BoxDecoration(
-              color: theme.cardColor, // Kart rengi (Beyaz/Siyah)
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(25),
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4, offset: const Offset(0, 2))]
             ),
@@ -347,8 +418,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
           child: TabBarView(
             controller: _mediaTabController,
             children: [
-              _buildPhotoGrid(isUser: false, theme: theme),
-              _buildPhotoGrid(isUser: true, theme: theme),
+              _buildPhotoGrid(photos: _placePhotos),
+              _buildPhotoGrid(photos: _placePhotos), // Henüz business/user ayrımı yok
             ],
           ),
         ),
@@ -356,7 +427,16 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
     );
   }
 
-  Widget _buildPhotoGrid({required bool isUser, required ThemeData theme}) {
+  Widget _buildPhotoGrid({required List<String> photos}) {
+    if (photos.isEmpty) {
+      return const Center(
+        child: EmptyState(
+          icon: Icons.photo_library_outlined,
+          title: "Henüz fotoğraf yok",
+        ),
+      );
+    }
+
     return GridView.builder(
       padding: const EdgeInsets.all(15),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -365,10 +445,10 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
         mainAxisSpacing: 10,
         childAspectRatio: 1,
       ),
-      itemCount: 15,
+      itemCount: photos.length,
       itemBuilder: (context, index) {
         return AppCachedImage.cover(
-          imageUrl: "https://picsum.photos/300?random=${isUser ? index + 50 : index}",
+          imageUrl: photos[index],
           borderRadius: 15,
         );
       },

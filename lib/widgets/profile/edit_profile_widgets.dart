@@ -2,11 +2,12 @@ import 'dart:io';
 import 'dart:ui'; // ImageFilter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
+import 'package:cached_network_image/cached_network_image.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart'; 
+import '../../core/theme_styles.dart';
 import '../../core/text_styles.dart';
-import '../../core/app_strings.dart'; 
+import '../../core/app_strings.dart';
 
 // 1. NEER TEXT FIELD (Premium Giriş Alanı)
 class NeerTextField extends StatelessWidget {
@@ -108,20 +109,21 @@ class EditAvatarArea extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     // Hangi resmin gösterileceğine karar ver
-    ImageProvider<Object> imageProvider;
+    ImageProvider<Object>? imageProvider;
     if (selectedImage != null) {
       imageProvider = FileImage(selectedImage!);
     } else if (currentUrl != null && currentUrl!.isNotEmpty) {
-      imageProvider = NetworkImage(currentUrl!);
-    } else {
-      imageProvider = const NetworkImage("https://i.pravatar.cc/300"); 
+      imageProvider = CachedNetworkImageProvider(currentUrl!);
     }
 
     return Stack(
       fit: StackFit.expand,
       children: [
         // 1. Arkaplan (Blur)
-        Image(image: imageProvider, fit: BoxFit.cover),
+        if (imageProvider != null)
+          Image(image: imageProvider, fit: BoxFit.cover)
+        else
+          Container(color: theme.primaryColor.withValues(alpha: 0.3)),
         BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
           child: Container(
@@ -149,6 +151,9 @@ class EditAvatarArea extends StatelessWidget {
                       radius: 60,
                       backgroundColor: theme.cardColor,
                       backgroundImage: imageProvider,
+                      child: imageProvider == null
+                          ? Icon(Icons.person_rounded, size: 50, color: theme.disabledColor)
+                          : null,
                     ),
                   ),
                   

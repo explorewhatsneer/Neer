@@ -4,19 +4,20 @@ import 'package:flutter/material.dart';
 import '../../core/theme_styles.dart';
 import '../../core/text_styles.dart';
 import '../../core/app_strings.dart';
-import '../common/app_cached_image.dart'; 
+import '../common/app_cached_image.dart';
+import '../common/empty_state.dart';
 
 // 1. BÖLÜM BAŞLIĞI
 class SectionHeader extends StatelessWidget {
   final String title;
   final IconData icon;
-  
+
   const SectionHeader({super.key, required this.title, required this.icon});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Row(
@@ -24,17 +25,17 @@ class SectionHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: theme.primaryColor.withValues(alpha: 0.1), 
+              color: theme.primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8)
             ),
             child: Icon(icon, size: 18, color: theme.primaryColor),
           ),
           const SizedBox(width: 10),
           Text(
-            title, 
+            title,
             style: AppTextStyles.h3.copyWith(
               color: theme.textTheme.bodyLarge?.color,
-              fontSize: 18 
+              fontSize: 18
             )
           ),
         ],
@@ -43,9 +44,20 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
-// 2. MEKAN İSTATİSTİKLERİ (Puan, Yorum, Fiyat)
+// 2. MEKAN İSTATİSTİKLERİ (Puan, Yorum, Canlı Kullanıcı, Durum)
 class PlaceStatsRow extends StatelessWidget {
-  const PlaceStatsRow({super.key});
+  final double rating;
+  final int reviewCount;
+  final int liveUserCount;
+  final String category;
+
+  const PlaceStatsRow({
+    super.key,
+    this.rating = 0.0,
+    this.reviewCount = 0,
+    this.liveUserCount = 0,
+    this.category = '',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +65,7 @@ class PlaceStatsRow extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 25, top: 5), 
+      margin: const EdgeInsets.only(bottom: 25, top: 5),
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
       decoration: BoxDecoration(
         color: theme.cardColor,
@@ -64,13 +76,37 @@ class PlaceStatsRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildItem("4.8", AppStrings.rating, Icons.star_rounded, Colors.orange, theme),
+          _buildItem(
+            rating > 0 ? rating.toStringAsFixed(1) : "-",
+            AppStrings.rating,
+            Icons.star_rounded,
+            Colors.orange,
+            theme,
+          ),
           _divider(theme),
-          _buildItem("120", AppStrings.reviews, Icons.chat_bubble_rounded, Colors.blue, theme),
+          _buildItem(
+            reviewCount.toString(),
+            AppStrings.reviews,
+            Icons.chat_bubble_rounded,
+            Colors.blue,
+            theme,
+          ),
           _divider(theme),
-          _buildItem("₺₺₺", AppStrings.price, Icons.attach_money_rounded, Colors.green, theme),
+          _buildItem(
+            liveUserCount.toString(),
+            AppStrings.peopleCount,
+            Icons.people_alt_rounded,
+            Colors.green,
+            theme,
+          ),
           _divider(theme),
-          _buildItem(AppStrings.open, AppStrings.status, Icons.check_circle_rounded, theme.primaryColor, theme),
+          _buildItem(
+            category.isNotEmpty ? category : AppStrings.generalPlace,
+            AppStrings.status,
+            Icons.category_rounded,
+            theme.primaryColor,
+            theme,
+          ),
         ],
       ),
     );
@@ -79,32 +115,41 @@ class PlaceStatsRow extends StatelessWidget {
   Widget _divider(ThemeData theme) => Container(width: 1, height: 30, color: theme.dividerColor.withValues(alpha: 0.5));
 
   Widget _buildItem(String value, String label, IconData icon, Color color, ThemeData theme) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 16, color: color),
-            const SizedBox(width: 4),
-            Text(
-              value, 
-              style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700, fontSize: 16)
+    return Flexible(
+      child: Column(
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  value,
+                  style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700, fontSize: 16),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(
+              color: theme.disabledColor,
+              fontWeight: FontWeight.w600
             ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label, 
-          style: AppTextStyles.caption.copyWith(
-            color: theme.disabledColor, 
-            fontWeight: FontWeight.w600
-          )
-        ),
-      ],
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }
 
-// 3. ETKİNLİK BİLETİ
+// 3. ETKİNLİK BİLETİ (Henüz events tablosu yok — placeholder kalıyor)
 class EventTicketCard extends StatelessWidget {
   const EventTicketCard({super.key});
 
@@ -129,21 +174,17 @@ class EventTicketCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: theme.primaryColor,
               borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
-              image: const DecorationImage(
-                image: NetworkImage("https://picsum.photos/200"), 
-                fit: BoxFit.cover, 
-                opacity: 0.4
-              ),
             ),
-            child: const Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("MAR", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                Text("14", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900)),
+                Text(AppStrings.comingSoon, style: AppTextStyles.caption.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                const Icon(Icons.event_rounded, color: Colors.white, size: 28),
               ],
             ),
           ),
-          
+
           // Sağ Bilgi Kısmı
           Expanded(
             child: Padding(
@@ -153,17 +194,21 @@ class EventTicketCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Akustik Caz Gecesi", 
+                    AppStrings.upcomingEvents,
                     style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700)
                   ),
                   const SizedBox(height: 5),
                   Row(
                     children: [
-                      Icon(Icons.access_time_rounded, size: 14, color: theme.disabledColor),
+                      Icon(Icons.info_outline_rounded, size: 14, color: theme.disabledColor),
                       const SizedBox(width: 5),
-                      Text(
-                        "20:00 - 23:30", 
-                        style: AppTextStyles.caption.copyWith(color: theme.disabledColor)
+                      Expanded(
+                        child: Text(
+                          AppStrings.noEventsYet,
+                          style: AppTextStyles.caption.copyWith(color: theme.disabledColor),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
@@ -171,31 +216,34 @@ class EventTicketCard extends StatelessWidget {
               ),
             ),
           ),
-          
-          // Bilet Butonu
-          IconButton(
-            onPressed: (){}, 
-            icon: Icon(Icons.confirmation_number_outlined, color: theme.primaryColor)
-          ),
         ],
       ),
     );
   }
 }
 
-// 4. ETKİLEŞİM GRİD (Ziyaret/Fotoğraf/Beğeni)
+// 4. ETKİLEŞİM GRİD (Ziyaret/Fotoğraf/Review sayıları)
 class InteractionStatsGrid extends StatelessWidget {
-  const InteractionStatsGrid({super.key});
+  final int visitCount;
+  final int photoCount;
+  final int reviewCount;
+
+  const InteractionStatsGrid({
+    super.key,
+    this.visitCount = 0,
+    this.photoCount = 0,
+    this.reviewCount = 0,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: _buildInfoBox("5", AppStrings.visits, Icons.location_on_rounded, Colors.blue, context)),
+        Expanded(child: _buildInfoBox(visitCount.toString(), AppStrings.visits, Icons.location_on_rounded, Colors.blue, context)),
         const SizedBox(width: 10),
-        Expanded(child: _buildInfoBox("3", AppStrings.photos, Icons.camera_alt_rounded, Colors.purple, context)),
+        Expanded(child: _buildInfoBox(photoCount.toString(), AppStrings.photos, Icons.camera_alt_rounded, Colors.purple, context)),
         const SizedBox(width: 10),
-        Expanded(child: _buildInfoBox("12", AppStrings.likes, Icons.thumb_up_rounded, Colors.orange, context)),
+        Expanded(child: _buildInfoBox(reviewCount.toString(), AppStrings.reviews, Icons.rate_review_rounded, Colors.orange, context)),
       ],
     );
   }
@@ -226,12 +274,21 @@ class InteractionStatsGrid extends StatelessWidget {
 
 // 5. LİDERLİK TABLOSU
 class VenueLeaderboard extends StatelessWidget {
-  const VenueLeaderboard({super.key});
+  final List<Map<String, dynamic>> topVisitors;
+
+  const VenueLeaderboard({super.key, this.topVisitors = const []});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    if (topVisitors.isEmpty) {
+      return EmptyState(
+        icon: Icons.emoji_events_outlined,
+        title: AppStrings.noDataYet,
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.all(15),
@@ -242,37 +299,53 @@ class VenueLeaderboard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildUserRow(1, "zeynepkamil", "42 Ziyaret", "https://i.pravatar.cc/150?u=1", theme),
-          Divider(color: theme.dividerColor.withValues(alpha: 0.5)),
-          _buildUserRow(2, "canbertkorkmaz", "38 Ziyaret", "https://i.pravatar.cc/150?u=2", theme),
-          Divider(color: theme.dividerColor.withValues(alpha: 0.5)),
-          _buildUserRow(3, "ingebogan", "21 Ziyaret", "https://i.pravatar.cc/150?u=3", theme),
+          for (int i = 0; i < topVisitors.length; i++) ...[
+            if (i > 0) Divider(color: theme.dividerColor.withValues(alpha: 0.5)),
+            _buildUserRow(
+              i + 1,
+              _getName(topVisitors[i]),
+              "${topVisitors[i]['visit_count']} ${AppStrings.visits}",
+              _getAvatar(topVisitors[i]),
+              theme,
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  String _getName(Map<String, dynamic> visitor) {
+    final profiles = visitor['profiles'];
+    if (profiles is Map) return profiles['username'] ?? profiles['full_name'] ?? '?';
+    return '?';
+  }
+
+  String _getAvatar(Map<String, dynamic> visitor) {
+    final profiles = visitor['profiles'];
+    if (profiles is Map) return profiles['avatar_url'] ?? '';
+    return '';
   }
 
   Widget _buildUserRow(int rank, String name, String detail, String img, ThemeData theme) {
     return Row(
       children: [
         Text(
-          "#$rank", 
+          "#$rank",
           style: AppTextStyles.bodyLarge.copyWith(
-            fontWeight: FontWeight.w900, 
-            color: rank == 1 ? Colors.orange : theme.disabledColor, 
+            fontWeight: FontWeight.w900,
+            color: rank == 1 ? Colors.orange : theme.disabledColor,
           )
         ),
         const SizedBox(width: 15),
         CachedAvatar(imageUrl: img, name: name, radius: 18),
         const SizedBox(width: 10),
         Expanded(
-          child: Text("@$name", 
-            // 🔥 DÜZELTME: bodyMedium -> bodySmall
+          child: Text("@$name",
             style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600)
           )
         ),
         Text(
-          detail, 
+          detail,
           style: AppTextStyles.caption.copyWith(color: theme.primaryColor, fontWeight: FontWeight.bold)
         ),
       ],
@@ -280,14 +353,30 @@ class VenueLeaderboard extends StatelessWidget {
   }
 }
 
-// 6. ARKADAŞ NOTU (Bubble)
+// 6. ARKADAŞ NOTU (Bubble) — İlk review'ı gösterir
 class FriendNoteBubble extends StatelessWidget {
-  const FriendNoteBubble({super.key});
+  final String? comment;
+  final String? authorName;
+  final String? authorAvatar;
+
+  const FriendNoteBubble({
+    super.key,
+    this.comment,
+    this.authorName,
+    this.authorAvatar,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    if (comment == null || comment!.isEmpty) {
+      return EmptyState(
+        icon: Icons.chat_bubble_outline_rounded,
+        title: AppStrings.noReviewsYet,
+      );
+    }
 
     return Stack(
       clipBehavior: Clip.none,
@@ -298,9 +387,9 @@ class FriendNoteBubble extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.cardColor,
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(0), 
-              topRight: Radius.circular(20), 
-              bottomLeft: Radius.circular(20), 
+              topLeft: Radius.circular(0),
+              topRight: Radius.circular(20),
+              bottomLeft: Radius.circular(20),
               bottomRight: Radius.circular(20)
             ),
             boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
@@ -310,15 +399,17 @@ class FriendNoteBubble extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "\"Kahveleri harika ama haftasonu yer bulmak çok zor, erken gitmeni öneririm!\"", 
-                // 🔥 DÜZELTME: bodyMedium -> bodySmall
+                "\"$comment\"",
                 style: AppTextStyles.bodySmall.copyWith(fontStyle: FontStyle.italic)
               ),
               const SizedBox(height: 10),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end, 
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text("- Ece Doğan", style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, color: theme.disabledColor))
+                  Text(
+                    "- ${authorName ?? '?'}",
+                    style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, color: theme.disabledColor),
+                  )
                 ]
               )
             ],
@@ -331,9 +422,9 @@ class FriendNoteBubble extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: theme.scaffoldBackgroundColor, width: 2)
             ),
-            child: const CachedAvatar(
-              imageUrl: "https://i.pravatar.cc/150?u=ece",
-              name: "Ece",
+            child: CachedAvatar(
+              imageUrl: authorAvatar ?? '',
+              name: authorName ?? '?',
               radius: 20,
             ),
           ),
@@ -345,12 +436,28 @@ class FriendNoteBubble extends StatelessWidget {
 
 // 7. DETAYLI PUAN ÇUBUKLARI
 class DetailedRatingBars extends StatelessWidget {
-  const DetailedRatingBars({super.key});
+  final Map<String, double> ratings;
+
+  const DetailedRatingBars({super.key, this.ratings = const {}});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    final taste = (ratings['taste'] ?? 0).clamp(0.0, 5.0);
+    final service = (ratings['service'] ?? 0).clamp(0.0, 5.0);
+    final ambiance = (ratings['ambiance'] ?? 0).clamp(0.0, 5.0);
+    final price = (ratings['price'] ?? 0).clamp(0.0, 5.0);
+
+    final hasData = taste > 0 || service > 0 || ambiance > 0 || price > 0;
+
+    if (!hasData) {
+      return EmptyState(
+        icon: Icons.tune_outlined,
+        title: AppStrings.noRatingsYet,
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -361,13 +468,13 @@ class DetailedRatingBars extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildBarItem(AppStrings.serviceSpeed, 0.85, theme),
+          _buildBarItem(AppStrings.taste, taste / 5, theme),
           const SizedBox(height: 15),
-          _buildBarItem(AppStrings.cleanliness, 0.95, theme),
+          _buildBarItem(AppStrings.serviceSpeed, service / 5, theme),
           const SizedBox(height: 15),
-          _buildBarItem(AppStrings.taste, 0.90, theme),
+          _buildBarItem(AppStrings.cleanliness, ambiance / 5, theme),
           const SizedBox(height: 15),
-          _buildBarItem(AppStrings.pricePerf, 0.70, theme),
+          _buildBarItem(AppStrings.pricePerf, price / 5, theme),
         ],
       ),
     );
@@ -381,7 +488,7 @@ class DetailedRatingBars extends StatelessWidget {
           children: [
             Text(label, style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600)),
             Text(
-              "${(percent * 5).toStringAsFixed(1)}", 
+              (percent * 5).toStringAsFixed(1),
               style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, color: theme.primaryColor)
             ),
           ],
@@ -390,9 +497,9 @@ class DetailedRatingBars extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(3),
           child: LinearProgressIndicator(
-            value: percent, 
-            backgroundColor: theme.dividerColor.withValues(alpha: 0.2), 
-            color: theme.primaryColor, 
+            value: percent,
+            backgroundColor: theme.dividerColor.withValues(alpha: 0.2),
+            color: theme.primaryColor,
             minHeight: 6
           ),
         ),
@@ -403,11 +510,16 @@ class DetailedRatingBars extends StatelessWidget {
 
 // 8. KONUM VE QR SATIRI
 class LocationQrRow extends StatelessWidget {
-  const LocationQrRow({super.key});
+  final double? latitude;
+  final double? longitude;
+
+  const LocationQrRow({super.key, this.latitude, this.longitude});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final lat = latitude ?? 41.0082;
+    final lng = longitude ?? 28.9784;
 
     return Row(
       children: [
@@ -419,17 +531,24 @@ class LocationQrRow extends StatelessWidget {
             decoration: BoxDecoration(
               color: theme.dividerColor.withValues(alpha: 0.1),
               borderRadius: AppThemeStyles.radius16,
-              image: const DecorationImage(
-                image: NetworkImage("https://maps.googleapis.com/maps/api/staticmap?center=41.0082,28.9784&zoom=14&size=400x200&sensor=false"), 
-                fit: BoxFit.cover,
-                opacity: 0.8
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.location_on_rounded, color: theme.primaryColor, size: 32),
+                  const SizedBox(height: 4),
+                  Text(
+                    "${lat.toStringAsFixed(4)}, ${lng.toStringAsFixed(4)}",
+                    style: AppTextStyles.caption.copyWith(color: theme.disabledColor),
+                  ),
+                ],
               ),
             ),
-            child: Center(child: Icon(Icons.location_on_rounded, color: theme.primaryColor, size: 32)),
           ),
         ),
         const SizedBox(width: 15),
-        
+
         // Menü QR
         Expanded(
           flex: 1,
