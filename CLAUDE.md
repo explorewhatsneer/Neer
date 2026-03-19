@@ -112,3 +112,15 @@ flutter pub get              # Install dependencies
 - Trust score: 0-100 scale, starts at 70, daily gain cap of 5 points
 - Blocking: bidirectional invisibility in map, search, and chat
 - Rate limiting: 3s for verified users, 20s for low trust, 30-120s for anonymous
+
+## UI/UX Design System (Premium Glassmorphism & Bento Box)
+- **Core Aesthetic:** Apple VisionOS style. High blur, extreme transparency, dynamic ambient backgrounds.
+- **Glass Panel Rules:** - `blurSigma`: Minimum 45.
+  - Alpha (Transparency): `0.12 - 0.25` range.
+  - Borders: Always 1px frosted edges using `Colors.white.withValues(alpha: 0.18)`.
+- **Micro-interactions (Haptics):** All tappable glass buttons/cards must shrink (`Scale: 0.95`) on press and trigger `HapticFeedback.lightImpact()` or `heavyImpact()` via spring animations.
+- **Layout Architecture:**
+  - **Profiles:** "Bento Box" asymmetrical grids. NO stacked horizontal scrolling lists (except for specific carousels).
+  - **Tabs & Nav:** Floating "Pill" (Segmented Control) designs, not edge-to-edge full bars.
+  - **Lists (Chat/Feed/Notifications):** "Floating Islands" (cards with `padding: 16` and `12px` gaps). ABSOLUTELY NO standard lines/dividers (`Divider`).
+- **Color/Opacity Rule:** NEVER use `.withOpacity()`. Always use `.withValues(alpha: ...)` to prevent performance leaks and follow modern Flutter standards.
