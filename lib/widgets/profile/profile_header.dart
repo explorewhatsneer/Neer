@@ -335,7 +335,7 @@ class _TrustScoreRing extends StatelessWidget {
 }
 
 // ==========================================
-// PILL TAB BAR — floating segmented control
+// PILL TAB BAR — VisionOS Floating Segmented Control
 // ==========================================
 class PillTabBar extends StatelessWidget {
   final TabController controller;
@@ -354,21 +354,33 @@ class PillTabBar extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(22),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
+        filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
         child: Container(
-          height: 44,
+          height: 46,
           padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(
             color: isDark
-                ? Colors.white.withValues(alpha: 0.08)
-                : Colors.black.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(16),
+                ? Colors.white.withValues(alpha: 0.10)
+                : Colors.white.withValues(alpha: 0.40),
+            borderRadius: BorderRadius.circular(22),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.18),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.15)
+                  : Colors.white.withValues(alpha: 0.50),
               width: 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withValues(alpha: 0.35)
+                    : AppColors.primary.withValues(alpha: 0.12),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+                spreadRadius: -2,
+              ),
+            ],
           ),
           child: TabBar(
             controller: controller,
@@ -376,27 +388,43 @@ class PillTabBar extends StatelessWidget {
               onTap?.call(index);
             },
             indicator: BoxDecoration(
-              borderRadius: BorderRadius.circular(13),
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.15)
-                  : Colors.white.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(19),
+              gradient: isDark
+                  ? LinearGradient(
+                      colors: [
+                        AppColors.primary.withValues(alpha: 0.35),
+                        AppColors.primaryDark.withValues(alpha: 0.25),
+                      ],
+                    )
+                  : const LinearGradient(
+                      colors: [Colors.white, Color(0xFFF8F4F6)],
+                    ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.08),
-                  blurRadius: 8,
+                  color: isDark
+                      ? AppColors.primary.withValues(alpha: 0.25)
+                      : Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
+                if (isDark)
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.10),
+                    blurRadius: 20,
+                    spreadRadius: 1,
+                  ),
               ],
             ),
             indicatorSize: TabBarIndicatorSize.tab,
             dividerColor: Colors.transparent,
             labelColor: isDark ? Colors.white : AppColors.lightTextHeading,
             unselectedLabelColor: isDark
-                ? Colors.white.withValues(alpha: 0.45)
-                : Colors.black.withValues(alpha: 0.40),
+                ? Colors.white.withValues(alpha: 0.50)
+                : Colors.black.withValues(alpha: 0.38),
             labelStyle: AppTextStyles.caption.copyWith(
               fontWeight: FontWeight.w700,
               fontSize: 13,
+              letterSpacing: 0.3,
             ),
             unselectedLabelStyle: AppTextStyles.caption.copyWith(
               fontWeight: FontWeight.w500,

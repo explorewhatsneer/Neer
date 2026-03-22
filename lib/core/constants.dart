@@ -12,10 +12,10 @@ class AppColors {
   static const Color gradientMiddle = Color(0xFFE8D5F0); // Pink-Lavender
   static const Color gradientEnd = Color(0xFFD5DEF5);    // Soft Blue-Lavender
 
-  // --- DARK GRADIENT (daha belirgin, daha derin) ---
-  static const Color darkGradientStart = Color(0xFF241835);  // Rich Purple
-  static const Color darkGradientMiddle = Color(0xFF1C1430); // Medium Purple
-  static const Color darkGradientEnd = Color(0xFF141228);     // Deep Indigo
+  // --- DARK GRADIENT (derin, zengin renkler) ---
+  static const Color darkGradientStart = Color(0xFF1A0E2E);  // Deep purple-black
+  static const Color darkGradientMiddle = Color(0xFF140D24); // Dark plum
+  static const Color darkGradientEnd = Color(0xFF0E0A1E);     // Near-black indigo
 
   // --- AYDINLIK MOD (LIGHT) ---
   static const Color lightBackground = Color(0xFFF8F0F5);
@@ -64,16 +64,22 @@ class AppColors {
     colors: [Color(0xFFE8A0BF), Color(0xFFD4849A)],
   );
 
-  static const LinearGradient navBarGradient = LinearGradient(
+  static final LinearGradient navBarGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFD4849A), Color(0xFFC07A90)],
+    colors: [
+      Colors.white.withValues(alpha: 0.45),
+      Colors.white.withValues(alpha: 0.35),
+    ],
   );
 
-  static const LinearGradient darkNavBarGradient = LinearGradient(
+  static final LinearGradient darkNavBarGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF342845), Color(0xFF281E38)],
+    colors: [
+      const Color(0xFF221A30).withValues(alpha: 0.55),
+      const Color(0xFF1A1228).withValues(alpha: 0.50),
+    ],
   );
 
   // --- GÖLGE YARDIMCILARI ---

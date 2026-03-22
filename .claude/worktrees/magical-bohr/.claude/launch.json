@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Flutter Web (Debug)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "flutter", "run", "-d", "chrome", "--web-port", "8080"],
+      "port": 8080
+    },
+    {
+      "name": "Flutter Web (Headless)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "flutter", "run", "-d", "web-server", "--web-port", "8081"],
+      "port": 8081
+    }
+  ]
+}
