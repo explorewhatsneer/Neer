@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart';
 import '../../core/text_styles.dart';
 import '../../core/constants.dart';
 import '../../core/app_strings.dart';

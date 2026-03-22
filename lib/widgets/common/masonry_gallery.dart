@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import '../../core/constants.dart';
 import 'app_cached_image.dart';
 
 /// Pinterest/Masonry style photo gallery with random aspect ratios.

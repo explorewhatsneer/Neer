@@ -17,6 +17,7 @@ import '../widgets/common/glass_button.dart';
 import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/empty_state.dart';
+import '../widgets/common/masonry_gallery.dart';
 
 class BusinessProfileScreen extends StatefulWidget {
   final String venueId;
@@ -437,21 +438,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
       );
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(15),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 1,
-      ),
-      itemCount: photos.length,
-      itemBuilder: (context, index) {
-        return AppCachedImage.cover(
-          imageUrl: photos[index],
-          borderRadius: 15,
-        );
-      },
+    return MasonryGallery(
+      photos: photos,
+      padding: const EdgeInsets.all(12),
     );
   }
 }

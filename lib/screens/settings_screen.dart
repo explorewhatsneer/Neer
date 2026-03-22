@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart';
+import '../core/constants.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 import '../core/theme_manager.dart';
@@ -20,6 +20,7 @@ import '../widgets/common/app_cached_image.dart';
 // WIDGETLAR
 import '../widgets/settings/settings_widgets.dart';
 import '../widgets/dialogs/anonymous_popup.dart';
+import 'dart:ui';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -257,7 +258,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+    final isDark = theme.brightness == Brightness.dark;
+
     final user = _service.client.auth.currentUser;
     final userImage = user?.userMetadata?['avatar_url'] ?? "https://i.pravatar.cc/150?img=60";
     final userName = user?.userMetadata?['full_name'] ?? "Kullanıcı";
@@ -284,12 +286,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          AppStrings.settingsTitle, 
-          style: AppTextStyles.h3.copyWith(fontSize: 20)
+          AppStrings.settingsTitle,
+          style: AppTextStyles.h3.copyWith(fontSize: 20, fontWeight: FontWeight.w700),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.iconTheme.color, size: 20),
-          onPressed: () => Navigator.pop(context),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: Center(
+            child: GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                Navigator.pop(context);
+              },
+              child: Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.black.withValues(alpha: 0.05),
+                  ),
+                ),
+                child: Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: theme.iconTheme.color),
+              ),
+            ),
+          ),
         ),
       ),
       
@@ -298,71 +321,95 @@ class _SettingsScreenState extends State<SettingsScreen> {
         physics: const BouncingScrollPhysics(),
         children: [
           
-          // --- 1. PREMIUM PROFİL KARTI ---
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [theme.primaryColor, const Color(0xFF6A002F)], 
-                begin: Alignment.topLeft, end: Alignment.bottomRight
-              ),
-              borderRadius: AppThemeStyles.radius24,
-              boxShadow: [
-                BoxShadow(
-                  color: theme.primaryColor.withValues(alpha: 0.4), 
-                  blurRadius: 20, 
-                  offset: const Offset(0, 10)
-                )
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  child: CachedAvatar(
-                    imageUrl: userImage,
-                    name: userName,
-                    radius: 32,
+          // --- 1. PREMIUM PROFİL KARTI (Glass Morphism) ---
+          ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.25),
+                    width: 1,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.30),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                      spreadRadius: -4,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        userName, 
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20),
-                        maxLines: 1, overflow: TextOverflow.ellipsis,
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(2.5),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 2),
                       ),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      child: CachedAvatar(
+                        imageUrl: userImage,
+                        name: userName,
+                        radius: 30,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            userName,
+                            style: AppTextStyles.h3.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 19,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 0.5),
+                            ),
+                            child: Text(
+                              "Free",
+                              style: AppTextStyles.caption.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // QR Code Button (glass)
+                    GestureDetector(
+                      onTap: () => HapticFeedback.selectionClick(),
+                      child: Container(
+                        width: 44,
+                        height: 44,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 0.5)
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.20)),
                         ),
-                        child: const Text("Free Üyelik", style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                        child: const Icon(Icons.qr_code_2_rounded, color: Colors.white, size: 22),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                // QR Code Button
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12)
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.qr_code_2_rounded, color: Colors.white, size: 24),
-                    onPressed: () {
-                      HapticFeedback.selectionClick();
-                    }, 
-                  ),
-                )
-              ],
+              ),
             ),
           ),
 
@@ -386,39 +433,72 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onTap: () => context.push(AppRoutes.loginMethods),
               ),
 
-              // 🔥 PREMIUM KARTI
+              // Premium upgrade card
               GestureDetector(
-                onTap: () => context.push(AppRoutes.premium),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  context.push(AppRoutes.premium);
+                },
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFD700), // Altın Rengi
-                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)), 
-                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, -2))],
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFFB800), Color(0xFFFF8C00)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
                   ),
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.1), shape: BoxShape.circle),
-                        child: const Icon(Icons.workspace_premium_rounded, color: Colors.black87, size: 24),
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 20),
                       ),
-                      const SizedBox(width: 15),
+                      const SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppStrings.goPremiumBtn, style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w900, fontSize: 14)),
-                            Text(AppStrings.unlimitedFeatures, style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w600, fontSize: 12)),
+                            Text(
+                              AppStrings.goPremiumBtn,
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              AppStrings.unlimitedFeatures,
+                              style: AppTextStyles.caption.copyWith(
+                                color: Colors.white.withValues(alpha: 0.80),
+                                fontSize: 11,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(8)),
-                        child: Text(AppStrings.upgrade, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 10, color: Color(0xFFFFD700))),
-                      )
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          AppStrings.upgrade,
+                          style: AppTextStyles.caption.copyWith(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 10,
+                            color: const Color(0xFFFF8C00),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -524,9 +604,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Center(
             child: Column(
               children: [
-                Text(AppStrings.appName, style: TextStyle(color: theme.primaryColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(
+                  AppStrings.appName,
+                  style: AppTextStyles.h3.copyWith(
+                    color: theme.primaryColor.withValues(alpha: 0.6),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text("v1.0.8 (Premium)", style: TextStyle(color: theme.disabledColor, fontSize: 11, fontWeight: FontWeight.w600)),
+                Text(
+                  "v1.0.8",
+                  style: AppTextStyles.caption.copyWith(
+                    color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.25),
+                    fontSize: 11,
+                  ),
+                ),
               ],
             ),
           ),

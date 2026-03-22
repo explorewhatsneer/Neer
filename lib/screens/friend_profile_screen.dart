@@ -23,7 +23,6 @@ import '../widgets/friend/friend_profile_widgets.dart' show FriendEmptyCard, Mut
 // 🔥 YENİ TASARIM BİLEŞENLERİ (StackedCardCarousel, RankingPodium vb.)
 import '../widgets/profile/profile_components.dart'; 
 import '../widgets/feed/feed_widgets.dart';
-import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/animated_list_item.dart';
 import '../widgets/common/masonry_gallery.dart';
