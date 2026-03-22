@@ -4,7 +4,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
-import 'core/constants.dart';
 import 'core/theme_manager.dart';
 import 'core/language_manager.dart';
 import 'core/app_router.dart';
@@ -12,6 +11,7 @@ import 'core/connectivity_service.dart';
 import 'providers/auth_provider.dart';
 import 'providers/profile_provider.dart';
 import 'providers/catch_provider.dart';
+import 'widgets/common/premium_background.dart';
 
 // GLOBAL YÖNETİCİLER (geriye uyumluluk — yeni kodda Provider kullanın)
 final ThemeManager themeManager = ThemeManager();
@@ -75,16 +75,12 @@ class MyApp extends StatelessWidget {
             ],
             routerConfig: appRouter,
             builder: (context, child) {
-              // Global gradient arka plan — tüm ekranlar bu gradient'i devralır
-              final brightness = Theme.of(context).brightness;
-              final isDark = brightness == Brightness.dark;
-              return Container(
-                decoration: BoxDecoration(
-                  gradient: isDark
-                      ? AppColors.darkBackgroundGradient
-                      : AppColors.backgroundGradient,
-                ),
-                child: child,
+              // Premium animated mesh gradient — tüm ekranlar bu arka planı devralır
+              return Stack(
+                children: [
+                  const PremiumBackground(),
+                  if (child != null) child,
+                ],
               );
             },
           );
