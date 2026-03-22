@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/text_styles.dart';
+import '../core/constants.dart';
 import '../core/theme_styles.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
@@ -17,6 +19,8 @@ import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/common/animated_list_item.dart';
 import '../widgets/common/app_cached_image.dart';
+import '../widgets/common/glass_panel.dart';
+import '../widgets/common/animated_press.dart';
 
 class CatchScreen extends StatefulWidget {
   const CatchScreen({super.key});
@@ -308,24 +312,22 @@ class _CatchScreenState extends State<CatchScreen> {
       }
     }
 
-    return Container(
+    return GlassPanel(
       margin: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: AppThemeStyles.radius24,
-        boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
-        border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
-      ),
       child: Row(
         children: [
+          // Pulsing status dot
           Container(
             width: 14,
             height: 14,
             decoration: BoxDecoration(
               color: statusColor,
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: statusColor.withValues(alpha: 0.4), blurRadius: 8)],
+              boxShadow: [
+                BoxShadow(color: statusColor.withValues(alpha: 0.5), blurRadius: 10),
+                BoxShadow(color: statusColor.withValues(alpha: 0.25), blurRadius: 20),
+              ],
             ),
           ),
           const SizedBox(width: 14),
@@ -340,23 +342,38 @@ class _CatchScreenState extends State<CatchScreen> {
                 if (remainingText.isNotEmpty)
                   Text(
                     '${AppStrings.remainingTime}: $remainingText',
-                    style: AppTextStyles.caption.copyWith(color: theme.disabledColor),
+                    style: AppTextStyles.caption.copyWith(
+                      color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.45),
+                    ),
                   ),
               ],
             ),
           ),
-          SizedBox(
-            height: 44,
-            child: ElevatedButton(
-              onPressed: isAvailable ? _handleBusy : _showDurationPicker,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isAvailable ? const Color(0xFFEF4444) : const Color(0xFF22C55E),
-                shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
-                elevation: 0,
+          AnimatedPress(
+            onTap: isAvailable ? _handleBusy : _showDurationPicker,
+            useHeavyHaptic: true,
+            child: Container(
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: isAvailable
+                    ? const Color(0xFFEF4444).withValues(alpha: 0.85)
+                    : const Color(0xFF22C55E).withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: (isAvailable ? const Color(0xFFEF4444) : const Color(0xFF22C55E))
+                        .withValues(alpha: 0.35),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              child: Text(
-                isAvailable ? AppStrings.goBusy : AppStrings.beAvailable,
-                style: AppTextStyles.button.copyWith(fontSize: 14),
+              child: Center(
+                child: Text(
+                  isAvailable ? AppStrings.goBusy : AppStrings.beAvailable,
+                  style: AppTextStyles.button.copyWith(fontSize: 14, color: Colors.white),
+                ),
               ),
             ),
           ),
@@ -384,267 +401,13 @@ class _CatchScreenState extends State<CatchScreen> {
       itemCount: sorted.length,
       itemBuilder: (context, index) => AnimatedListItem(
         index: index,
-        child: _buildFriendCard(sorted[index], theme, isDark, provider),
-      ),
-    );
-  }
-
-  Widget _buildFriendCard(Map<String, dynamic> friend, ThemeData theme, bool isDark, CatchProvider provider) {
-    final friendId = friend['id'] as String;
-    final name = friend['full_name'] ?? AppStrings.nameless;
-    final avatar = friend['avatar_url'] ?? '';
-    final status = friend['status'] ?? 'busy';
-    final phoneNumber = friend['phone_number']?.toString();
-    final isAvailable = status == 'available';
-    final isPending = status == 'pending';
-    final isWatched = provider.watchedIds.contains(friendId);
-    final cooldown = provider.cooldowns[friendId] ?? 0;
-    final showAcceptedAnim = provider.acceptedCatchReceiverId == friendId;
-
-    Color statusColor;
-    if (isAvailable) {
-      statusColor = const Color(0xFF22C55E);
-    } else if (isPending) {
-      statusColor = const Color(0xFFFBBF24);
-    } else {
-      statusColor = const Color(0xFFEF4444);
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: showAcceptedAnim
-              ? const Color(0xFF22C55E)
-              : statusColor.withValues(alpha: isAvailable ? 1.0 : 0.5),
-          width: isAvailable ? 3.5 : 2.5,
-        ),
-        boxShadow: isAvailable
-            ? [BoxShadow(color: statusColor.withValues(alpha: 0.25), blurRadius: 16, offset: const Offset(0, 4))]
-            : (isDark ? [] : AppThemeStyles.shadowLow),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(17),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // ═══ BÜYÜK PROFİL FOTOĞRAFI ═══
-            avatar.isNotEmpty
-                ? AppCachedImage(
-                    imageUrl: avatar,
-                    fit: BoxFit.cover,
-                    errorWidget: _buildAvatarPlaceholder(name, theme),
-                  )
-                : _buildAvatarPlaceholder(name, theme),
-
-            // ═══ ALT GRADIENT ═══
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 130,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.85),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            // ═══ ACCEPTED ANİMASYON OVERLAY ═══
-            if (showAcceptedAnim)
-              Container(
-                color: const Color(0xFF22C55E).withValues(alpha: 0.25),
-                child: const Center(
-                  child: Icon(Icons.check_circle_rounded, color: Colors.white, size: 52),
-                ),
-              ),
-
-            // ═══ ÜST SAĞ: ZİL ═══
-            Positioned(
-              top: 8,
-              right: 8,
-              child: _buildCardIcon(
-                icon: isWatched ? Icons.notifications_active_rounded : Icons.notifications_none_rounded,
-                color: isWatched ? const Color(0xFFFBBF24) : Colors.white,
-                onTap: () => _toggleWatch(friendId),
-              ),
-            ),
-
-            // ═══ ÜST SOL: TELEFON ═══
-            if (isAvailable && phoneNumber != null && phoneNumber.isNotEmpty)
-              Positioned(
-                top: 8,
-                left: 8,
-                child: _buildCardIcon(
-                  icon: Icons.phone_rounded,
-                  color: const Color(0xFF22C55E),
-                  onTap: () => _callFriend(phoneNumber),
-                ),
-              ),
-
-            // ═══ ALT KISIM: İSİM + DURUM + 3 BUTON ═══
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      name,
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                        color: Colors.white,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      isAvailable
-                          ? AppStrings.available
-                          : (isPending ? AppStrings.pendingStatus : AppStrings.busy),
-                      style: AppTextStyles.caption.copyWith(
-                        color: statusColor,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 11,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // ═══ 3 BUTON SATIRI ═══
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildCardAction(
-                            icon: Icons.person_rounded,
-                            color: Colors.white,
-                            bgColor: Colors.white.withValues(alpha: 0.15),
-                            onTap: () {
-                              HapticFeedback.selectionClick();
-                              context.push('/profile/$friendId');
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: _buildCardAction(
-                            icon: Icons.chat_bubble_rounded,
-                            color: Colors.white,
-                            bgColor: Colors.white.withValues(alpha: 0.15),
-                            onTap: () {
-                              HapticFeedback.selectionClick();
-                              context.push(AppRoutes.chat, extra: {'userId': friendId, 'userName': name, 'userImage': avatar.isNotEmpty ? avatar : null});
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: cooldown > 0 && !showAcceptedAnim
-                              ? _buildCardAction(
-                                  label: '${cooldown ~/ 60}:${(cooldown % 60).toString().padLeft(2, '0')}',
-                                  color: Colors.white54,
-                                  bgColor: Colors.white.withValues(alpha: 0.1),
-                                  onTap: () {},
-                                  isTimer: true,
-                                )
-                              : _buildCardAction(
-                                  icon: Icons.bolt_rounded,
-                                  color: isAvailable ? Colors.white : Colors.white38,
-                                  bgColor: isAvailable
-                                      ? const Color(0xFF22C55E)
-                                      : Colors.white.withValues(alpha: 0.08),
-                                  onTap: isAvailable && !showAcceptedAnim
-                                      ? () => _sendCatch(friendId)
-                                      : () {},
-                                ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCardAction({
-    IconData? icon,
-    String? label,
-    required Color color,
-    required Color bgColor,
-    required VoidCallback onTap,
-    bool isTimer = false,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 36,
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Center(
-          child: label != null
-              ? Text(
-                  label,
-                  style: AppTextStyles.caption.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
-                    fontFeatures: isTimer ? const [FontFeature.tabularFigures()] : null,
-                  ),
-                )
-              : Icon(icon, color: color, size: 18),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCardIcon({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.4),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: color, size: 18),
-      ),
-    );
-  }
-
-  Widget _buildAvatarPlaceholder(String name, ThemeData theme) {
-    return Container(
-      color: theme.disabledColor.withValues(alpha: 0.15),
-      child: Center(
-        child: Text(
-          name.isNotEmpty ? name[0].toUpperCase() : '?',
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: theme.disabledColor.withValues(alpha: 0.5),
-            fontSize: 48,
-          ),
+        child: _CatchCapsule(
+          friend: sorted[index],
+          provider: provider,
+          isDark: isDark,
+          onSendCatch: _sendCatch,
+          onToggleWatch: _toggleWatch,
+          onCallFriend: _callFriend,
         ),
       ),
     );
@@ -659,6 +422,425 @@ class _CatchScreenState extends State<CatchScreen> {
       icon: Icons.people_outline_rounded,
       title: AppStrings.noFriendsForCatch,
       description: AppStrings.noFriendsForCatchDesc,
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// CATCH CAPSULE — Glass card with neon aura for available
+// ═══════════════════════════════════════════════════════
+
+class _CatchCapsule extends StatefulWidget {
+  final Map<String, dynamic> friend;
+  final CatchProvider provider;
+  final bool isDark;
+  final Future<void> Function(String) onSendCatch;
+  final Future<void> Function(String) onToggleWatch;
+  final Future<void> Function(String?) onCallFriend;
+
+  const _CatchCapsule({
+    required this.friend,
+    required this.provider,
+    required this.isDark,
+    required this.onSendCatch,
+    required this.onToggleWatch,
+    required this.onCallFriend,
+  });
+
+  @override
+  State<_CatchCapsule> createState() => _CatchCapsuleState();
+}
+
+class _CatchCapsuleState extends State<_CatchCapsule>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _glowController;
+  late Animation<double> _glowAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _glowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    );
+    _glowAnimation = Tween<double>(begin: 0.15, end: 0.45).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+    );
+
+    final status = widget.friend['status'] ?? 'busy';
+    if (status == 'available') {
+      _glowController.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _CatchCapsule oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final status = widget.friend['status'] ?? 'busy';
+    if (status == 'available' && !_glowController.isAnimating) {
+      _glowController.repeat(reverse: true);
+    } else if (status != 'available' && _glowController.isAnimating) {
+      _glowController.stop();
+      _glowController.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _glowController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final friendId = widget.friend['id'] as String;
+    final name = widget.friend['full_name'] ?? AppStrings.nameless;
+    final avatar = widget.friend['avatar_url'] ?? '';
+    final status = widget.friend['status'] ?? 'busy';
+    final phoneNumber = widget.friend['phone_number']?.toString();
+    final isAvailable = status == 'available';
+    final isPending = status == 'pending';
+    final isWatched = widget.provider.watchedIds.contains(friendId);
+    final cooldown = widget.provider.cooldowns[friendId] ?? 0;
+    final showAcceptedAnim = widget.provider.acceptedCatchReceiverId == friendId;
+
+    Color statusColor;
+    if (isAvailable) {
+      statusColor = const Color(0xFF22C55E);
+    } else if (isPending) {
+      statusColor = const Color(0xFFFBBF24);
+    } else {
+      statusColor = const Color(0xFFEF4444);
+    }
+
+    return ListenableBuilder(
+      listenable: _glowAnimation,
+      builder: (context, child) {
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: isAvailable
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF22C55E).withValues(alpha: _glowAnimation.value),
+                      blurRadius: 24,
+                      spreadRadius: 2,
+                    ),
+                    BoxShadow(
+                      color: const Color(0xFF22C55E).withValues(alpha: _glowAnimation.value * 0.4),
+                      blurRadius: 40,
+                      spreadRadius: 4,
+                    ),
+                  ]
+                : showAcceptedAnim
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF22C55E).withValues(alpha: 0.35),
+                          blurRadius: 20,
+                        ),
+                      ]
+                    : [],
+          ),
+          child: child,
+        );
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              color: widget.isDark
+                  ? AppColors.darkSurface.withValues(alpha: 0.14)
+                  : Colors.white.withValues(alpha: 0.22),
+              border: Border.all(
+                color: isAvailable
+                    ? const Color(0xFF22C55E).withValues(alpha: 0.50)
+                    : Colors.white.withValues(alpha: 0.18),
+                width: 1,
+              ),
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // ═══ AVATAR BACKGROUND ═══
+                if (avatar.isNotEmpty)
+                  CachedNetworkImage(
+                    imageUrl: avatar,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => _buildAvatarPlaceholder(name),
+                    errorWidget: (_, __, ___) => _buildAvatarPlaceholder(name),
+                  )
+                else
+                  _buildAvatarPlaceholder(name),
+
+                // ═══ GRADIENT SHIELD ═══
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.0),
+                        Colors.black.withValues(alpha: 0.05),
+                        Colors.black.withValues(alpha: 0.50),
+                        Colors.black.withValues(alpha: 0.80),
+                      ],
+                      stops: const [0.0, 0.3, 0.65, 1.0],
+                    ),
+                  ),
+                ),
+
+                // ═══ ACCEPTED OVERLAY ═══
+                if (showAcceptedAnim)
+                  Container(
+                    color: const Color(0xFF22C55E).withValues(alpha: 0.25),
+                    child: const Center(
+                      child: Icon(Icons.check_circle_rounded, color: Colors.white, size: 52),
+                    ),
+                  ),
+
+                // ═══ TOP RIGHT: WATCH BELL ═══
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: _GlassIconButton(
+                    icon: isWatched ? Icons.notifications_active_rounded : Icons.notifications_none_rounded,
+                    color: isWatched ? const Color(0xFFFBBF24) : Colors.white,
+                    onTap: () => widget.onToggleWatch(friendId),
+                  ),
+                ),
+
+                // ═══ TOP LEFT: PHONE (available only) ═══
+                if (isAvailable && phoneNumber != null && phoneNumber.isNotEmpty)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: _GlassIconButton(
+                      icon: Icons.phone_rounded,
+                      color: const Color(0xFF22C55E),
+                      onTap: () => widget.onCallFriend(phoneNumber),
+                    ),
+                  ),
+
+                // ═══ BOTTOM: NAME + STATUS + ACTIONS ═══
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          name,
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            color: Colors.white,
+                            shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 6)],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Container(
+                              width: 7,
+                              height: 7,
+                              decoration: BoxDecoration(
+                                color: statusColor,
+                                shape: BoxShape.circle,
+                                boxShadow: [BoxShadow(color: statusColor.withValues(alpha: 0.5), blurRadius: 4)],
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              isAvailable
+                                  ? AppStrings.available
+                                  : (isPending ? AppStrings.pendingStatus : AppStrings.busy),
+                              style: AppTextStyles.caption.copyWith(
+                                color: statusColor,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+
+                        // ═══ 3 ACTION BUTTONS ═══
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _GlassActionButton(
+                                icon: Icons.person_rounded,
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  context.push('/profile/$friendId');
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: _GlassActionButton(
+                                icon: Icons.chat_bubble_rounded,
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  context.push(AppRoutes.chat, extra: {
+                                    'userId': friendId,
+                                    'userName': name,
+                                    'userImage': avatar.isNotEmpty ? avatar : null,
+                                  });
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: cooldown > 0 && !showAcceptedAnim
+                                  ? _GlassActionButton(
+                                      label: '${cooldown ~/ 60}:${(cooldown % 60).toString().padLeft(2, '0')}',
+                                      color: Colors.white54,
+                                      isTimer: true,
+                                      onTap: () {},
+                                    )
+                                  : _GlassActionButton(
+                                      icon: Icons.bolt_rounded,
+                                      color: isAvailable ? Colors.white : Colors.white38,
+                                      bgColor: isAvailable
+                                          ? const Color(0xFF22C55E).withValues(alpha: 0.80)
+                                          : null,
+                                      glowColor: isAvailable ? const Color(0xFF22C55E) : null,
+                                      onTap: isAvailable && !showAcceptedAnim
+                                          ? () => widget.onSendCatch(friendId)
+                                          : () {},
+                                    ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatarPlaceholder(String name) {
+    return Container(
+      color: AppColors.darkSurface.withValues(alpha: 0.30),
+      child: Center(
+        child: Text(
+          name.isNotEmpty ? name[0].toUpperCase() : '?',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: Colors.white.withValues(alpha: 0.3),
+            fontSize: 48,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// GLASS ICON BUTTON — frosted circle overlay
+// ═══════════════════════════════════════════════════════
+
+class _GlassIconButton extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _GlassIconButton({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedPress(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.12), width: 0.5),
+            ),
+            child: Icon(icon, color: color, size: 18),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// GLASS ACTION BUTTON — bottom action row in capsule
+// ═══════════════════════════════════════════════════════
+
+class _GlassActionButton extends StatelessWidget {
+  final IconData? icon;
+  final String? label;
+  final Color color;
+  final Color? bgColor;
+  final Color? glowColor;
+  final VoidCallback onTap;
+  final bool isTimer;
+
+  const _GlassActionButton({
+    this.icon,
+    this.label,
+    this.color = Colors.white,
+    this.bgColor,
+    this.glowColor,
+    required this.onTap,
+    this.isTimer = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedPress(
+      onTap: onTap,
+      child: Container(
+        height: 36,
+        decoration: BoxDecoration(
+          color: bgColor ?? Colors.white.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.10), width: 0.5),
+          boxShadow: glowColor != null
+              ? [BoxShadow(color: glowColor!.withValues(alpha: 0.30), blurRadius: 8)]
+              : [],
+        ),
+        child: Center(
+          child: label != null
+              ? Text(
+                  label!,
+                  style: AppTextStyles.caption.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    fontFeatures: isTimer ? const [FontFeature.tabularFigures()] : null,
+                  ),
+                )
+              : Icon(icon, color: color, size: 18),
+        ),
+      ),
     );
   }
 }

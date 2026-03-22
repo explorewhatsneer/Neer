@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'text_styles.dart';
-import 'theme_styles.dart';
 
-/// Tek satırda SnackBar gösterme utility'si.
+/// Glass morphism SnackBar — floating toast style.
+///
 /// ```dart
 /// AppSnackBar.success(context, 'Kaydedildi!');
 /// AppSnackBar.error(context, 'Bir hata oluştu.');
-/// AppSnackBar.info(context, 'Bilgi mesajı');
 /// ```
 class AppSnackBar {
   AppSnackBar._();
@@ -33,8 +32,15 @@ class AppSnackBar {
       SnackBar(
         content: Row(
           children: [
-            Icon(icon, color: Colors.white, size: 20),
-            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.20),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: Colors.white, size: 18),
+            ),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 message,
@@ -48,11 +54,12 @@ class AppSnackBar {
             ),
           ],
         ),
-        backgroundColor: color,
+        backgroundColor: color.withValues(alpha: 0.85),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         duration: const Duration(seconds: 3),
+        elevation: 0,
       ),
     );
   }

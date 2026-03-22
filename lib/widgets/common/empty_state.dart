@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../core/constants.dart';
 import '../../core/text_styles.dart';
 
-/// Reusable empty state widget for list screens.
-///
-/// ```dart
-/// EmptyState(
-///   icon: Icons.group_off_rounded,
-///   title: 'Henüz arkadaş yok',
-///   description: 'Haritadan arkadaş bul!',
-/// )
-/// ```
+/// Premium empty state with glass icon container — VisionOS style.
 class EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -22,13 +15,14 @@ class EmptyState extends StatelessWidget {
     required this.icon,
     required this.title,
     this.description,
-    this.iconSize = 80,
+    this.iconSize = 48,
     this.action,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Center(
       child: Padding(
@@ -36,17 +30,37 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: iconSize,
-              color: theme.disabledColor.withValues(alpha: 0.3),
+            // Glass icon container
+            Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.06)
+                    : Colors.white.withValues(alpha: 0.20),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  width: 1,
+                ),
+                boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.04),
+              ),
+              child: Icon(
+                icon,
+                size: iconSize,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.20)
+                    : Colors.black.withValues(alpha: 0.15),
+              ),
             ),
             const SizedBox(height: 24),
             Text(
               title,
               textAlign: TextAlign.center,
               style: AppTextStyles.h3.copyWith(
-                color: theme.disabledColor,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.45)
+                    : Colors.black.withValues(alpha: 0.40),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -56,7 +70,9 @@ class EmptyState extends StatelessWidget {
                 description!,
                 textAlign: TextAlign.center,
                 style: AppTextStyles.bodySmall.copyWith(
-                  color: theme.disabledColor,
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.30)
+                      : Colors.black.withValues(alpha: 0.30),
                   height: 1.5,
                 ),
               ),

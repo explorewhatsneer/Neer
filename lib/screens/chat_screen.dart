@@ -121,7 +121,7 @@ class _ChatScreenState extends State<ChatScreen> {
         scrolledUnderElevation: 0,
         flexibleSpace: ClipRect(
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
             child: Container(
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: theme.dividerColor.withValues(alpha: 0.1)))
@@ -224,29 +224,33 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
 
-          // --- INPUT ALANI ---
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: theme.cardColor, 
-              border: Border(top: BorderSide(color: theme.dividerColor, width: 0.5)), 
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05), 
-                  blurRadius: 10,
-                  offset: const Offset(0, -2),
-                )
-              ],
-            ),
-            // 🔥 Alt güvenli alan (Home Indicator) için padding
-            child: Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).padding.bottom, 
-              ),
-              child: ChatInput(
-                controller: _messageController,
-                onSendPressed: _sendMessage,
-                focusNode: FocusNode(), 
+          // --- GLASS INPUT AREA ---
+          ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.darkSurface.withValues(alpha: 0.14)
+                      : Colors.white.withValues(alpha: 0.22),
+                  border: Border(
+                    top: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).padding.bottom,
+                  ),
+                  child: ChatInput(
+                    controller: _messageController,
+                    onSendPressed: _sendMessage,
+                    focusNode: FocusNode(),
+                  ),
+                ),
               ),
             ),
           ),

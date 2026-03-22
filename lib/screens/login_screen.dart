@@ -111,27 +111,25 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 50),
 
-              // --- GLASS FORM CARD ---
+              // --- GLASS FORM CARD (VisionOS sigma 45) ---
               ClipRRect(
                 borderRadius: BorderRadius.circular(28),
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                  filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
                   child: Container(
                     padding: const EdgeInsets.all(28),
                     decoration: BoxDecoration(
                       color: isDark
-                          ? AppColors.darkSurface.withValues(alpha: 0.50)
-                          : Colors.white.withValues(alpha: 0.60),
+                          ? AppColors.darkSurface.withValues(alpha: 0.14)
+                          : Colors.white.withValues(alpha: 0.22),
                       borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.08)
-                            : Colors.white.withValues(alpha: 0.65),
+                        color: Colors.white.withValues(alpha: 0.18),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.08),
+                          color: AppColors.primary.withValues(alpha: 0.10),
                           blurRadius: 30,
                           offset: const Offset(0, 10),
                         ),

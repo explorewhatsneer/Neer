@@ -1,9 +1,8 @@
-import 'dart:ui'; 
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
+import 'package:flutter/services.dart';
 
-// CORE IMPORTLARI
-import '../../core/theme_styles.dart'; 
+import '../../core/constants.dart';
 import '../../core/text_styles.dart';
 import '../../core/app_strings.dart';
 import '../common/app_cached_image.dart';
@@ -23,21 +22,26 @@ class ModernSearchBar extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        HapticFeedback.selectionClick(); 
+        HapticFeedback.selectionClick();
         onTap();
       },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
           child: Container(
             height: 52,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: isDark ? Colors.black.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.85),
+              color: isDark
+                  ? AppColors.darkSurface.withValues(alpha: 0.14)
+                  : Colors.white.withValues(alpha: 0.22),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), width: 1),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.18),
+                width: 1,
+              ),
+              boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
             ),
             child: Row(
               children: [
@@ -84,33 +88,38 @@ class PersonResultCard extends StatelessWidget {
     // Puan Rengi
     final scoreColor = _getScoreColor(trustScore);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
-        border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            onTap();
-          },
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10), // Padding biraz daraltıldı
-            child: Row(
-              children: [
-                // AVATAR
-                Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle, 
-                    border: Border.all(color: theme.dividerColor.withValues(alpha: 0.2), width: 1),
-                  ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppColors.darkSurface.withValues(alpha: 0.14)
+                : Colors.white.withValues(alpha: 0.22),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.18), width: 1),
+            boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onTap();
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
+                      ),
                   child: CachedAvatar(
                     imageUrl: hasValidUrl ? imageUrl : '',
                     name: name,
@@ -186,6 +195,8 @@ class PersonResultCard extends StatelessWidget {
           ),
         ),
       ),
+    ),
+      ),
     );
   }
 
@@ -217,25 +228,31 @@ class PlaceResultCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
-        border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            onTap();
-          },
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppColors.darkSurface.withValues(alpha: 0.14)
+                : Colors.white.withValues(alpha: 0.22),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.18), width: 1),
+            boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onTap();
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
               children: [
                 Container(
                   width: 52, height: 52,
@@ -275,6 +292,8 @@ class PlaceResultCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    ),
       ),
     );
   }

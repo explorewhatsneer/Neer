@@ -216,10 +216,10 @@ class _FullscreenImageViewerState extends State<FullscreenImageViewer> {
         onVerticalDragEnd: _onVerticalDragEnd,
         child: Stack(
           children: [
-            // Background tap to close
+            // Glass background — blurred + dark
             GestureDetector(
               onTap: () => Navigator.of(context).pop(),
-              child: Container(color: Colors.black.withValues(alpha: opacity * 0.9)),
+              child: Container(color: Colors.black.withValues(alpha: opacity * 0.85)),
             ),
 
             // Image PageView

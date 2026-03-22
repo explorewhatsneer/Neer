@@ -329,17 +329,15 @@ class _FeedPostCardState extends State<FeedPostCard> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
         child: Container(
           decoration: BoxDecoration(
             color: isDark
-                ? AppColors.darkSurface.withValues(alpha: 0.50)
-                : Colors.white.withValues(alpha: 0.65),
+                ? AppColors.darkSurface.withValues(alpha: 0.14)
+                : Colors.white.withValues(alpha: 0.22),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.06)
-                  : Colors.white.withValues(alpha: 0.70),
+              color: Colors.white.withValues(alpha: 0.18),
               width: 1,
             ),
             boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
@@ -437,17 +435,15 @@ class _FeedReviewCardState extends State<FeedReviewCard> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
         child: Container(
           decoration: BoxDecoration(
             color: isDark
-                ? AppColors.darkSurface.withValues(alpha: 0.50)
-                : Colors.white.withValues(alpha: 0.65),
+                ? AppColors.darkSurface.withValues(alpha: 0.14)
+                : Colors.white.withValues(alpha: 0.22),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.06)
-                  : Colors.white.withValues(alpha: 0.70),
+              color: Colors.white.withValues(alpha: 0.18),
               width: 1,
             ),
             boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
@@ -471,13 +467,11 @@ class _FeedReviewCardState extends State<FeedReviewCard> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: isDark
-                        ? Colors.white.withValues(alpha: 0.05)
-                        : AppColors.gradientStart.withValues(alpha: 0.25),
+                        ? Colors.white.withValues(alpha: 0.06)
+                        : AppColors.gradientStart.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.05)
-                          : Colors.white.withValues(alpha: 0.50),
+                      color: Colors.white.withValues(alpha: 0.12),
                     ),
                   ),
                   child: Column(

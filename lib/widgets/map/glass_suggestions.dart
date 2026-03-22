@@ -2,7 +2,7 @@ import 'dart:ui'; // ImageFilter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 
-// CORE IMPORTLARI
+import '../../core/constants.dart';
 import '../../core/text_styles.dart';
 import '../../core/app_strings.dart';
 
@@ -30,37 +30,23 @@ class GlassSuggestions extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), // Premium Blur
+        filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
         child: Container(
           width: double.infinity,
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.5,
           ),
           margin: const EdgeInsets.only(top: 8),
-          
           decoration: BoxDecoration(
-            // Dinamik Cam Rengi (Koyu/Açık)
-            color: isDark 
-                ? Colors.black.withValues(alpha: 0.6) 
-                : Colors.white.withValues(alpha: 0.85),
-            
+            color: isDark
+                ? AppColors.darkSurface.withValues(alpha: 0.14)
+                : Colors.white.withValues(alpha: 0.22),
             borderRadius: BorderRadius.circular(24),
-            
-            // Premium Çerçeve
             border: Border.all(
-              color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.5), 
-              width: 1.0
+              color: Colors.white.withValues(alpha: 0.18),
+              width: 1,
             ),
-            
-            // Premium Gölge
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.15), 
-                blurRadius: 20, 
-                offset: const Offset(0, 8), 
-                spreadRadius: 2
-              )
-            ],
+            boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
           ),
           
           child: CustomScrollView(

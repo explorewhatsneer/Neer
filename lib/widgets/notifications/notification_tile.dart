@@ -1,21 +1,25 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
+import 'package:flutter/services.dart';
 
-// CORE
-import '../../core/theme_styles.dart';
+import '../../core/constants.dart';
 import '../../core/text_styles.dart';
 import '../../core/app_strings.dart';
 import '../common/app_cached_image.dart';
 
+/// Glass Floating Island — notification card (VisionOS style).
+///
+/// Unread state: subtle primary glow indicator.
+/// No dividers — cards separated by padding gaps.
 class NotificationTile extends StatelessWidget {
-  final dynamic id; // int veya String gelebilir
-  final String type; 
+  final dynamic id;
+  final String type;
   final String title;
   final String body;
   final String time;
   final String? imageUrl;
   final bool isRead;
-  final Function(String) onDismiss; 
+  final Function(String) onDismiss;
 
   const NotificationTile({
     super.key,
@@ -33,117 +37,159 @@ class NotificationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
-    // ID'yi güvenli bir şekilde String'e çeviriyoruz
-    final String safeId = id.toString(); 
-
-    final unreadColor = isDark 
-        ? theme.primaryColor.withValues(alpha: 0.1) 
-        : const Color(0xFFE0F7FA);
+    final String safeId = id.toString();
 
     return Dismissible(
       key: Key(safeId),
       direction: DismissDirection.endToStart,
       onDismissed: (_) {
-        HapticFeedback.mediumImpact(); 
+        HapticFeedback.mediumImpact();
         onDismiss(safeId);
       },
       background: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: theme.colorScheme.error,
-          borderRadius: AppThemeStyles.radius16,
+          color: const Color(0xFFFF453A).withValues(alpha: 0.80),
+          borderRadius: BorderRadius.circular(20),
         ),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         child: const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 28),
       ),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isRead ? theme.cardColor : unreadColor, 
-          borderRadius: AppThemeStyles.radius16,
-          boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
-          border: isRead 
-              ? (isDark ? Border.all(color: Colors.white12) : null)
-              : Border.all(color: theme.primaryColor.withValues(alpha: 0.3), width: 1),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildIcon(theme),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title, 
-                          style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold),
-                          overflow: TextOverflow.ellipsis,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppColors.darkSurface.withValues(alpha: isRead ? 0.12 : 0.18)
+                  : Colors.white.withValues(alpha: isRead ? 0.18 : 0.28),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isRead
+                    ? Colors.white.withValues(alpha: 0.18)
+                    : theme.primaryColor.withValues(alpha: 0.25),
+                width: 1,
+              ),
+              boxShadow: [
+                ...AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
+                if (!isRead)
+                  BoxShadow(
+                    color: theme.primaryColor.withValues(alpha: 0.08),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+              ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Unread glow dot
+                if (!isRead)
+                  Container(
+                    margin: const EdgeInsets.only(top: 4, right: 8),
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: theme.primaryColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: theme.primaryColor.withValues(alpha: 0.4),
+                          blurRadius: 6,
                         ),
+                      ],
+                    ),
+                  ),
+                _buildIcon(theme, isDark),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Text(
+                            time,
+                            style: AppTextStyles.caption.copyWith(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.4)
+                                  : Colors.black.withValues(alpha: 0.35),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
+                      const SizedBox(height: 4),
                       Text(
-                        time, 
-                        style: AppTextStyles.caption.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w600)
+                        body,
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          height: 1.4,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: theme.textTheme.bodyMedium?.color,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    body, 
-                    style: AppTextStyles.bodyLarge.copyWith(height: 1.4, fontSize: 14, fontWeight: FontWeight.w600, color: theme.textTheme.bodyMedium?.color),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildIcon(ThemeData theme) {
-    // Sistem bildirimi veya resim yoksa ikon göster
+  Widget _buildIcon(ThemeData theme, bool isDark) {
     if (type == AppStrings.system || imageUrl == null || imageUrl!.isEmpty) {
       return Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: theme.dividerColor.withValues(alpha: 0.1), 
-          shape: BoxShape.circle
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : theme.primaryColor.withValues(alpha: 0.08),
+          shape: BoxShape.circle,
         ),
-        child: Icon(Icons.notifications_active_rounded, color: theme.primaryColor, size: 24),
+        child: Icon(Icons.notifications_active_rounded, color: theme.primaryColor, size: 22),
       );
-    } 
-    
-    // Resim varsa göster
+    }
+
     return Stack(
       children: [
-        CachedAvatar(imageUrl: imageUrl!, name: '', radius: 24),
-        // Sağ alt köşe ikonu (opsiyonel)
+        CachedAvatar(imageUrl: imageUrl!, name: '', radius: 22),
         Positioned(
-          bottom: 0, right: 0,
+          bottom: 0,
+          right: 0,
           child: Container(
-            padding: const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
-              color: theme.cardColor, 
+              color: isDark
+                  ? AppColors.darkSurface
+                  : Colors.white,
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4)]
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4)],
             ),
             child: Icon(
               type == AppStrings.friendRequest ? Icons.person_add_rounded : Icons.location_on_rounded,
-              size: 14,
+              size: 12,
               color: type == AppStrings.friendRequest ? Colors.blue : Colors.orange,
             ),
           ),
-        )
+        ),
       ],
     );
   }

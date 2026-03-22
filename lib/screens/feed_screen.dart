@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 
 // CORE IMPORTLARI
 import '../core/constants.dart';
-import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 
 // MODELLER
@@ -135,7 +134,7 @@ class _FeedScreenState extends State<FeedScreen> {
         preferredSize: const Size.fromHeight(60),
         child: ClipRRect(
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
             child: AppBar(
               backgroundColor: isDark
                   ? Colors.black.withValues(alpha: 0.30)

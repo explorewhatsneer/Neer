@@ -58,14 +58,14 @@ class _ShimmerLoadingState extends State<ShimmerLoading> with SingleTickerProvid
               end: Alignment(_animation.value + 1, 0),
               colors: isDark
                   ? [
-                      Colors.white.withValues(alpha: 0.05),
-                      Colors.white.withValues(alpha: 0.15),
-                      Colors.white.withValues(alpha: 0.05),
+                      Colors.white.withValues(alpha: 0.04),
+                      Colors.white.withValues(alpha: 0.12),
+                      Colors.white.withValues(alpha: 0.04),
                     ]
                   : [
-                      Colors.grey.withValues(alpha: 0.15),
-                      Colors.grey.withValues(alpha: 0.3),
-                      Colors.grey.withValues(alpha: 0.15),
+                      Colors.white.withValues(alpha: 0.10),
+                      Colors.white.withValues(alpha: 0.25),
+                      Colors.white.withValues(alpha: 0.10),
                     ],
             ).createShader(bounds);
           },
@@ -105,8 +105,12 @@ class ShimmerBox extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.withValues(alpha: 0.15),
+        color: isDark ? Colors.white.withValues(alpha: 0.06) : Colors.white.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.08),
+          width: 0.5,
+        ),
       ),
     );
   }
@@ -163,11 +167,11 @@ class ShimmerGridCard extends StatelessWidget {
     return ShimmerLoading(
       child: Container(
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(20),
+          color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.15),
-            width: 2,
+            color: Colors.white.withValues(alpha: 0.12),
+            width: 1,
           ),
         ),
         child: Column(

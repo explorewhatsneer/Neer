@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/constants.dart';
-import '../../core/theme_styles.dart';
+import '../../core/text_styles.dart';
 
-// 1. PREMIUM AUTH HEADER (Logo ve Başlık)
+// ==========================================
+// 1. PREMIUM AUTH HEADER (Logo + Title)
+// ==========================================
 class AuthHeader extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -28,8 +31,8 @@ class AuthHeader extends StatelessWidget {
             gradient: AppColors.primaryGradient,
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.30),
-                blurRadius: 20,
+                color: AppColors.primary.withValues(alpha: 0.35),
+                blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
             ],
@@ -52,7 +55,7 @@ class AuthHeader extends StatelessWidget {
         Text(
           subtitle,
           textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium?.copyWith(
+          style: AppTextStyles.bodySmall.copyWith(
             color: theme.disabledColor,
             letterSpacing: 1.0,
             fontWeight: FontWeight.w500,
@@ -63,8 +66,10 @@ class AuthHeader extends StatelessWidget {
   }
 }
 
-// 2. NEER AUTH INPUT (Glass Morphism)
-class NeerAuthInput extends StatelessWidget {
+// ==========================================
+// 2. NEER AUTH INPUT — Glass with focus glow
+// ==========================================
+class NeerAuthInput extends StatefulWidget {
   final String hint;
   final IconData icon;
   final TextEditingController controller;
@@ -85,45 +90,88 @@ class NeerAuthInput extends StatelessWidget {
   });
 
   @override
+  State<NeerAuthInput> createState() => _NeerAuthInputState();
+}
+
+class _NeerAuthInputState extends State<NeerAuthInput> {
+  final FocusNode _focusNode = FocusNode();
+  bool _isFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      setState(() => _isFocused = _focusNode.hasFocus);
+      if (_focusNode.hasFocus) {
+        HapticFeedback.selectionClick();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
       decoration: BoxDecoration(
         color: isDark
-            ? Colors.white.withValues(alpha: 0.06)
-            : Colors.white.withValues(alpha: 0.55),
-        borderRadius: AppThemeStyles.radius16,
+            ? Colors.white.withValues(alpha: _isFocused ? 0.10 : 0.06)
+            : Colors.white.withValues(alpha: _isFocused ? 0.45 : 0.25),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.08)
-              : Colors.white.withValues(alpha: 0.70),
-          width: 1,
+          color: _isFocused
+              ? AppColors.primary.withValues(alpha: 0.40)
+              : Colors.white.withValues(alpha: 0.18),
+          width: _isFocused ? 1.5 : 1,
         ),
-        boxShadow: isDark
-            ? []
-            : [BoxShadow(color: AppColors.primary.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 4))],
+        boxShadow: _isFocused
+            ? [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.15),
+                  blurRadius: 16,
+                  spreadRadius: 1,
+                ),
+              ]
+            : [],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: TextField(
-        controller: controller,
-        obscureText: isPassword && !isPasswordVisible,
-        keyboardType: inputType,
-        style: theme.textTheme.bodyLarge,
+        controller: widget.controller,
+        focusNode: _focusNode,
+        obscureText: widget.isPassword && !widget.isPasswordVisible,
+        keyboardType: widget.inputType,
+        style: AppTextStyles.bodyLarge,
         cursorColor: theme.primaryColor,
         decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(color: theme.disabledColor.withValues(alpha: 0.6)),
-          icon: Icon(icon, color: theme.primaryColor.withValues(alpha: 0.7)),
+          hintText: widget.hint,
+          hintStyle: AppTextStyles.bodyLarge.copyWith(
+            color: theme.disabledColor.withValues(alpha: 0.5),
+          ),
+          icon: Icon(
+            widget.icon,
+            color: _isFocused
+                ? theme.primaryColor
+                : theme.primaryColor.withValues(alpha: 0.5),
+          ),
           border: InputBorder.none,
-          suffixIcon: isPassword
+          suffixIcon: widget.isPassword
               ? IconButton(
                   icon: Icon(
-                    isPasswordVisible ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                    widget.isPasswordVisible
+                        ? Icons.visibility_off_rounded
+                        : Icons.visibility_rounded,
                     color: theme.disabledColor,
                   ),
-                  onPressed: onVisibilityToggle,
+                  onPressed: widget.onVisibilityToggle,
                 )
               : null,
         ),
@@ -132,7 +180,9 @@ class NeerAuthInput extends StatelessWidget {
   }
 }
 
+// ==========================================
 // 3. AUTH BUTTON (Gradient Glass Style)
+// ==========================================
 class AuthButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
@@ -156,7 +206,7 @@ class AuthButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: isLoading ? null : AppColors.primaryGradient,
           color: isLoading ? theme.disabledColor : null,
-          borderRadius: AppThemeStyles.radius16,
+          borderRadius: BorderRadius.circular(16),
           boxShadow: isLoading
               ? []
               : [
@@ -171,7 +221,7 @@ class AuthButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
-            shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
           onPressed: isLoading ? null : onTap,
           child: isLoading
