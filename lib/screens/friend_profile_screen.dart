@@ -15,13 +15,12 @@ import '../core/app_router.dart';
 import '../models/post_model.dart';
 
 // WIDGETS
-import '../widgets/friend/friend_profile_header.dart'; 
-import '../widgets/friend/friend_action_button.dart'; 
+import '../widgets/friend/friend_profile_header.dart';
+import '../widgets/friend/friend_action_button.dart';
 import '../widgets/friend/friend_private_view.dart';
-import '../widgets/friend/friend_profile_widgets.dart' show FriendEmptyCard, MutualHistoryList; 
-
-// 🔥 YENİ TASARIM BİLEŞENLERİ (StackedCardCarousel, RankingPodium vb.)
-import '../widgets/profile/profile_components.dart'; 
+import '../widgets/friend/friend_profile_widgets.dart' show FriendEmptyCard, MutualHistoryList;
+import '../widgets/profile/profile_header.dart' show PillTabBar;
+import '../widgets/profile/profile_components.dart';
 import '../widgets/feed/feed_widgets.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/animated_list_item.dart';
@@ -499,28 +498,12 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                       
                       bottom: PreferredSize(
                         preferredSize: const Size.fromHeight(60),
-                        child: Container(
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: theme.scaffoldBackgroundColor, 
-                            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                            boxShadow: [BoxShadow(color: Colors.transparent, blurRadius: 0)], 
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          child: Container(
-                            decoration: BoxDecoration(color: theme.cardColor, borderRadius: BorderRadius.circular(30)),
-                            child: TabBar(
-                              controller: _mainTabController, 
-                              indicator: BoxDecoration(borderRadius: BorderRadius.circular(30), color: theme.primaryColor, boxShadow: [BoxShadow(color: theme.primaryColor.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))]),
-                              indicatorSize: TabBarIndicatorSize.tab, 
-                              dividerColor: Colors.transparent, 
-                              labelColor: Colors.white, 
-                              unselectedLabelColor: theme.disabledColor, 
-                              labelStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w800, fontSize: 13),
-                              unselectedLabelStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600, fontSize: 13),
-                              overlayColor: WidgetStateProperty.all(Colors.transparent),
-                              tabs: [Tab(text: AppStrings.navProfile), Tab(text: AppStrings.activity), Tab(text: AppStrings.gallery)],
-                            ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                          child: PillTabBar(
+                            controller: _mainTabController,
+                            tabs: [AppStrings.navProfile, AppStrings.activity, AppStrings.gallery],
+                            onTap: (_) => HapticFeedback.selectionClick(),
                           ),
                         ),
                       ),

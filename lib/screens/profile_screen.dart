@@ -2,29 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../main.dart'; // supabase nesnesi için
+import '../main.dart';
 
 // CORE
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
+import '../core/constants.dart';
 
-// MODELLER & SERVİSLER
+// MODELS & SERVICES
 import '../models/post_model.dart';
 import '../services/supabase_service.dart';
 import '../providers/profile_provider.dart';
 
-// WIDGETLAR
-// 🔥 YENİ TASARIM COMPONENTLERİ (StackedCardCarousel, RankingPodium vb.)
+// WIDGETS
 import '../widgets/profile/profile_components.dart';
 import '../widgets/profile/profile_header.dart';
 import '../widgets/feed/feed_widgets.dart';
 import '../widgets/common/glass_button.dart';
+import '../widgets/common/glass_panel.dart';
+import '../widgets/common/animated_press.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/animated_list_item.dart';
 import '../widgets/common/masonry_gallery.dart';
-
-// Import Çakışmasını Önleme
 import '../widgets/friend/friend_profile_widgets.dart' show FriendEmptyCard;
 
 class ProfileScreen extends StatefulWidget {
@@ -41,7 +41,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   late TabController _mainTabController;
   final ScrollController _scrollController = ScrollController();
 
-  // Streams & Futures (profil verisi hariç — o ProfileProvider'da)
+  // Streams & Futures
   late Stream<List<Map<String, dynamic>>> _favoritesStream;
   late Stream<List<Map<String, dynamic>>> _notesStream;
   late Stream<List<String>> _photosStream;
@@ -55,8 +55,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   void initState() {
     super.initState();
     _mainTabController = TabController(length: 3, vsync: this);
-
-    // Profil verisi Provider'dan yükleniyor
     context.read<ProfileProvider>().loadProfile(_uid);
 
     _favoritesStream = _supabaseService.getUserFavorites(_uid);
@@ -69,13 +67,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     _surveyHistoryFuture = _supabaseService.getSurveyHistory(_uid);
   }
 
-  // --- YARDIMCI: ID BULUCU ---
   String _findPlaceId(Map<String, dynamic> data) {
     if (data['placeId'] != null && data['placeId'].toString().isNotEmpty) return data['placeId'];
     if (data['venueId'] != null && data['venueId'].toString().isNotEmpty) return data['venueId'];
     if (data['businessId'] != null && data['businessId'].toString().isNotEmpty) return data['businessId'];
     if (data['id'] != null && data['id'].toString().isNotEmpty) return data['id'];
-    
     if (data['place_name'] != null && data['place_name'].toString().isNotEmpty) {
       return data['place_name'].toString().toLowerCase().replaceAll(' ', '_');
     }
@@ -88,26 +84,24 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     return "";
   }
 
-  // --- POPUP FONKSİYONLARI ---
-  void _showAllQuests(BuildContext context) { /* Gerekirse detay sayfası */ }
-  void _showAllFavorites(BuildContext context) { /* Gerekirse detay sayfası */ }
-  void _showAllFrequentPlaces(BuildContext context) { /* Gerekirse detay sayfası */ }
-  void _showAllNotes(BuildContext context) { /* Gerekirse detay sayfası */ }
-  void _showAllSurveys(BuildContext context) { /* Gerekirse detay sayfası */ }
+  void _showAllQuests(BuildContext context) {}
+  void _showAllFavorites(BuildContext context) {}
+  void _showAllFrequentPlaces(BuildContext context) {}
+  void _showAllNotes(BuildContext context) {}
+  void _showAllSurveys(BuildContext context) {}
 
-  // --- ANA BUILD METHODU ---
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final profileProvider = context.watch<ProfileProvider>();
-    final _user = profileProvider.profile;
+    final user = profileProvider.profile;
 
     if (profileProvider.isLoading) {
       return Scaffold(backgroundColor: Colors.transparent, body: const ShimmerList(itemCount: 5));
     }
 
-    final String displayImage = (_user?.profileImage != null && _user!.profileImage.isNotEmpty)
-        ? _user.profileImage
+    final String displayImage = (user?.profileImage != null && user!.profileImage.isNotEmpty)
+        ? user.profileImage
         : "https://i.pravatar.cc/150?img=60";
 
     return Scaffold(
@@ -119,12 +113,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
               sliver: SliverAppBar(
-                expandedHeight: 300.0,
+                expandedHeight: 340.0,
                 pinned: true,
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 automaticallyImplyLeading: false,
-                
+
                 actions: [
                   Center(
                     child: GlassButton.appBar(
@@ -132,13 +126,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       onTap: () async {
                         HapticFeedback.lightImpact();
                         await context.push(AppRoutes.editProfile);
-                        // ProfileProvider realtime stream otomatik güncelleyecek
                       },
                     ),
                   ),
                   const SizedBox(width: 8),
-
-                  // AYARLAR BUTONU
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.only(right: 16.0),
@@ -152,57 +143,30 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     ),
                   ),
                 ],
-                
+
                 flexibleSpace: FlexibleSpaceBar(
                   stretchModes: const [StretchMode.zoomBackground],
                   background: ProfileHeader(
                     imageUrl: displayImage,
-                    name: _user?.name ?? AppStrings.nameless,
-                    username: _user?.username ?? "kullanici",
-                    bio: _user?.bio ?? "",
-                    followersCount: (_user?.followersCount ?? 0).toString(),
-                    followingCount: (_user?.followingCount ?? 0).toString(),
+                    name: user?.name ?? AppStrings.nameless,
+                    username: user?.username ?? "kullanici",
+                    bio: user?.bio ?? "",
+                    followersCount: (user?.followersCount ?? 0).toString(),
+                    followingCount: (user?.followingCount ?? 0).toString(),
                     friendsCount: "42",
-                    trustScore: (_user?.trustScore ?? 5.0).toDouble(),
+                    trustScore: (user?.trustScore ?? 5.0).toDouble(),
                   ),
                 ),
-                
+
+                // PILL TABS
                 bottom: PreferredSize(
                   preferredSize: const Size.fromHeight(60),
-                  child: Container(
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                      boxShadow: [BoxShadow(color: Colors.transparent, blurRadius: 0)],
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: theme.cardColor, 
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: TabBar(
-                        controller: _mainTabController, 
-                        indicator: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          color: theme.primaryColor, 
-                          boxShadow: [BoxShadow(color: theme.primaryColor.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))],
-                        ),
-                        indicatorSize: TabBarIndicatorSize.tab, 
-                        dividerColor: Colors.transparent, 
-                        labelColor: Colors.white, 
-                        unselectedLabelColor: theme.disabledColor, 
-                        labelStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w800, fontSize: 13),
-                        unselectedLabelStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600, fontSize: 13),
-                        overlayColor: WidgetStateProperty.all(Colors.transparent),
-                        onTap: (index) => HapticFeedback.selectionClick(),
-                        tabs: [
-                          Tab(text: AppStrings.profileTab), 
-                          Tab(text: AppStrings.activityTab), 
-                          Tab(text: AppStrings.galleryTab), 
-                        ],
-                      ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                    child: PillTabBar(
+                      controller: _mainTabController,
+                      tabs: [AppStrings.profileTab, AppStrings.activityTab, AppStrings.galleryTab],
+                      onTap: (_) => HapticFeedback.selectionClick(),
                     ),
                   ),
                 ),
@@ -214,7 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           controller: _mainTabController,
           physics: const BouncingScrollPhysics(),
           children: [
-            _buildProfileTab(theme, _user),
+            _buildProfileTab(theme, user),
             _buildActivityTab(theme),
             _buildGalleryTab(theme),
           ],
@@ -223,194 +187,163 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
 
-// ... (Importlar aynı kalacak, sadece build metodunun içindeki sıralamayı değiştiriyoruz)
+  // ======================
+  // TAB 1: PROFIL — Bento Box Architecture
+  // ======================
+  Widget _buildProfileTab(ThemeData theme, dynamic user) {
+    final isDark = theme.brightness == Brightness.dark;
 
-// ======================
-// 🟢 TAB 1: PROFİL (YENİ SIRALAMA & GÖRÜNÜM)
-// ======================
-Widget _buildProfileTab(ThemeData theme, dynamic _user) {
-  return Builder(builder: (BuildContext context) {
-    return CustomScrollView(
-      key: const PageStorageKey<String>('tab1'),
-      slivers: [
-        SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                
-                // 1. BAŞARI ROZETLERİ (GÖREVLER) - En Üstte, Kompakt
-                SizedBox(
-                  height: 60, // Rozet yüksekliği
-                  child: FutureBuilder<List<Map<String, dynamic>>>(
-                    future: _questsFuture,
+    return Builder(builder: (BuildContext context) {
+      return CustomScrollView(
+        key: const PageStorageKey<String>('tab1'),
+        slivers: [
+          SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  // ==========================================
+                  // A. BENTO DASHBOARD (Asymmetric Grid)
+                  // ==========================================
+                  _BentoDashboard(
+                    isDark: isDark,
+                    questsFuture: _questsFuture,
+                    notesStream: _notesStream,
+                    surveyHistoryFuture: _surveyHistoryFuture,
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // ==========================================
+                  // B. SPOTLIGHT — Single Carousel (Favorites Only)
+                  // ==========================================
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: SectionHeader(
+                      title: AppStrings.favoritesTitle,
+                      icon: Icons.favorite_rounded,
+                      onActionTap: () => _showAllFavorites(context),
+                    ),
+                  ),
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: _favoritesStream,
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink(); // Boşsa gösterme
-                      return ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        scrollDirection: Axis.horizontal,
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: FriendEmptyCard(
+                            title: AppStrings.noFavorites,
+                            subtitle: AppStrings.noFavoritesDesc,
+                            icon: Icons.favorite_border_rounded,
+                          ),
+                        );
+                      }
+                      return StackedCardCarousel(
                         itemCount: snapshot.data!.length,
+                        height: 300,
                         itemBuilder: (context, index) {
-                          var q = snapshot.data![index];
-                          return DynamicQuestCard(
-                            title: q['title'] ?? 'Görev',
-                            subtitle: q['subtitle'] ?? '',
-                            progress: (q['progress'] is num) ? (q['progress'] as num).toDouble() : 0.0,
+                          var fav = snapshot.data![index];
+                          return VerticalPlaceCard(
+                            name: fav['place_name'] ?? 'Mekan',
+                            rating: (fav['rating'] is num)
+                                ? (fav['rating'] as num).toStringAsFixed(1)
+                                : "0.0",
+                            imgUrl: fav['image'] ?? "https://picsum.photos/400",
+                            onTap: () => context.push(
+                              '/venue/${_findPlaceId(fav)}',
+                              extra: {
+                                'venueName': fav['place_name'] ?? 'Mekan',
+                                'imageUrl': fav['image'] ?? "https://picsum.photos/400",
+                              },
+                            ),
                           );
                         },
                       );
                     },
                   ),
-                ),
-                const SizedBox(height: 20),
 
-// 2. SIK UĞRANILANLAR (Podyum + Scrollable Mini Liste)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SectionHeader(title: AppStrings.frequentPlacesTitle, icon: Icons.emoji_events_rounded, onActionTap: () => _showAllFrequentPlaces(context)),
-                ),
-                FutureBuilder<List<Map<String, dynamic>>>(
-                  future: _frequentPlacesFuture,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) return const Padding(padding: EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(icon: Icons.explore_off_rounded, title: "Henüz Mekan Yok", subtitle: "Sık ziyaretler burada listelenir."));
-                    
-                    var places = snapshot.data!;
-                    var top3 = places.take(3).toList();
-                    // 4. sıradan başla, en fazla 10. sıraya kadar al (toplam 7 eleman: 4,5,6,7,8,9,10)
-                    var others = places.skip(3).take(7).toList(); 
+                  const SizedBox(height: 28),
 
-                    return Column(
-                      children: [
-                        // PODYUM (1, 2, 3)
-                        RankingPodium(
-                          top3Places: top3, 
-                          onTap: (id, name, img) => context.push('/venue/$id', extra: {'venueName': name, 'imageUrl': img})
-                        ),
-                        
-                        // LİSTE (4 - 10 Arası)
-                        if (others.isNotEmpty) ...[
-                          const SizedBox(height: 10),
-                          // 🔥 KRİTİK NOKTA: Sadece 2 satır gösterecek yükseklik (yaklaşık 150-160px)
-                          Container(
-                            height: 160, 
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: ListView.builder(
-                              // İçerideki kaydırma fiziği
-                              physics: const BouncingScrollPhysics(), 
-                              padding: EdgeInsets.zero,
-                              itemCount: others.length,
-                              itemBuilder: (context, index) {
-                                var entry = others[index];
-                                return SimpleRankRow(
-                                  rank: index + 4, // 4'ten başla
-                                  name: entry['place_name'] ?? "",
-                                  count: (entry['visit_count'] as num).toInt(),
-                                  imgUrl: entry['image_url'] ?? "",
-                                  onTap: () => context.push('/venue/${_findPlaceId(entry)}', extra: {'venueName': entry['place_name']??"", 'imageUrl': entry['image_url']??""}),
-                                );
-                              },
+                  // ==========================================
+                  // C. VERTICAL FLOW — Frequent Places
+                  // ==========================================
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: SectionHeader(
+                      title: AppStrings.frequentPlacesTitle,
+                      icon: Icons.emoji_events_rounded,
+                      onActionTap: () => _showAllFrequentPlaces(context),
+                    ),
+                  ),
+                  FutureBuilder<List<Map<String, dynamic>>>(
+                    future: _frequentPlacesFuture,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: FriendEmptyCard(
+                            icon: Icons.explore_off_rounded,
+                            title: "Henüz Mekan Yok",
+                            subtitle: "Sık ziyaretler burada listelenir.",
+                          ),
+                        );
+                      }
+
+                      var places = snapshot.data!;
+                      var top3 = places.take(3).toList();
+                      var others = places.skip(3).take(7).toList();
+
+                      return Column(
+                        children: [
+                          // Podium (1, 2, 3)
+                          RankingPodium(
+                            top3Places: top3,
+                            onTap: (id, name, img) => context.push(
+                              '/venue/$id',
+                              extra: {'venueName': name, 'imageUrl': img},
                             ),
-                          )
-                        ]
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: 30),
+                          ),
 
-                // 3. FAVORİ MEKANLAR
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SectionHeader(title: AppStrings.favoritesTitle, icon: Icons.favorite_rounded, onActionTap: () => _showAllFavorites(context)),
-                ),
-                StreamBuilder<List<Map<String, dynamic>>>(
-                  stream: _favoritesStream,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(title: AppStrings.noFavorites, subtitle: AppStrings.noFavoritesDesc, icon: Icons.favorite_border_rounded));
-                    
-                    return StackedCardCarousel(
-                      itemCount: snapshot.data!.length,
-                      height: 300, 
-                      itemBuilder: (context, index) {
-                        var fav = snapshot.data![index];
-                        return VerticalPlaceCard(
-                          name: fav['place_name'] ?? 'Mekan',
-                          rating: (fav['rating'] is num) ? (fav['rating'] as num).toStringAsFixed(1) : "0.0",
-                          imgUrl: fav['image'] ?? "https://picsum.photos/400",
-                          onTap: () => context.push('/venue/${_findPlaceId(fav)}', extra: {'venueName': fav['place_name'] ?? 'Mekan', 'imageUrl': fav['image'] ?? "https://picsum.photos/400"}),
-                        );
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: 30),
+                          // Vertical list (4+) — glass rank rows
+                          if (others.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            ...others.asMap().entries.map((entry) => Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: SimpleRankRow(
+                                rank: entry.key + 4,
+                                name: entry.value['place_name'] ?? "",
+                                count: (entry.value['visit_count'] as num).toInt(),
+                                imgUrl: entry.value['image_url'] ?? "",
+                                onTap: () => context.push(
+                                  '/venue/${_findPlaceId(entry.value)}',
+                                  extra: {
+                                    'venueName': entry.value['place_name'] ?? "",
+                                    'imageUrl': entry.value['image_url'] ?? "",
+                                  },
+                                ),
+                              ),
+                            )),
+                          ],
+                        ],
+                      );
+                    },
+                  ),
 
-                // 4. NOTLARIM (Yeni Sticky Note Tasarımı)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SectionHeader(title: AppStrings.myNotes, icon: Icons.edit_note_rounded, onActionTap: () => _showAllNotes(context)),
-                ),
-                StreamBuilder<List<Map<String, dynamic>>>(
-                  stream: _notesStream,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(title: AppStrings.notebookEmpty, subtitle: AppStrings.notebookEmptyDesc, icon: Icons.note_alt_rounded));
-                    
-                    return StackedCardCarousel(
-                      itemCount: snapshot.data!.length,
-                      height: 280, 
-                      itemBuilder: (context, index) {
-                        var note = snapshot.data![index];
-                        return VerticalNoteCard(
-                          placeName: note['place_name'] ?? "Mekan",
-                          note: note['content'] ?? "",
-                          date: _formatDate(note['date']),
-                          profileImg: _user?.profileImage ?? "https://i.pravatar.cc/150",
-                          onTap: () => context.push('/venue/${_findPlaceId(note)}', extra: {'venueName': note['place_name'] ?? "Mekan", 'imageUrl': "https://picsum.photos/200"}),
-                        );
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: 30),
-
-                // 5. DEĞERLENDİRME GEÇMİŞİ (Yeni Kartlar)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SectionHeader(title: AppStrings.surveyHistoryTitle, icon: Icons.poll_rounded, onActionTap: () => _showAllSurveys(context)),
-                ),
-                FutureBuilder<List<Map<String, dynamic>>>(
-                  future: _surveyHistoryFuture,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(title: AppStrings.noSurveys, subtitle: AppStrings.noSurveysDesc, icon: Icons.analytics_outlined));                    
-                    return StackedCardCarousel(
-                      itemCount: snapshot.data!.length,
-                      height: 240, // Daha kompakt
-                      itemBuilder: (context, index) {
-                        var survey = snapshot.data![index];
-                        return DetailedReviewCard(
-                          placeName: survey['location_name'] ?? 'Mekan', 
-                          score: (survey['rating'] is num) ? (survey['rating'] as num).toDouble() : 0.0,
-                          date: _formatDate(survey['created_at']),
-                          onTap: () => context.push('/venue/${_findPlaceId(survey)}', extra: {'venueName': survey['location_name'] ?? "Mekan", 'imageUrl': "https://picsum.photos/200"}),
-                        );
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: 120),
-              ],
+                  const SizedBox(height: 120),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
-    );
-  });
-}
+        ],
+      );
+    });
+  }
 
   // ======================
-  // 🔵 TAB 2: AKTİVİTE
+  // TAB 2: ACTIVITY
   // ======================
   Widget _buildActivityTab(ThemeData theme) {
     return Builder(builder: (BuildContext context) {
@@ -421,9 +354,20 @@ Widget _buildProfileTab(ThemeData theme, dynamic _user) {
           StreamBuilder<List<PostModel>>(
             stream: _activityStream,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) return const SliverToBoxAdapter(child: ShimmerList(itemCount: 4));
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SliverToBoxAdapter(child: ShimmerList(itemCount: 4));
+              }
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.only(top: 80), child: FriendEmptyCard(title: AppStrings.noActivity, subtitle: AppStrings.noActivityUser, icon: Icons.local_activity_rounded)));
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 80),
+                    child: FriendEmptyCard(
+                      title: AppStrings.noActivity,
+                      subtitle: AppStrings.noActivityUser,
+                      icon: Icons.local_activity_rounded,
+                    ),
+                  ),
+                );
               }
               var posts = snapshot.data!;
               return SliverPadding(
@@ -435,7 +379,9 @@ Widget _buildProfileTab(ThemeData theme, dynamic _user) {
                       index: index,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: post.type == 'review' ? FeedReviewCard(post: post) : FeedPostCard(post: post),
+                        child: post.type == 'review'
+                            ? FeedReviewCard(post: post)
+                            : FeedPostCard(post: post),
                       ),
                     );
                   }, childCount: posts.length),
@@ -449,7 +395,7 @@ Widget _buildProfileTab(ThemeData theme, dynamic _user) {
   }
 
   // ======================
-  // 🟠 TAB 3: GALERİ
+  // TAB 3: GALLERY (Masonry)
   // ======================
   Widget _buildGalleryTab(ThemeData theme) {
     return Builder(builder: (BuildContext context) {
@@ -461,7 +407,16 @@ Widget _buildProfileTab(ThemeData theme, dynamic _user) {
             stream: _photosStream,
             builder: (context, snapshot) {
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.only(top: 80), child: FriendEmptyCard(title: AppStrings.galleryEmpty, subtitle: AppStrings.galleryEmptyUser, icon: Icons.photo_library_rounded)));
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 80),
+                    child: FriendEmptyCard(
+                      title: AppStrings.galleryEmpty,
+                      subtitle: AppStrings.galleryEmptyUser,
+                      icon: Icons.photo_library_rounded,
+                    ),
+                  ),
+                );
               }
               var photos = snapshot.data!;
               return SliverMasonryGallery(
@@ -487,13 +442,251 @@ Widget _buildProfileTab(ThemeData theme, dynamic _user) {
     if (date == null) return "";
     if (date is DateTime) return "${date.day}.${date.month}.${date.year}";
     if (date is String) {
-        try {
-            final dt = DateTime.parse(date);
-            return "${dt.day}.${dt.month}.${dt.year}";
-        } catch (e) {
-            return date;
-        }
+      try {
+        final dt = DateTime.parse(date);
+        return "${dt.day}.${dt.month}.${dt.year}";
+      } catch (e) {
+        return date;
+      }
     }
     return "";
+  }
+}
+
+// ==========================================
+// BENTO DASHBOARD — Asymmetric Glass Grid
+// ==========================================
+class _BentoDashboard extends StatelessWidget {
+  final bool isDark;
+  final Future<List<Map<String, dynamic>>> questsFuture;
+  final Stream<List<Map<String, dynamic>>> notesStream;
+  final Future<List<Map<String, dynamic>>> surveyHistoryFuture;
+
+  const _BentoDashboard({
+    required this.isDark,
+    required this.questsFuture,
+    required this.notesStream,
+    required this.surveyHistoryFuture,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SizedBox(
+      height: 170,
+      child: Row(
+        children: [
+          // LEFT SQUARE — Quest / Badge
+          Expanded(
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: questsFuture,
+              builder: (context, snapshot) {
+                final quest = (snapshot.hasData && snapshot.data!.isNotEmpty)
+                    ? snapshot.data!.first
+                    : null;
+                final progress = quest != null && quest['progress'] is num
+                    ? (quest['progress'] as num).toDouble() / 100
+                    : 0.0;
+                final title = quest?['title'] ?? AppStrings.comingSoon;
+
+                return AnimatedPress(
+                  onTap: () {},
+                  useHeavyHaptic: true,
+                  child: GlassPanel.bento(
+                    height: 170,
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Circular progress
+                        SizedBox(
+                          width: 52,
+                          height: 52,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              CircularProgressIndicator(
+                                value: 1.0,
+                                strokeWidth: 3,
+                                valueColor: AlwaysStoppedAnimation(
+                                  isDark
+                                      ? Colors.white.withValues(alpha: 0.08)
+                                      : Colors.black.withValues(alpha: 0.06),
+                                ),
+                              ),
+                              CircularProgressIndicator(
+                                value: progress,
+                                strokeWidth: 3,
+                                valueColor: AlwaysStoppedAnimation(theme.primaryColor),
+                                strokeCap: StrokeCap.round,
+                              ),
+                              Icon(
+                                progress >= 1.0
+                                    ? Icons.emoji_events_rounded
+                                    : Icons.flag_rounded,
+                                color: theme.primaryColor,
+                                size: 22,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "${(progress * 100).toInt()}%",
+                          style: AppTextStyles.caption.copyWith(
+                            color: theme.primaryColor,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(width: 10),
+
+          // RIGHT COLUMN — Two stacked rectangles
+          Expanded(
+            child: Column(
+              children: [
+                // Top card — Last Note
+                Expanded(
+                  child: StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: notesStream,
+                    builder: (context, snapshot) {
+                      final note = (snapshot.hasData && snapshot.data!.isNotEmpty)
+                          ? snapshot.data!.first
+                          : null;
+                      final noteText = note?['content'] ?? AppStrings.notebookEmpty;
+
+                      return AnimatedPress(
+                        onTap: () {},
+                        child: GlassPanel.bento(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.edit_note_rounded,
+                                    size: 16,
+                                    color: theme.primaryColor,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    AppStrings.myNotes,
+                                    style: AppTextStyles.caption.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: theme.primaryColor,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                noteText,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyles.caption.copyWith(
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 12,
+                                  height: 1.3,
+                                  color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // Bottom card — Last Review
+                Expanded(
+                  child: FutureBuilder<List<Map<String, dynamic>>>(
+                    future: surveyHistoryFuture,
+                    builder: (context, snapshot) {
+                      final review = (snapshot.hasData && snapshot.data!.isNotEmpty)
+                          ? snapshot.data!.first
+                          : null;
+                      final score = review != null && review['rating'] is num
+                          ? (review['rating'] as num).toDouble()
+                          : 0.0;
+                      final placeName = review?['location_name'] ?? AppStrings.noReviewsYet;
+
+                      return AnimatedPress(
+                        onTap: () {},
+                        child: GlassPanel.bento(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.star_rounded,
+                                    size: 16,
+                                    color: AppColors.warning,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    score > 0
+                                        ? score.toStringAsFixed(1)
+                                        : "-",
+                                    style: AppTextStyles.h3.copyWith(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.warning,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                placeName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyles.caption.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                  color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

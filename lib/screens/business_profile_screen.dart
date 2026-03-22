@@ -1,23 +1,28 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-// CORE IMPORTLARI
+// CORE
+import '../core/constants.dart';
 import '../core/theme_styles.dart';
 import '../core/text_styles.dart';
 import '../core/app_strings.dart';
 
-// SERVİSLER
+// SERVICES
 import '../services/supabase_service.dart';
 
-// WIDGETLAR
+// WIDGETS
 import '../widgets/business/business_widgets.dart';
 import '../widgets/common/active_users_sheet.dart';
 import '../widgets/common/check_in_button.dart';
 import '../widgets/common/glass_button.dart';
+import '../widgets/common/glass_panel.dart';
+import '../widgets/common/animated_press.dart';
 import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/common/masonry_gallery.dart';
+import '../widgets/profile/profile_header.dart' show PillTabBar;
 
 class BusinessProfileScreen extends StatefulWidget {
   final String venueId;
@@ -214,22 +219,35 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
+                    // Ambient background — blurred venue image
                     AppCachedImage.cover(imageUrl: widget.imageUrl, height: 300),
+                    ClipRect(
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                        child: Container(color: Colors.transparent),
+                      ),
+                    ),
+                    // Sharp overlay image (smaller, centered)
+                    Positioned.fill(
+                      child: AppCachedImage.cover(imageUrl: widget.imageUrl, height: 300),
+                    ),
+                    // Gradient shield
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.black.withValues(alpha: 0.1),
-                            Colors.transparent,
-                            Colors.black.withValues(alpha: 0.6),
-                            Colors.black.withValues(alpha: 0.9),
+                            Colors.black.withValues(alpha: 0.05),
+                            Colors.black.withValues(alpha: 0.10),
+                            Colors.black.withValues(alpha: 0.55),
+                            Colors.black.withValues(alpha: 0.85),
                           ],
-                          stops: const [0.0, 0.4, 0.7, 1.0],
+                          stops: const [0.0, 0.35, 0.65, 1.0],
                         ),
                       ),
                     ),
+                    // Venue info (boxless)
                     Positioned(
                       bottom: 70,
                       left: 20, right: 20,
@@ -240,37 +258,51 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                               decoration: BoxDecoration(
-                                color: theme.primaryColor,
-                                borderRadius: BorderRadius.circular(8)
+                                color: Colors.white.withValues(alpha: 0.18),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
                               ),
                               child: Text(
                                 _category,
                                 style: AppTextStyles.caption.copyWith(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5
-                                )
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
                             ),
                           const SizedBox(height: 8),
                           Text(
                             widget.venueName,
-                            style: AppTextStyles.h2.copyWith(
+                            style: AppTextStyles.h1.copyWith(
                               color: Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.w900,
-                              height: 1.1
-                            )
+                              fontSize: 28,
+                              fontWeight: FontWeight.w800,
+                              height: 1.1,
+                              shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 8)],
+                            ),
                           ),
                           if (_liveUserCount > 0) ...[
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                const Icon(Icons.people_alt_rounded, color: Colors.white70, size: 16),
-                                const SizedBox(width: 4),
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF30D158),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [BoxShadow(color: const Color(0xFF30D158).withValues(alpha: 0.5), blurRadius: 6)],
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
                                 Text(
                                   "$_liveUserCount ${AppStrings.peopleCount}",
-                                  style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500),
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.80),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ],
                             ),
@@ -283,29 +315,12 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
               ),
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(60),
-                child: Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: theme.scaffoldBackgroundColor,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                  ),
-                  child: Center(
-                    child: TabBar(
-                      controller: _mainTabController,
-                      labelColor: theme.primaryColor,
-                      unselectedLabelColor: theme.disabledColor,
-                      indicatorColor: theme.primaryColor,
-                      indicatorWeight: 3,
-                      indicatorSize: TabBarIndicatorSize.label,
-                      indicatorPadding: const EdgeInsets.only(bottom: 10),
-                      labelStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w800, fontSize: 15),
-                      dividerColor: Colors.transparent,
-                      tabs: [
-                        Tab(text: AppStrings.overview),
-                        Tab(text: AppStrings.mediaGallery),
-                      ],
-                      onTap: (_) => HapticFeedback.selectionClick(),
-                    ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+                  child: PillTabBar(
+                    controller: _mainTabController,
+                    tabs: [AppStrings.overview, AppStrings.mediaGallery],
+                    onTap: (_) => HapticFeedback.selectionClick(),
                   ),
                 ),
               ),
@@ -333,52 +348,180 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
     final reviewProfiles = review?['profiles'];
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PlaceStatsRow(
-            rating: _rating,
-            reviewCount: _reviews.length,
-            liveUserCount: _liveUserCount,
-            category: _category,
-          ),
-          SectionHeader(title: AppStrings.upcomingEvents, icon: Icons.event_available_rounded),
-          const EventTicketCard(),
-          const SizedBox(height: 30),
-          SectionHeader(title: AppStrings.historyWithPlace, icon: Icons.insights_rounded),
-          InteractionStatsGrid(
-            visitCount: 0, // Kullanıcıya özel — gelecekte eklenecek
-            photoCount: _placePhotos.length,
-            reviewCount: _reviews.length,
-          ),
-          const SizedBox(height: 30),
-          SectionHeader(title: AppStrings.regulars, icon: Icons.emoji_events_rounded),
-          VenueLeaderboard(topVisitors: _topVisitors),
-          const SizedBox(height: 30),
-          SectionHeader(title: AppStrings.friendsSay, icon: Icons.chat_bubble_rounded),
-          FriendNoteBubble(
-            comment: review != null ? (review['comment'] ?? review['content'] ?? '').toString() : null,
-            authorName: reviewProfiles is Map ? (reviewProfiles['full_name'] ?? reviewProfiles['username']) : null,
-            authorAvatar: reviewProfiles is Map ? reviewProfiles['avatar_url'] : null,
-          ),
-          const SizedBox(height: 30),
-          SectionHeader(title: AppStrings.detailedRatings, icon: Icons.tune_rounded),
-          DetailedRatingBars(ratings: _ratingStats),
-          const SizedBox(height: 30),
-          LocationQrRow(latitude: _latitude, longitude: _longitude),
-          const SizedBox(height: 20),
+          // ==========================================
+          // BENTO DASHBOARD (Venue-specific)
+          // ==========================================
+          SizedBox(
+            height: 170,
+            child: Row(
+              children: [
+                // LEFT: Live Density
+                Expanded(
+                  child: AnimatedPress(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => ActiveUsersSheet(chatId: widget.venueId),
+                      );
+                    },
+                    useHeavyHaptic: true,
+                    child: GlassPanel.bento(
+                      height: 170,
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: (_liveUserCount > 0 ? const Color(0xFF30D158) : theme.disabledColor).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Icon(
+                              Icons.people_alt_rounded,
+                              color: _liveUserCount > 0 ? const Color(0xFF30D158) : theme.disabledColor,
+                              size: 22,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            "$_liveUserCount",
+                            style: AppTextStyles.h1.copyWith(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w800,
+                              color: _liveUserCount > 0 ? const Color(0xFF30D158) : theme.disabledColor,
+                            ),
+                          ),
+                          Text(
+                            AppStrings.peopleCount,
+                            style: AppTextStyles.caption.copyWith(
+                              color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.5),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
 
-          Center(
-            child: TextButton.icon(
-              onPressed: () {
-                HapticFeedback.lightImpact();
-              },
-              icon: Icon(Icons.flag_rounded, color: theme.disabledColor, size: 18),
-              label: Text(AppStrings.reportIssue, style: TextStyle(color: theme.disabledColor)),
+                const SizedBox(width: 10),
+
+                // RIGHT: Check-in + Rating
+                Expanded(
+                  child: Column(
+                    children: [
+                      // Check-in card
+                      Expanded(
+                        child: AnimatedPress(
+                          onTap: () {},
+                          child: GlassPanel.bento(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.location_on_rounded, color: theme.primaryColor, size: 20),
+                                const SizedBox(height: 6),
+                                Text(
+                                  "Check-in",
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      // Rating card
+                      Expanded(
+                        child: AnimatedPress(
+                          onTap: () {},
+                          child: GlassPanel.bento(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            child: Row(
+                              children: [
+                                Icon(Icons.star_rounded, color: AppColors.warning, size: 22),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _rating > 0 ? _rating.toStringAsFixed(1) : "-",
+                                  style: AppTextStyles.h2.copyWith(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.warning,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  "${_reviews.length}",
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: theme.disabledColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 40),
+
+          const SizedBox(height: 24),
+
+          // Rest of content
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SectionHeader(title: AppStrings.upcomingEvents, icon: Icons.event_available_rounded),
+                const EventTicketCard(),
+                const SizedBox(height: 30),
+                SectionHeader(title: AppStrings.regulars, icon: Icons.emoji_events_rounded),
+                VenueLeaderboard(topVisitors: _topVisitors),
+                const SizedBox(height: 30),
+                SectionHeader(title: AppStrings.friendsSay, icon: Icons.chat_bubble_rounded),
+                FriendNoteBubble(
+                  comment: review != null ? (review['comment'] ?? review['content'] ?? '').toString() : null,
+                  authorName: reviewProfiles is Map ? (reviewProfiles['full_name'] ?? reviewProfiles['username']) : null,
+                  authorAvatar: reviewProfiles is Map ? reviewProfiles['avatar_url'] : null,
+                ),
+                const SizedBox(height: 30),
+                SectionHeader(title: AppStrings.detailedRatings, icon: Icons.tune_rounded),
+                DetailedRatingBars(ratings: _ratingStats),
+                const SizedBox(height: 30),
+                LocationQrRow(latitude: _latitude, longitude: _longitude),
+                const SizedBox(height: 20),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () => HapticFeedback.lightImpact(),
+                    icon: Icon(Icons.flag_rounded, color: theme.disabledColor, size: 18),
+                    label: Text(AppStrings.reportIssue, style: TextStyle(color: theme.disabledColor)),
+                  ),
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
         ],
       ),
     );
