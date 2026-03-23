@@ -20,6 +20,10 @@ import '../screens/chat_screen.dart';
 import '../screens/group_chat_screen.dart';
 import '../screens/friend_profile_screen.dart';
 import '../screens/business_profile_screen.dart';
+import '../screens/quests_badges_screen.dart';
+import '../screens/notes_screen.dart';
+import '../screens/reviews_screen.dart';
+import '../screens/frequent_places_screen.dart';
 
 /// Route names — type-safe referans
 class AppRoutes {
@@ -40,6 +44,13 @@ class AppRoutes {
   static const String groupChat = '/group-chat';
   static const String friendProfile = '/profile/:userId';
   static const String businessProfile = '/venue/:venueId';
+
+  // Yeni profil ekranları
+  static const String questsBadges = '/quests-badges';
+  static const String myNotes = '/my-notes';
+  static const String myReviews = '/my-reviews';
+  static const String frequentPlacesFull = '/frequent-places';
+  static const String heatmapFull = '/heatmap';
 }
 
 final GoRouter appRouter = GoRouter(
@@ -163,6 +174,24 @@ final GoRouter appRouter = GoRouter(
           context, state, FriendProfileScreen(targetUserId: userId),
         );
       },
+    ),
+
+    // ═══ YENİ PROFİL EKRANLARI (iOS sağdan kayma) ═══
+    GoRoute(
+      path: AppRoutes.questsBadges,
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const QuestsBadgesScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.myNotes,
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const NotesScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.myReviews,
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const ReviewsScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.frequentPlacesFull,
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const FrequentPlacesScreen()),
     ),
 
     // ═══ BUSINESS PROFILE (modal alttan yukarı) ═══

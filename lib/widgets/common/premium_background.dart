@@ -132,16 +132,18 @@ List<Widget> _buildOrbs(bool isDark, double t) {
           const Color(0xFFD090E8), // Orchid
         ];
 
+  // Dark modda 3 orb (daha az yük), light'ta 5 orb
+  final orbCount = isDark ? 3 : 5;
   final alphas = isDark
-      ? [0.70, 0.55, 0.60, 0.45, 0.50]
+      ? [0.26, 0.22, 0.20, 0.0, 0.0]
       : [0.55, 0.45, 0.50, 0.40, 0.42];
 
   final basePositions = [
-    const Alignment(-0.7, -0.5),  // Top-left
-    const Alignment(0.8, -0.4),   // Top-right
-    const Alignment(-0.4, 0.6),   // Bottom-left
-    const Alignment(0.5, 0.7),    // Bottom-right
-    const Alignment(0.0, 0.0),    // Center
+    const Alignment(-1.1, -1.0),  // sol üst köşe dışı
+    const Alignment(1.1, -0.9),   // sağ üst köşe dışı
+    const Alignment(-1.0, 1.0),   // sol alt köşe dışı
+    const Alignment(1.0, 1.0),    // sağ alt köşe dışı
+    const Alignment(0.0, 0.1),    // merkez (sabit)
   ];
 
   // LARGE orb sizes — must fill significant screen area
@@ -149,10 +151,10 @@ List<Widget> _buildOrbs(bool isDark, double t) {
 
   final phases = [0.0, 0.20, 0.40, 0.60, 0.80];
 
-  return List.generate(5, (i) {
+  return List.generate(orbCount, (i) {
     final phase = (t + phases[i]) % 1.0;
-    final dx = math.sin(phase * 2 * math.pi) * 0.18;
-    final dy = math.cos(phase * 2 * math.pi) * 0.12;
+    final dx = math.sin(phase * 2 * math.pi) * 0.35;
+    final dy = math.cos(phase * 2 * math.pi) * 0.30;
 
     final alignment = Alignment(
       (basePositions[i].x + dx).clamp(-1.3, 1.3),

@@ -7,36 +7,108 @@ import '../core/neer_design_system.dart';
 /// Premium Floating Pill NavBar — Apple VisionOS style.
 ///
 /// Features:
-/// - Floating pill shape with horizontal margins (not edge-to-edge)
-/// - Ultra-high blur (sigma 50) frosted glass
-/// - Center map button elevated with glow
-/// - Active indicators with neon glow dot + label
-/// - Spring scale micro-interaction on tap
-class CustomNavBar extends StatelessWidget {
+/// - Scroll-aware: scrolls down → shrinks to gradient dot, scrolls up → expands back
+/// - No labels — icon-only
+/// - Active indicator: gradient underline bar (2.5px)
+/// - Notification dot for Chat (index 1) and Catch (index 3)
+/// - Spring expand/collapse animation (elasticOut)
+class CustomNavBar extends StatefulWidget {
   final int activeIndex;
   final Function(int) onTabChange;
+  final ScrollController? scrollController;
+  final bool hasChat;
+  final bool hasCatch;
 
   const CustomNavBar({
     super.key,
     required this.activeIndex,
     required this.onTabChange,
+    this.scrollController,
+    this.hasChat = false,
+    this.hasCatch = false,
   });
 
+  @override
+  State<CustomNavBar> createState() => _CustomNavBarState();
+}
+
+class _CustomNavBarState extends State<CustomNavBar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+  late Animation<double> _expandAnim;
+  bool _isDot = false;
+  double _lastScrollOffset = 0;
+
   static const List<IconData> _icons = [
-    Icons.person_rounded,
+    Icons.map_rounded,
     Icons.chat_bubble_rounded,
-    Icons.pin_drop_rounded,
     Icons.dynamic_feed_rounded,
     Icons.bolt_rounded,
+    Icons.person_rounded,
   ];
 
-  static const List<String> _labels = [
-    'Profil',
-    'Chat',
-    'Harita',
-    'Feed',
-    'Catch',
-  ];
+  // Emoji for dot mode (active tab)
+  static const List<String> _emojis = ['🗺️', '💬', '⚡', '🎯', '👤'];
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+      reverseDuration: const Duration(milliseconds: 300),
+    );
+    _expandAnim = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.elasticOut,
+      reverseCurve: Curves.easeInCubic,
+    );
+    _animController.value = 1.0; // başlangıçta açık
+
+    widget.scrollController?.addListener(_onScroll);
+  }
+
+  @override
+  void didUpdateWidget(CustomNavBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.scrollController != widget.scrollController) {
+      oldWidget.scrollController?.removeListener(_onScroll);
+      widget.scrollController?.addListener(_onScroll);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController?.removeListener(_onScroll);
+    _animController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final sc = widget.scrollController;
+    if (sc == null || !sc.hasClients) return;
+    final offset = sc.offset;
+    final delta = offset - _lastScrollOffset;
+    _lastScrollOffset = offset;
+
+    if (delta > 8 && !_isDot) {
+      _collapseToDoc();
+    } else if (delta < -4 && _isDot) {
+      _expandToBar();
+    }
+  }
+
+  void _collapseToDoc() {
+    if (_isDot) return;
+    setState(() => _isDot = true);
+    _animController.reverse();
+  }
+
+  void _expandToBar() {
+    if (!_isDot) return;
+    setState(() => _isDot = false);
+    _animController.forward();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,165 +116,98 @@ class CustomNavBar extends StatelessWidget {
     final bottomPad = MediaQuery.of(context).padding.bottom;
 
     return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        bottom: bottomPad + 8,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
-          child: Container(
-            height: 68,
-            decoration: BoxDecoration(
-              color: isDark
-                  ? NeerColors.darkSurface.withValues(alpha: 0.55)
-                  : Colors.white.withValues(alpha: 0.45),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.14)
-                    : Colors.white.withValues(alpha: 0.55),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: isDark
-                      ? Colors.black.withValues(alpha: 0.50)
-                      : NeerColors.primary.withValues(alpha: 0.18),
-                  blurRadius: 30,
-                  offset: const Offset(0, 8),
-                  spreadRadius: -4,
-                ),
-                if (!isDark)
-                  BoxShadow(
-                    color: Colors.white.withValues(alpha: 0.30),
-                    blurRadius: 1,
-                    offset: const Offset(0, -0.5),
+      padding: EdgeInsets.only(left: 16, right: 16, bottom: bottomPad + 8),
+      child: AnimatedBuilder(
+        animation: _expandAnim,
+        builder: (context, child) {
+          final screenW = MediaQuery.of(context).size.width - 32;
+          final t = _expandAnim.value.clamp(0.0, 1.0);
+          final width = 36.0 + (t * (screenW - 36));
+          final height = 36.0 + (t * (58.0 - 36.0));
+          final radius = 18.0 + (t * (28.0 - 18.0));
+
+          return GestureDetector(
+            onTap: _isDot ? _expandToBar : null,
+            child: Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(radius),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 35, sigmaY: 35),
+                  child: Container(
+                    width: width,
+                    height: height,
+                    decoration: BoxDecoration(
+                      color: _isDot
+                          ? null
+                          : (isDark
+                              ? NeerColors.darkSurface.withValues(alpha: 0.35)
+                              : Colors.white.withValues(alpha: 0.35)),
+                      gradient: _isDot ? NeerGradients.purplePink : null,
+                      borderRadius: BorderRadius.circular(radius),
+                      border: Border.all(
+                        color: _isDot
+                            ? Colors.white.withValues(alpha: 0.22)
+                            : Colors.white.withValues(alpha: 0.12),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _isDot
+                              ? NeerColors.primary.withValues(alpha: 0.35)
+                              : Colors.black.withValues(alpha: 0.40),
+                          blurRadius: _isDot ? 16 : 28,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: _isDot
+                        ? Center(
+                            child: Text(
+                              _emojis[widget.activeIndex],
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          )
+                        : Opacity(
+                            opacity: t,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: List.generate(5, (i) => _NavItem(
+                                icon: _icons[i],
+                                isActive: i == widget.activeIndex,
+                                isDark: isDark,
+                                hasNotification: (i == 1 && widget.hasChat) ||
+                                    (i == 3 && widget.hasCatch),
+                                onTap: () {
+                                  HapticFeedback.lightImpact();
+                                  widget.onTabChange(i);
+                                },
+                              )),
+                            ),
+                          ),
                   ),
-              ],
+                ),
+              ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(5, (index) {
-                if (index == 2) return _CenterButton(isActive: activeIndex == 2, isDark: isDark, onTap: () { HapticFeedback.mediumImpact(); onTabChange(2); });
-                return _NavItem(
-                  icon: _icons[index],
-                  label: _labels[index],
-                  isActive: index == activeIndex,
-                  isDark: isDark,
-                  onTap: () {
-                    if (index != activeIndex) {
-                      HapticFeedback.lightImpact();
-                      onTabChange(index);
-                    }
-                  },
-                );
-              }),
-            ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 }
 
-/// Center map button — elevated circle with gradient glow.
-class _CenterButton extends StatefulWidget {
-  final bool isActive;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  const _CenterButton({required this.isActive, required this.isDark, required this.onTap});
-
-  @override
-  State<_CenterButton> createState() => _CenterButtonState();
-}
-
-class _CenterButtonState extends State<_CenterButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _scaleController;
-  late Animation<double> _scaleAnim;
-
-  @override
-  void initState() {
-    super.initState();
-    _scaleController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 120),
-      reverseDuration: const Duration(milliseconds: 200),
-    );
-    _scaleAnim = Tween<double>(begin: 1.0, end: 0.88).animate(
-      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut, reverseCurve: Curves.elasticOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _scaleController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => _scaleController.forward(),
-      onTapUp: (_) {
-        _scaleController.reverse();
-        widget.onTap();
-      },
-      onTapCancel: () => _scaleController.reverse(),
-      child: ScaleTransition(
-        scale: _scaleAnim,
-        child: Container(
-          width: 54,
-          height: 54,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: NeerGradients.purplePink,
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.35),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: NeerColors.primary.withValues(alpha: widget.isActive ? 0.55 : 0.30),
-                blurRadius: widget.isActive ? 20 : 12,
-                offset: const Offset(0, 4),
-                spreadRadius: widget.isActive ? 2 : -2,
-              ),
-              BoxShadow(
-                color: NeerColors.primary.withValues(alpha: 0.15),
-                blurRadius: 40,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.pin_drop_rounded,
-            color: Colors.white,
-            size: 26,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Individual nav item with icon, label, and active glow dot.
+/// Individual nav item — icon only with gradient underline indicator.
 class _NavItem extends StatefulWidget {
   final IconData icon;
-  final String label;
   final bool isActive;
   final bool isDark;
+  final bool hasNotification;
   final VoidCallback onTap;
 
   const _NavItem({
     required this.icon,
-    required this.label,
     required this.isActive,
     required this.isDark,
+    required this.hasNotification,
     required this.onTap,
   });
 
@@ -224,7 +229,11 @@ class _NavItemState extends State<_NavItem>
       reverseDuration: const Duration(milliseconds: 180),
     );
     _scaleAnim = Tween<double>(begin: 1.0, end: 0.85).animate(
-      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut, reverseCurve: Curves.elasticOut),
+      CurvedAnimation(
+        parent: _scaleController,
+        curve: Curves.easeInOut,
+        reverseCurve: Curves.elasticOut,
+      ),
     );
   }
 
@@ -252,40 +261,53 @@ class _NavItemState extends State<_NavItem>
       child: ScaleTransition(
         scale: _scaleAnim,
         child: SizedBox(
-          width: 56,
-          height: 60,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          width: 52,
+          height: 58,
+          child: Stack(
+            alignment: Alignment.center,
             children: [
-              // Icon with optional glow background
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOutCubic,
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: widget.isActive
-                      ? activeColor.withValues(alpha: widget.isDark ? 0.12 : 0.10)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  widget.icon,
-                  color: widget.isActive ? activeColor : inactiveColor,
-                  size: 22,
-                ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    widget.icon,
+                    color: widget.isActive ? activeColor : inactiveColor,
+                    size: 22,
+                  ),
+                  const SizedBox(height: 4),
+                  // Gradient underline indicator
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOutCubic,
+                    width: widget.isActive ? 16 : 0,
+                    height: 2.5,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(2),
+                      gradient: widget.isActive ? NeerGradients.purplePink : null,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 2),
-              // Label
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 250),
-                style: TextStyle(
-                  color: widget.isActive ? activeColor : inactiveColor,
-                  fontSize: 9.5,
-                  fontWeight: widget.isActive ? FontWeight.w700 : FontWeight.w500,
-                  letterSpacing: 0.2,
+              // Notification dot
+              if (widget.hasNotification)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: NeerColors.secondary,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: widget.isDark
+                            ? NeerColors.darkSurface
+                            : Colors.white,
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
                 ),
-                child: Text(widget.label),
-              ),
             ],
           ),
         ),

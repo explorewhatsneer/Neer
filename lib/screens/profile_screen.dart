@@ -25,6 +25,7 @@ import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/animated_list_item.dart';
 import '../widgets/common/masonry_gallery.dart';
 import '../widgets/friend/friend_profile_widgets.dart' show FriendEmptyCard;
+import '../widgets/common/app_cached_image.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -50,6 +51,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   late Future<List<Map<String, dynamic>>> _frequentPlacesFuture;
   late Future<List<Map<String, dynamic>>> _surveyHistoryFuture;
 
+  late Future<List<Map<String, dynamic>>> _badgesFuture;
+  late Future<List<Map<String, dynamic>>> _allBadgeDefsFuture;
+  late Future<List<Map<String, dynamic>>> _activeQuestsFuture;
+  late Future<Map<String, dynamic>> _identityStatsFuture;
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +70,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     _questsFuture = _supabaseService.getUserQuests(_uid);
     _frequentPlacesFuture = _supabaseService.getFrequentPlaces(_uid);
     _surveyHistoryFuture = _supabaseService.getSurveyHistory(_uid);
+
+    _badgesFuture = _supabaseService.getUserBadges(_uid);
+    _allBadgeDefsFuture = _supabaseService.getAllBadgeDefinitions();
+    _activeQuestsFuture = _supabaseService.getUserActiveQuests(_uid);
+    _identityStatsFuture = _supabaseService.getUserIdentityStats(_uid);
   }
 
   String _findPlaceId(Map<String, dynamic> data) {
@@ -151,8 +162,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     bio: user?.bio ?? "",
                     followersCount: (user?.followersCount ?? 0).toString(),
                     followingCount: (user?.followingCount ?? 0).toString(),
-                    friendsCount: "42",
+                    friendsCount: "0",
                     trustScore: (user?.trustScore ?? 5.0).toDouble(),
+                    checkInCount: user?.checkInCount ?? 0,
+                    activeDays: user?.activeDays ?? 0,
+                    neerScoreLabel: user?.neerScoreLabel ?? AppStrings.neerScoreStandard,
                   ),
                 ),
 
@@ -213,10 +227,47 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     surveyHistoryFuture: _surveyHistoryFuture,
                   ),
 
+                  const SizedBox(height: 16),
+
+                  // ==========================================
+                  // B. NEER KİMLİĞİ KARTI
+                  // ==========================================
+                  StreamBuilder<List<String>>(
+                    stream: _photosStream,
+                    builder: (context, photoSnap) {
+                      final photoCount = photoSnap.data?.length ?? 0;
+                      return _NeerIdentityCard(
+                        statsFuture: _identityStatsFuture,
+                        photoCount: photoCount,
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // ==========================================
+                  // C. ROZET VİTRİNİ
+                  // ==========================================
+                  _BadgeVitrin(
+                    earnedFuture: _badgesFuture,
+                    allFuture: _allBadgeDefsFuture,
+                    onSeeAll: () {},
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // ==========================================
+                  // D. GÖREVLER PREVİEW
+                  // ==========================================
+                  _QuestPreviewWidget(
+                    questsFuture: _activeQuestsFuture,
+                    onSeeAll: () => _showAllQuests(context),
+                  ),
+
                   const SizedBox(height: 28),
 
                   // ==========================================
-                  // B. SPOTLIGHT — Single Carousel (Favorites Only)
+                  // E. SPOTLIGHT — Single Carousel (Favorites Only)
                   // ==========================================
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -266,66 +317,15 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   const SizedBox(height: 28),
 
                   // ==========================================
-                  // C. VERTICAL FLOW — Frequent Places
+                  // F. SIK UĞRANANLAR
                   // ==========================================
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: SectionHeader(
-                      title: AppStrings.frequentPlacesTitle,
-                      icon: Icons.emoji_events_rounded,
-                      onActionTap: () => _showAllFrequentPlaces(context),
-                    ),
-                  ),
                   FutureBuilder<List<Map<String, dynamic>>>(
                     future: _frequentPlacesFuture,
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: FriendEmptyCard(
-                            icon: Icons.explore_off_rounded,
-                            title: "Henüz Mekan Yok",
-                            subtitle: "Sık ziyaretler burada listelenir.",
-                          ),
-                        );
-                      }
-
-                      var places = snapshot.data!;
-                      var top3 = places.take(3).toList();
-                      var others = places.skip(3).take(7).toList();
-
-                      return Column(
-                        children: [
-                          // Podium (1, 2, 3)
-                          RankingPodium(
-                            top3Places: top3,
-                            onTap: (id, name, img) => context.push(
-                              '/venue/$id',
-                              extra: {'venueName': name, 'imageUrl': img},
-                            ),
-                          ),
-
-                          // Vertical list (4+) — glass rank rows
-                          if (others.isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            ...others.asMap().entries.map((entry) => Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: SimpleRankRow(
-                                rank: entry.key + 4,
-                                name: entry.value['place_name'] ?? "",
-                                count: (entry.value['visit_count'] as num).toInt(),
-                                imgUrl: entry.value['image_url'] ?? "",
-                                onTap: () => context.push(
-                                  '/venue/${_findPlaceId(entry.value)}',
-                                  extra: {
-                                    'venueName': entry.value['place_name'] ?? "",
-                                    'imageUrl': entry.value['image_url'] ?? "",
-                                  },
-                                ),
-                              ),
-                            )),
-                          ],
-                        ],
+                      final places = snapshot.data ?? [];
+                      return _FrequentPlacesSection(
+                        places: places.take(3).toList(),
+                        onSeeAll: () => _showAllFrequentPlaces(context),
                       );
                     },
                   ),
@@ -448,6 +448,469 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       }
     }
     return "";
+  }
+}
+
+// ==========================================
+// NEER KİMLİĞİ KARTI
+// ==========================================
+class _NeerIdentityCard extends StatelessWidget {
+  final Future<Map<String, dynamic>> statsFuture;
+  final int photoCount;
+  const _NeerIdentityCard({required this.statsFuture, required this.photoCount});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: statsFuture,
+      builder: (context, snapshot) {
+        final stats = snapshot.data;
+        return AnimatedPress(
+          onTap: () {},
+          child: GlassPanel.card(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(AppStrings.neerIdentityTitle,
+                  style: NeerTypography.caption.copyWith(
+                    color: Theme.of(context).disabledColor, letterSpacing: 0.8,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    _IdentityStat(value: stats?['total_places']?.toString() ?? '—', label: 'mekan'),
+                    _IdentityStat(value: photoCount.toString(), label: 'kare'),
+                    _IdentityStat(value: stats?['total_cities']?.toString() ?? '—', label: 'şehir'),
+                    _IdentityStat(value: stats?['active_days']?.toString() ?? '—', label: 'gün'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _IdentityStat extends StatelessWidget {
+  final String value, label;
+  const _IdentityStat({required this.value, required this.label});
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, style: NeerTypography.h2.copyWith(fontSize: 20, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 2),
+          Text(label, style: NeerTypography.caption.copyWith(color: Theme.of(context).disabledColor, fontSize: 10)),
+        ],
+      ),
+    );
+  }
+}
+
+// ==========================================
+// ROZET VİTRİNİ
+// ==========================================
+class _BadgeVitrin extends StatelessWidget {
+  final Future<List<Map<String, dynamic>>> earnedFuture;
+  final Future<List<Map<String, dynamic>>> allFuture;
+  final VoidCallback onSeeAll;
+  const _BadgeVitrin({required this.earnedFuture, required this.allFuture, required this.onSeeAll});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<dynamic>>(
+      future: Future.wait([earnedFuture, allFuture]),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox.shrink();
+        final earned = snapshot.data![0] as List<Map<String, dynamic>>;
+        final all = snapshot.data![1] as List<Map<String, dynamic>>;
+        if (all.isEmpty) return const SizedBox.shrink();
+        return GlassPanel.card(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SectionHeader(title: AppStrings.badgesTitle, onActionTap: onSeeAll),
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: all.map((badge) {
+                    final isEarned = earned.any((e) => e['badge_id'] == badge['id']);
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 44, height: 44,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isEarned
+                                  ? Theme.of(context).primaryColor.withValues(alpha: 0.18)
+                                  : Colors.white.withValues(alpha: 0.04),
+                              border: Border.all(
+                                color: isEarned
+                                    ? Theme.of(context).primaryColor.withValues(alpha: 0.45)
+                                    : Colors.white.withValues(alpha: 0.08),
+                                width: 1,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                isEarned ? (badge['icon'] ?? '🏅') : '?',
+                                style: TextStyle(
+                                  fontSize: isEarned ? 20 : 14,
+                                  color: isEarned ? null : Colors.white.withValues(alpha: 0.25),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            isEarned ? (badge['name_tr'] ?? '') : '???',
+                            style: NeerTypography.caption.copyWith(
+                              color: isEarned ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
+                              fontSize: 9,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ==========================================
+// GÖREVLER PREVİEW
+// ==========================================
+class _QuestPreviewWidget extends StatelessWidget {
+  final Future<List<Map<String, dynamic>>> questsFuture;
+  final VoidCallback onSeeAll;
+  const _QuestPreviewWidget({required this.questsFuture, required this.onSeeAll});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: questsFuture,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
+        final quests = snapshot.data!;
+        final daily = quests.where((q) => q['type'] == 'daily').take(2).toList();
+        final weeklyList = quests.where((q) => q['type'] == 'weekly').toList();
+        final epic = quests.where((q) =>
+            q['type'] == 'epic' && (q['user_quests']?.first?['is_completed'] != true)).take(1).toList();
+        return GlassPanel.card(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SectionHeader(title: AppStrings.questsTitle, onActionTap: onSeeAll),
+              const SizedBox(height: 8),
+              ...daily.map((q) => _QuestRow(quest: q)),
+              if (weeklyList.isNotEmpty) _QuestRow(quest: weeklyList.first),
+              if (epic.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                _EpicQuestCard(quest: epic.first),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _QuestRow extends StatelessWidget {
+  final Map<String, dynamic> quest;
+  const _QuestRow({required this.quest});
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final userQuests = quest['user_quests'];
+    final first = (userQuests is List && userQuests.isNotEmpty) ? userQuests.first : null;
+    final progress = (first?['progress'] ?? 0) as int;
+    final target = (quest['target_count'] ?? 1) as int;
+    final isCompleted = first?['is_completed'] == true;
+    final ratio = target > 0 ? progress / target : 0.0;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: 18, height: 18,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isCompleted ? theme.primaryColor.withValues(alpha: 0.25) : Colors.transparent,
+              border: Border.all(
+                color: isCompleted ? theme.primaryColor : Colors.white.withValues(alpha: 0.25),
+                width: 1.5,
+              ),
+            ),
+            child: isCompleted ? Icon(Icons.check, size: 10, color: theme.primaryColor) : null,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  quest['title_tr'] ?? quest['title_en'] ?? '',
+                  style: NeerTypography.bodySmall.copyWith(
+                    fontWeight: FontWeight.w500,
+                    decoration: isCompleted ? TextDecoration.lineThrough : null,
+                    color: isCompleted ? theme.disabledColor : null,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(2),
+                  child: LinearProgressIndicator(
+                    value: ratio.clamp(0.0, 1.0), minHeight: 2,
+                    backgroundColor: Colors.white.withValues(alpha: 0.07),
+                    valueColor: AlwaysStoppedAnimation(isCompleted ? NeerColors.success : theme.primaryColor),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            isCompleted ? '+${quest['ts_reward']} ✓' : '+${quest['ts_reward']}',
+            style: NeerTypography.caption.copyWith(
+              color: NeerColors.success.withValues(alpha: isCompleted ? 1.0 : 0.65),
+              fontWeight: FontWeight.w600, fontSize: 10,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EpicQuestCard extends StatelessWidget {
+  final Map<String, dynamic> quest;
+  const _EpicQuestCard({required this.quest});
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final userQuests = quest['user_quests'];
+    final first = (userQuests is List && userQuests.isNotEmpty) ? userQuests.first : null;
+    final progress = (first?['progress'] ?? 0) as int;
+    final target = (quest['target_count'] ?? 1) as int;
+    final ratio = target > 0 ? progress / target : 0.0;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.primaryColor.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: theme.primaryColor.withValues(alpha: 0.22)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text('EPİK', style: NeerTypography.caption.copyWith(
+                  color: theme.primaryColor, fontSize: 9, letterSpacing: 0.8,
+                )),
+              ),
+              const Spacer(),
+              Text('+${quest['ts_reward']} TS',
+                style: NeerTypography.caption.copyWith(
+                  color: NeerColors.success.withValues(alpha: 0.8), fontWeight: FontWeight.w600,
+                )),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(quest['title_tr'] ?? quest['title_en'] ?? '',
+            style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: ratio.clamp(0.0, 1.0), minHeight: 3,
+              backgroundColor: Colors.white.withValues(alpha: 0.07),
+              valueColor: AlwaysStoppedAnimation(theme.primaryColor),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text('$progress / $target',
+            style: NeerTypography.caption.copyWith(color: theme.disabledColor, fontSize: 10)),
+        ],
+      ),
+    );
+  }
+}
+
+// ==========================================
+// SIK UĞRANANLAR — A TASARIMI
+// ==========================================
+class _FrequentPlacesSection extends StatelessWidget {
+  final List<Map<String, dynamic>> places;
+  final VoidCallback onSeeAll;
+  const _FrequentPlacesSection({required this.places, required this.onSeeAll});
+
+  @override
+  Widget build(BuildContext context) {
+    if (places.isEmpty) {
+      return FriendEmptyCard(
+        icon: Icons.explore_off_rounded,
+        title: 'Henüz mekan yok',
+        subtitle: AppStrings.zeroFrequent,
+      );
+    }
+    return Column(
+      children: [
+        SectionHeader(title: AppStrings.frequentPlacesTitle, onActionTap: onSeeAll),
+        _FrequentCard(place: places[0], rank: 1, height: 72),
+        if (places.length > 1) ...[
+          const SizedBox(height: 5),
+          _FrequentCard(place: places[1], rank: 2, height: 52),
+        ],
+        if (places.length > 2) ...[
+          const SizedBox(height: 5),
+          _FrequentCard(place: places[2], rank: 3, height: 52),
+        ],
+      ],
+    );
+  }
+}
+
+class _FrequentCard extends StatelessWidget {
+  final Map<String, dynamic> place;
+  final int rank;
+  final double height;
+  const _FrequentCard({required this.place, required this.rank, required this.height});
+
+  List<Color> _rankGradient() {
+    switch (rank) {
+      case 1: return [const Color(0xFF8B5CF6).withValues(alpha: 0.55), const Color(0xFFEC4899).withValues(alpha: 0.38)];
+      case 2: return [const Color(0xFF3B82F6).withValues(alpha: 0.42), const Color(0xFF8B5CF6).withValues(alpha: 0.28)];
+      default: return [const Color(0xFFEC4899).withValues(alpha: 0.38), const Color(0xFFFF8C42).withValues(alpha: 0.25)];
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final name = place['place_name'] ?? place['name'] ?? '';
+    final img = place['image_url'] ?? place['image'] ?? '';
+    final visits = (place['visit_count'] as num?)?.toInt() ?? 0;
+
+    return AnimatedPress(
+      onTap: () {},
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(rank == 1 ? 14 : 12),
+        child: SizedBox(
+          height: height,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              img.isNotEmpty
+                  ? AppCachedImage.cover(imageUrl: img)
+                  : Container(decoration: BoxDecoration(gradient: LinearGradient(colors: _rankGradient()))),
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [Color(0xAA000000), Color(0x22000000)],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: rank == 1 ? 14 : 10),
+                child: Row(
+                  children: [
+                    Text(
+                      rank.toString(),
+                      style: TextStyle(
+                        color: rank == 1 ? const Color(0xFFFFD700).withValues(alpha: 0.9) : Colors.white.withValues(alpha: 0.4),
+                        fontSize: rank == 1 ? 22 : 16, fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    if (img.isNotEmpty)
+                      Container(
+                        width: rank == 1 ? 36 : 28,
+                        height: rank == 1 ? 36 : 28,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(7),
+                          child: AppCachedImage.cover(imageUrl: img),
+                        ),
+                      ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(name, maxLines: 1, overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: rank == 1 ? 0.9 : 0.8),
+                              fontSize: rank == 1 ? 14 : 12, fontWeight: FontWeight.w600,
+                            )),
+                          if (rank == 1) ...[
+                            const SizedBox(height: 2),
+                            Text('$visits ziyaret',
+                              style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 11)),
+                          ],
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: rank == 1
+                            ? const Color(0xFFFFD700).withValues(alpha: 0.15)
+                            : Colors.white.withValues(alpha: 0.11),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: rank == 1
+                              ? const Color(0xFFFFD700).withValues(alpha: 0.28)
+                              : Colors.white.withValues(alpha: 0.16),
+                        ),
+                      ),
+                      child: Text(
+                        visits.toString(),
+                        style: TextStyle(
+                          color: rank == 1
+                              ? const Color(0xFFFFD700).withValues(alpha: 0.9)
+                              : Colors.white.withValues(alpha: 0.65),
+                          fontSize: 10, fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

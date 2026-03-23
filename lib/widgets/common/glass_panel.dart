@@ -27,7 +27,7 @@ class GlassPanel extends StatelessWidget {
     super.key,
     required this.child,
     this.borderRadius = const BorderRadius.all(Radius.circular(24)),
-    this.blurSigma = 45,
+    this.blurSigma = 28,
     this.padding,
     this.margin,
     this.width,
@@ -36,8 +36,8 @@ class GlassPanel extends StatelessWidget {
     this.boxShadow,
     this.border,
     this.backgroundColor,
-    this.darkAlpha = 0.14,
-    this.lightAlpha = 0.22,
+    this.darkAlpha = 0.08,
+    this.lightAlpha = 0.38,
   });
 
   /// Bottom sheet style — top corners rounded.
@@ -52,10 +52,10 @@ class GlassPanel extends StatelessWidget {
     this.boxShadow,
     this.border,
     this.backgroundColor,
-    this.darkAlpha = 0.18,
-    this.lightAlpha = 0.28,
+    this.darkAlpha = 0.10,
+    this.lightAlpha = 0.45,
   })  : borderRadius = const BorderRadius.vertical(top: Radius.circular(35)),
-        blurSigma = 50;
+        blurSigma = 32;
 
   /// AppBar style — no bottom radius.
   const GlassPanel.appBar({
@@ -69,10 +69,10 @@ class GlassPanel extends StatelessWidget {
     this.boxShadow,
     this.border,
     this.backgroundColor,
-    this.darkAlpha = 0.12,
-    this.lightAlpha = 0.20,
+    this.darkAlpha = 0.06,
+    this.lightAlpha = 0.30,
   })  : borderRadius = BorderRadius.zero,
-        blurSigma = 45;
+        blurSigma = 40;
 
   /// Card style — fully rounded, used in Bento Box.
   const GlassPanel.card({
@@ -86,10 +86,10 @@ class GlassPanel extends StatelessWidget {
     this.boxShadow,
     this.border,
     this.backgroundColor,
-    this.darkAlpha = 0.12,
-    this.lightAlpha = 0.22,
+    this.darkAlpha = 0.08,
+    this.lightAlpha = 0.38,
   })  : borderRadius = const BorderRadius.all(Radius.circular(22)),
-        blurSigma = 45;
+        blurSigma = 24;
 
   /// Bento cell — tighter radius, used inside Bento Dashboard grids.
   const GlassPanel.bento({
@@ -103,10 +103,10 @@ class GlassPanel extends StatelessWidget {
     this.boxShadow,
     this.border,
     this.backgroundColor,
-    this.darkAlpha = 0.12,
-    this.lightAlpha = 0.20,
+    this.darkAlpha = 0.10,
+    this.lightAlpha = 0.35,
   })  : borderRadius = const BorderRadius.all(Radius.circular(20)),
-        blurSigma = 45;
+        blurSigma = 20;
 
   @override
   Widget build(BuildContext context) {

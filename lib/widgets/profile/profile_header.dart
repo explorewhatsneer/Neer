@@ -1,17 +1,10 @@
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 
-/// Premium Glassmorphism Profile Header — VisionOS style.
-///
-/// Features:
-/// - Dynamic ambient background (blurred avatar at sigma 45)
-/// - Boxless name & bio (text shadows + gradient shield)
-/// - Compact stat pills on avatar row
-/// - Trust score ring
 class ProfileHeader extends StatelessWidget {
   final String imageUrl;
   final String name;
@@ -21,6 +14,10 @@ class ProfileHeader extends StatelessWidget {
   final String followingCount;
   final String friendsCount;
   final double trustScore;
+  // New fields (optional for backward compat)
+  final int checkInCount;
+  final int activeDays;
+  final String neerScoreLabel;
 
   const ProfileHeader({
     super.key,
@@ -32,231 +29,179 @@ class ProfileHeader extends StatelessWidget {
     required this.followingCount,
     required this.friendsCount,
     required this.trustScore,
+    this.checkInCount = 0,
+    this.activeDays = 0,
+    this.neerScoreLabel = 'Standart',
   });
+
+  static final List<Shadow> _shadows = [
+    Shadow(color: Colors.black.withValues(alpha: 0.6), blurRadius: 8, offset: Offset(0, 2)),
+  ];
+  static final List<Shadow> _shadowsLight = [
+    Shadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 6, offset: Offset(0, 1)),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final resolvedImage = imageUrl.isNotEmpty ? imageUrl : "https://i.pravatar.cc/300";
-
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // 1. AMBIENT BACKGROUND — Full-screen blurred avatar
-        CachedNetworkImage(
-          imageUrl: resolvedImage,
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-          placeholder: (_, __) => Container(color: NeerColors.darkSurface),
-          errorWidget: (_, __, ___) => Container(color: NeerColors.darkSurface),
-        ),
-
-        // 2. HEAVY BLUR — sigma 45, ambient glow
-        ClipRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
-            child: Container(color: Colors.transparent),
-          ),
-        ),
-
-        // 3. GRADIENT SHIELD — top-down darkening for text readability
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withValues(alpha: 0.05),
-                Colors.black.withValues(alpha: 0.15),
-                Colors.black.withValues(alpha: 0.55),
-                Colors.black.withValues(alpha: 0.75),
-              ],
-              stops: const [0.0, 0.35, 0.7, 1.0],
-            ),
-          ),
-        ),
-
-        // 4. CONTENT — avatar, stats, name/bio (boxless)
-        Positioned(
-          bottom: 75, // space for pill tabs
-          left: 20,
-          right: 20,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ROW 1: Avatar + Meta + NeerScore
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // --- ROW: Avatar + Stats + Trust Score ---
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // AVATAR with frosted ring
-                  _AvatarRing(imageUrl: resolvedImage, size: 72),
-
-                  const SizedBox(width: 16),
-
-                  // STATS — 3 columns
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _StatColumn(count: followersCount, label: AppStrings.followers),
-                        _StatColumn(count: followingCount, label: AppStrings.following),
-                        _StatColumn(count: friendsCount, label: AppStrings.friends),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  // TRUST SCORE ring
-                  _TrustScoreRing(score: trustScore, size: 52),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // --- NAME & BIO (boxless, directly on ambient bg) ---
-              Align(
-                alignment: Alignment.centerLeft,
+              _AvatarRing(imageUrl: imageUrl.isNotEmpty ? imageUrl : 'https://i.pravatar.cc/300', size: 72),
+              const SizedBox(width: 14),
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: NeerTypography.h2.copyWith(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        shadows: _textShadows,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      "@$username",
-                      style: NeerTypography.caption.copyWith(
-                        color: Colors.white.withValues(alpha: 0.65),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        shadows: _textShadows,
-                      ),
-                    ),
-                    if (bio.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        bio,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: NeerTypography.bodySmall.copyWith(
-                          color: Colors.white.withValues(alpha: 0.80),
-                          fontSize: 14,
-                          height: 1.4,
-                          shadows: _textShadowsLight,
-                        ),
-                      ),
-                    ],
+                    Text(name, style: NeerTypography.h2.copyWith(
+                      color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700, shadows: _shadows,
+                    )),
+                    const SizedBox(height: 2),
+                    Text('@$username', style: NeerTypography.caption.copyWith(
+                      color: Colors.white.withValues(alpha: 0.55), shadows: _shadows,
+                    )),
                   ],
                 ),
               ),
+              const SizedBox(width: 12),
+              _NeerScoreRing(score: trustScore, label: neerScoreLabel, size: 52),
             ],
           ),
-        ),
-      ],
+          // ROW 2: Bio
+          if (bio.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(bio, maxLines: 2, overflow: TextOverflow.ellipsis,
+              style: NeerTypography.bodySmall.copyWith(
+                color: Colors.white.withValues(alpha: 0.75), shadows: _shadowsLight,
+              ),
+            ),
+          ],
+          // ROW 3: Stat pills
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 6,
+            children: [
+              _StatPill(value: followersCount, label: AppStrings.followers),
+              _StatPill(value: checkInCount.toString(), label: 'mekan'),
+              _StatPill(value: activeDays.toString(), label: 'gün'),
+            ],
+          ),
+        ],
+      ),
     );
   }
-
-  static final List<Shadow> _textShadows = [
-    Shadow(
-      color: Colors.black.withValues(alpha: 0.6),
-      blurRadius: 8,
-      offset: const Offset(0, 2),
-    ),
-  ];
-
-  static final List<Shadow> _textShadowsLight = [
-    Shadow(
-      color: Colors.black.withValues(alpha: 0.4),
-      blurRadius: 6,
-      offset: const Offset(0, 1),
-    ),
-  ];
 }
 
-// ==========================================
-// AVATAR RING — frosted glass border
-// ==========================================
+class _StatPill extends StatelessWidget {
+  final String value, label;
+  const _StatPill({required this.value, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18), width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(value, style: NeerTypography.caption.copyWith(
+            color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12,
+          )),
+          const SizedBox(width: 3),
+          Text(label, style: NeerTypography.caption.copyWith(
+            color: Colors.white.withValues(alpha: 0.55), fontSize: 11,
+          )),
+        ],
+      ),
+    );
+  }
+}
+
 class _AvatarRing extends StatelessWidget {
   final String imageUrl;
   final double size;
-
   const _AvatarRing({required this.imageUrl, required this.size});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: size,
-      height: size,
+      width: size, height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.30),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.30),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: Colors.white.withValues(alpha: 0.30), width: 2),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.30), blurRadius: 16, offset: Offset(0, 4))],
       ),
       child: ClipOval(
         child: CachedNetworkImage(
-          imageUrl: imageUrl,
-          fit: BoxFit.cover,
-          width: size,
-          height: size,
+          imageUrl: imageUrl, fit: BoxFit.cover, width: size, height: size,
           placeholder: (_, __) => Container(color: Colors.grey.shade800),
-          errorWidget: (_, __, ___) => Container(
-            color: Colors.grey.shade800,
-            child: const Icon(Icons.person, color: Colors.white54),
-          ),
+          errorWidget: (_, __, ___) => Container(color: Colors.grey.shade800, child: const Icon(Icons.person, color: Colors.white54)),
         ),
       ),
     );
   }
 }
 
-// ==========================================
-// STAT COLUMN — count + label
-// ==========================================
-class _StatColumn extends StatelessWidget {
-  final String count;
+class _NeerScoreRing extends StatelessWidget {
+  final double score;
   final String label;
+  final double size;
+  const _NeerScoreRing({required this.score, required this.label, required this.size});
 
-  const _StatColumn({required this.count, required this.label});
+  Color _scoreColor() {
+    if (score >= 8.0) return const Color(0xFF30D158);
+    if (score >= 5.0) return const Color(0xFFFF9F0A);
+    return const Color(0xFFFF453A);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final color = _scoreColor();
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          count,
-          style: NeerTypography.h3.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-            shadows: [Shadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 4)],
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: NeerTypography.caption.copyWith(
-            color: Colors.white.withValues(alpha: 0.55),
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
+        SizedBox(
+          width: size, height: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              CircularProgressIndicator(
+                value: 1.0, strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.10)),
+              ),
+              CircularProgressIndicator(
+                value: (score / 10.0).clamp(0.0, 1.0),
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation(color),
+                strokeCap: StrokeCap.round,
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    score.toStringAsFixed(1),
+                    style: TextStyle(
+                      color: Colors.white, fontSize: size < 40 ? 10 : 12,
+                      fontWeight: FontWeight.w800, height: 1.0,
+                    ),
+                  ),
+                  if (size >= 44)
+                    Text(
+                      label,
+                      style: TextStyle(color: color, fontSize: 7, fontWeight: FontWeight.w600),
+                    ),
+                ],
+              ),
+            ],
           ),
         ),
       ],
@@ -265,83 +210,49 @@ class _StatColumn extends StatelessWidget {
 }
 
 // ==========================================
-// TRUST SCORE RING — circular progress
+// GRADIENT TAB INDICATOR — custom painter
 // ==========================================
-class _TrustScoreRing extends StatelessWidget {
-  final double score;
-  final double size;
-
-  const _TrustScoreRing({required this.score, required this.size});
-
-  Color _scoreColor() {
-    if (score >= 8.0) return const Color(0xFF30D158); // Green
-    if (score >= 5.0) return const Color(0xFFFF9F0A); // Orange
-    return const Color(0xFFFF453A); // Red
-  }
+class GradientTabIndicator extends Decoration {
+  final double height;
+  final BorderRadius borderRadius;
+  const GradientTabIndicator({
+    this.height = 2.5,
+    this.borderRadius = const BorderRadius.all(Radius.circular(2)),
+  });
 
   @override
-  Widget build(BuildContext context) {
-    final color = _scoreColor();
+  BoxPainter createBoxPainter([VoidCallback? onChange]) =>
+      _GradientTabPainter(height: height, borderRadius: borderRadius);
+}
 
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Background ring
-          SizedBox(
-            width: size,
-            height: size,
-            child: CircularProgressIndicator(
-              value: 1.0,
-              strokeWidth: 2.5,
-              valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.10)),
-            ),
-          ),
-          // Value ring
-          SizedBox(
-            width: size,
-            height: size,
-            child: CircularProgressIndicator(
-              value: (score / 10.0).clamp(0.0, 1.0),
-              strokeWidth: 2.5,
-              valueColor: AlwaysStoppedAnimation(color),
-              strokeCap: StrokeCap.round,
-            ),
-          ),
-          // Score text
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.shield_rounded, size: 12, color: color),
-              Text(
-                score.toStringAsFixed(1),
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  height: 1.0,
-                  shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 4)],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+class _GradientTabPainter extends BoxPainter {
+  final double height;
+  final BorderRadius borderRadius;
+  _GradientTabPainter({required this.height, required this.borderRadius});
+
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    final rect = Rect.fromLTWH(
+      offset.dx, offset.dy + (configuration.size?.height ?? 0) - height,
+      configuration.size?.width ?? 0, height,
     );
+    final paint = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+      ).createShader(rect);
+    canvas.drawRRect(borderRadius.toRRect(rect), paint);
   }
 }
 
 // ==========================================
-// PILL TAB BAR — VisionOS Floating Segmented Control
+// PROFILE TAB BAR — left-aligned gradient underline
 // ==========================================
-class PillTabBar extends StatelessWidget {
+class ProfileTabBar extends StatelessWidget {
   final TabController controller;
   final List<String> tabs;
   final ValueChanged<int>? onTap;
 
-  const PillTabBar({
+  const ProfileTabBar({
     super.key,
     required this.controller,
     required this.tabs,
@@ -351,89 +262,34 @@ class PillTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(22),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
-        child: Container(
-          height: 46,
-          padding: const EdgeInsets.all(3),
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.10)
-                : Colors.white.withValues(alpha: 0.40),
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.15)
-                  : Colors.white.withValues(alpha: 0.50),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? Colors.black.withValues(alpha: 0.35)
-                    : NeerColors.primary.withValues(alpha: 0.12),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-                spreadRadius: -2,
-              ),
-            ],
-          ),
-          child: TabBar(
-            controller: controller,
-            onTap: (index) {
-              onTap?.call(index);
-            },
-            indicator: BoxDecoration(
-              borderRadius: BorderRadius.circular(19),
-              gradient: isDark
-                  ? LinearGradient(
-                      colors: [
-                        NeerColors.primary.withValues(alpha: 0.35),
-                        NeerColors.primaryDark.withValues(alpha: 0.25),
-                      ],
-                    )
-                  : const LinearGradient(
-                      colors: [Colors.white, Color(0xFFF8F4F6)],
-                    ),
-              boxShadow: [
-                BoxShadow(
-                  color: isDark
-                      ? NeerColors.primary.withValues(alpha: 0.25)
-                      : Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-                if (isDark)
-                  BoxShadow(
-                    color: NeerColors.primary.withValues(alpha: 0.10),
-                    blurRadius: 20,
-                    spreadRadius: 1,
-                  ),
-              ],
-            ),
-            indicatorSize: TabBarIndicatorSize.tab,
-            dividerColor: Colors.transparent,
-            labelColor: isDark ? Colors.white : NeerColors.gray900,
-            unselectedLabelColor: isDark
-                ? Colors.white.withValues(alpha: 0.50)
-                : Colors.black.withValues(alpha: 0.38),
-            labelStyle: NeerTypography.caption.copyWith(
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
-              letterSpacing: 0.3,
-            ),
-            unselectedLabelStyle: NeerTypography.caption.copyWith(
-              fontWeight: FontWeight.w500,
-              fontSize: 13,
-            ),
-            overlayColor: WidgetStateProperty.all(Colors.transparent),
-            tabs: tabs.map((t) => Tab(text: t)).toList(),
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.black.withValues(alpha: 0.20)
+            : Colors.white.withValues(alpha: 0.10),
+        border: Border(
+          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.10), width: 0.5),
         ),
+      ),
+      child: TabBar(
+        controller: controller,
+        onTap: onTap,
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        padding: const EdgeInsets.only(left: 16),
+        labelPadding: const EdgeInsets.only(right: 20),
+        indicator: const GradientTabIndicator(),
+        indicatorColor: Colors.transparent,
+        dividerColor: Colors.transparent,
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white.withValues(alpha: 0.38),
+        labelStyle: NeerTypography.caption.copyWith(fontWeight: FontWeight.w500, fontSize: 13),
+        unselectedLabelStyle: NeerTypography.caption.copyWith(fontWeight: FontWeight.w400, fontSize: 13),
+        tabs: tabs.map((t) => Tab(text: t)).toList(),
       ),
     );
   }
 }
+
+// Keep PillTabBar as alias for backward compat (maps to ProfileTabBar)
+typedef PillTabBar = ProfileTabBar;

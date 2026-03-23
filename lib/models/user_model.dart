@@ -27,6 +27,12 @@ class UserModel {
   final String? pendingCatchId;
   final String? phoneNumber;
 
+  // Neer Score v2
+  final String neerScoreLabel;
+  final int totalUniquePlaces;
+  final int totalCities;
+  final int activeDays;
+
   UserModel({
     required this.uid,
     required this.email,
@@ -42,7 +48,7 @@ class UserModel {
     this.isPrivate = false,
     this.checkInCount = 0,
     this.photoCount = 0,
-    this.trustScore = 5.0, 
+    this.trustScore = 5.0,
     this.followersCount = 0,
     this.followingCount = 0,
     this.latitude,
@@ -52,6 +58,10 @@ class UserModel {
     this.availableUntil,
     this.pendingCatchId,
     this.phoneNumber,
+    this.neerScoreLabel = 'Standart',
+    this.totalUniquePlaces = 0,
+    this.totalCities = 0,
+    this.activeDays = 0,
   });
 
   // Veritabanına yazarken (Supabase snake_case kullanır)
@@ -108,10 +118,16 @@ class UserModel {
       checkInCount: map['check_in_count'] ?? 0,
       photoCount: map['photo_count'] ?? 0,
       trustScore: (map['trust_score'] ?? 5.0).toDouble(),
-      
+
       // 🔥 'map' hatası burada çözüldü:
-      followersCount: map['followers_count'] ?? 0, 
+      followersCount: map['followers_count'] ?? 0,
       followingCount: map['following_count'] ?? 0,
+
+      // Neer Score v2
+      neerScoreLabel: map['neer_score_label'] ?? 'Standart',
+      totalUniquePlaces: map['total_unique_places'] ?? 0,
+      totalCities: map['total_cities'] ?? 0,
+      activeDays: map['active_days'] ?? 0,
       // 🔥 KONUM VERİLERİNİ ÇEKİYORUZ
       latitude: map['latitude'] != null ? (map['latitude'] as num).toDouble() : null,
       longitude: map['longitude'] != null ? (map['longitude'] as num).toDouble() : null,
@@ -149,6 +165,10 @@ class UserModel {
     DateTime? availableUntil,
     String? pendingCatchId,
     String? phoneNumber,
+    String? neerScoreLabel,
+    int? totalUniquePlaces,
+    int? totalCities,
+    int? activeDays,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -171,6 +191,10 @@ class UserModel {
       availableUntil: availableUntil ?? this.availableUntil,
       pendingCatchId: pendingCatchId ?? this.pendingCatchId,
       phoneNumber: phoneNumber ?? this.phoneNumber,
+      neerScoreLabel: neerScoreLabel ?? this.neerScoreLabel,
+      totalUniquePlaces: totalUniquePlaces ?? this.totalUniquePlaces,
+      totalCities: totalCities ?? this.totalCities,
+      activeDays: activeDays ?? this.activeDays,
     );
   }
 }

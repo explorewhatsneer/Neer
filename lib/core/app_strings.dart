@@ -564,4 +564,39 @@ static String get remove => lang == 'tr' ? "Çıkar" : "Remove";
 
   // --- BAĞLANTI DURUMU ---
   static String get backOnline => lang == 'tr' ? "Tekrar bağlandı" : "Back online";
+
+// --- NEER SCORE ---
+  static String get neerScore => "Neer Score";
+  static String get neerScoreLabel => lang == 'tr' ? "Neer Skoru" : "Neer Score";
+  static String get neerScoreElite => "Elite";
+  static String get neerScoreExpert => lang == 'tr' ? "Uzman" : "Expert";
+  static String get neerScoreTrusted => lang == 'tr' ? "Güvenilir" : "Trusted";
+  static String get neerScoreStandard => lang == 'tr' ? "Standart" : "Standard";
+  static String get neerScoreLimited => lang == 'tr' ? "Kısıtlı" : "Limited";
+
+// --- YENİ EKRANLAR ---
+  static String get badgesTitle => lang == 'tr' ? "Rozetler" : "Badges";
+  static String get questsBadgesTitle => lang == 'tr' ? "Görevler & Rozetler" : "Quests & Badges";
+  static String get myNotesTitle => lang == 'tr' ? "Notlarım" : "My Notes";
+  static String get myReviewsTitle => lang == 'tr' ? "Puanlarım" : "My Reviews";
+  static String get frequentPlacesFullTitle => lang == 'tr' ? "Sık Uğradıklarım" : "My Frequent Places";
+  static String get cityMapTitle => lang == 'tr' ? "Şehir Haritam" : "My City Map";
+  static String get neerIdentityTitle => lang == 'tr' ? "Neer Kimliği" : "Neer Identity";
+
+// --- ZERO STATES ---
+  static String get zeroHeatmap => lang == 'tr'
+      ? "Check-in yaptıkça şehirdeki ayak izin burada belirmeye başlar."
+      : "Your city footprint will appear here as you check in.";
+  static String get zeroBadges => lang == 'tr'
+      ? "Görevleri tamamla, ilk rozetini kazan."
+      : "Complete quests to earn your first badge.";
+  static String get zeroQuests => lang == 'tr'
+      ? "İlk check-in'ini yapınca günlük görevler başlıyor."
+      : "Complete your first check-in to start daily quests.";
+  static String get zeroIdentity => lang == 'tr'
+      ? "Dışarı çık, check-in yap. Bu sayılar seninle büyür."
+      : "Go out, check in. These numbers grow with you.";
+  static String get zeroFrequent => lang == 'tr'
+      ? "Bir mekana tekrar tekrar git — liste kendiliğinden oluşur."
+      : "Visit a venue repeatedly — the list builds itself.";
 }
