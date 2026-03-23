@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(C:srcflutterbinflutter analyze:*)",
+      "Bash(cmd /c \"C:\\\\src\\\\flutter\\\\bin\\\\flutter.bat analyze 2>&1\")",
+      "Bash(cmd /c \"cd C:\\\\Users\\\\zcane\\\\neer && C:\\\\src\\\\flutter\\\\bin\\\\flutter.bat analyze\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\zcane\\\\neer & C:\\\\src\\\\flutter\\\\bin\\\\flutter.bat analyze --no-fatal-infos --no-fatal-warnings 2>&1\")",
+      "Bash(powershell -Command \"Set-Location ''C:\\\\Users\\\\zcane\\\\neer''; & ''C:\\\\src\\\\flutter\\\\bin\\\\flutter.bat'' analyze 2>&1\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path ''C:\\\\Users\\\\zcane\\\\neer\\\\lib\\\\screens'' -Name\")",
+      "Bash(powershell -Command \"New-Item -ItemType Directory -Path ''C:\\\\Users\\\\zcane\\\\neer\\\\supabase\\\\functions\\\\push-webhook'' -Force\")",
+      "Bash(powershell -Command \"Set-Location ''C:\\\\Users\\\\zcane\\\\neer''; & ''C:\\\\src\\\\flutter\\\\bin\\\\flutter.bat'' analyze --no-fatal-infos 2>&1\")"
+    ]
+  }
+}
