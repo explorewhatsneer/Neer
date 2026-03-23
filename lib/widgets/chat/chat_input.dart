@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/constants.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 
 class ChatInput extends StatelessWidget {
@@ -100,7 +99,7 @@ class ChatInput extends StatelessWidget {
                   enabled: enabled,
                   minLines: 1,
                   maxLines: 5,
-                  style: AppTextStyles.bodyLarge.copyWith(
+                  style: NeerTypography.bodyLarge.copyWith(
                     color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87,
                   ),
                   cursorColor: theme.primaryColor,
@@ -108,7 +107,7 @@ class ChatInput extends StatelessWidget {
                   onSubmitted: enabled ? (_) => onSendPressed() : null,
                   decoration: InputDecoration(
                     hintText: enabled ? AppStrings.typeMessage : "Bekle...",
-                    hintStyle: AppTextStyles.bodyLarge.copyWith(
+                    hintStyle: NeerTypography.bodyLarge.copyWith(
                       color: theme.disabledColor.withValues(alpha: 0.6),
                     ),
                     border: InputBorder.none,
@@ -123,12 +122,12 @@ class ChatInput extends StatelessWidget {
             Container(
               margin: const EdgeInsets.only(left: 8, bottom: 3),
               decoration: BoxDecoration(
-                color: enabled ? AppColors.primary : theme.disabledColor,
+                color: enabled ? NeerColors.primary : theme.disabledColor,
                 shape: BoxShape.circle,
                 boxShadow: enabled
                     ? [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.3),
+                          color: NeerColors.primary.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 3),
                         ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../common/app_cached_image.dart';
 
 // --- BASE CARD ---
@@ -94,7 +94,7 @@ class VerticalNoteCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(date, style: AppTextStyles.caption.copyWith(color: theme.disabledColor, fontSize: 10)),
+                  Text(date, style: NeerTypography.caption.copyWith(color: theme.disabledColor, fontSize: 10)),
                   Icon(Icons.push_pin_rounded, size: 16, color: theme.primaryColor.withValues(alpha: 0.5)),
                 ],
               ),
@@ -104,7 +104,7 @@ class VerticalNoteCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   note,
-                  style: AppTextStyles.bodySmall.copyWith(
+                  style: NeerTypography.bodySmall.copyWith(
                     fontSize: 15,
                     height: 1.4,
                     fontStyle: FontStyle.italic,
@@ -128,7 +128,7 @@ class VerticalNoteCard extends StatelessWidget {
                       placeName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, color: theme.primaryColor),
+                      style: NeerTypography.caption.copyWith(fontWeight: FontWeight.bold, color: theme.primaryColor),
                     ),
                   ),
                 ],
@@ -269,7 +269,7 @@ class _DetailedReviewCardState extends State<DetailedReviewCard> {
                                 widget.placeName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: AppTextStyles.h3.copyWith(fontSize: 16, height: 1.1),
+                                style: NeerTypography.h3.copyWith(fontSize: 16, height: 1.1),
                               ),
                               const SizedBox(height: 6),
                               Row(
@@ -480,7 +480,7 @@ class DynamicQuestCard extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600, fontSize: 12),
+                  style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w600, fontSize: 12),
                 ),
               ],
             ),

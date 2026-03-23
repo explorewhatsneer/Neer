@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // CORE IMPORTLARI
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart'; 
 
 class FriendPrivateView extends StatelessWidget {
@@ -27,7 +27,7 @@ class FriendPrivateView extends StatelessWidget {
           // BAŞLIK: "Bu Hesap Gizli"
           Text(
             AppStrings.accountPrivate, 
-            style: AppTextStyles.h3.copyWith(
+            style: NeerTypography.h3.copyWith(
               color: theme.textTheme.bodyLarge?.color, 
               fontWeight: FontWeight.bold
             ),
@@ -41,7 +41,7 @@ class FriendPrivateView extends StatelessWidget {
             child: Text(
               AppStrings.accountPrivateDesc, 
               textAlign: TextAlign.center,
-              style: AppTextStyles.bodySmall.copyWith(
+              style: NeerTypography.bodySmall.copyWith(
                 color: theme.disabledColor, 
                 height: 1.5
               ),

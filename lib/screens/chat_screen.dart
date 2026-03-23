@@ -2,8 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 // CORE IMPORTLARI
-import '../core/constants.dart';
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/snackbar_helper.dart';
 
@@ -70,13 +69,23 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // 🔥 MESAJ GÖNDERME
+  // 🔥 MESAJ GÖNDERME — Optimistic UI
   void _sendMessage() async {
     if (_messageController.text.trim().isEmpty || _currentUser == null) return;
-    
+
     String msg = _messageController.text.trim();
     _messageController.clear();
 
+    // Optimistic: Mesajı hemen scroll et (stream zaten ekleyecek)
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+
+    // Arka planda sunucuya gönder
     final result = await _service.sendMessage({
       'room_id': chatRoomId,
       'sender_id': currentUserId,
@@ -84,22 +93,10 @@ class _ChatScreenState extends State<ChatScreen> {
       'message': msg,
       'sender_name': _currentUser!.name,
       'sender_image': _currentUser!.profileImage,
-      'created_at': DateTime.now().toIso8601String(),
     });
 
-    if (result.isFailure) {
-      if (mounted) {
-        AppSnackBar.error(context, "Mesaj gönderilemedi: ${result.error.message}");
-      }
-      return;
-    }
-
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut
-      );
+    if (result.isFailure && mounted) {
+      AppSnackBar.error(context, "Mesaj gönderilemedi: ${result.error.message}");
     }
   }
 
@@ -108,9 +105,8 @@ class _ChatScreenState extends State<ChatScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
+    return GradientScaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: Colors.transparent,
 
       // --- APP BAR ---
       appBar: AppBar(
@@ -148,7 +144,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Text(
                   widget.userName, 
                   // 🔥 Core Style: BodyLarge (Bold)
-                  style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600)
+                  style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.w600)
                 ),
                 const SizedBox(height: 2),
                 Row(
@@ -161,7 +157,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     Text(
                       AppStrings.online, 
                       // 🔥 Core Style: Caption
-                      style: AppTextStyles.caption.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w600)
+                      style: NeerTypography.caption.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w600)
                     ),
                   ],
                 ),
@@ -175,8 +171,10 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Column(
         children: [
           Expanded(
-            // 🔥 SUPABASE STREAM
+            // Mesajlar 7 günlük TTL ile otomatik temizlenir (pg_cron)
+            // Bu nedenle stream limitsiz kullanılabilir — max ~birkaç yüz mesaj
             child: StreamBuilder<List<Map<String, dynamic>>>(
+              // Mesajlar 7 günlük TTL ile otomatik temizlenir (pg_cron)
               stream: _service.streamDMMessages(chatRoomId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -232,7 +230,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: isDark
-                      ? AppColors.darkSurface.withValues(alpha: 0.14)
+                      ? NeerColors.darkSurface.withValues(alpha: 0.14)
                       : Colors.white.withValues(alpha: 0.22),
                   border: Border(
                     top: BorderSide(

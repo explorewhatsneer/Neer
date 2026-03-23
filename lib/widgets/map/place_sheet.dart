@@ -3,8 +3,7 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 
 import '../../widgets/common/check_in_button.dart';
@@ -121,7 +120,7 @@ class PlaceSheet {
                                       name, 
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style: AppTextStyles.h2.copyWith(
+                                      style: NeerTypography.h2.copyWith(
                                         fontSize: 28, 
                                         fontWeight: FontWeight.w800,
                                         height: 1.1,
@@ -135,7 +134,7 @@ class PlaceSheet {
                                         const SizedBox(width: 4),
                                         Text(
                                           "İstanbul, Türkiye", // Şimdilik sabit, ilerde Geocoding ekleriz
-                                          style: AppTextStyles.bodySmall.copyWith(
+                                          style: NeerTypography.bodySmall.copyWith(
                                             color: theme.disabledColor, 
                                             fontWeight: FontWeight.w600
                                           )
@@ -151,7 +150,7 @@ class PlaceSheet {
                                 decoration: BoxDecoration(
                                   color: theme.cardColor,
                                   borderRadius: BorderRadius.circular(16),
-                                  boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+                                  boxShadow: isDark ? [] : NeerShadows.soft(),
                                   border: isDark ? Border.all(color: Colors.white12) : null,
                                 ),
                                 child: Column(
@@ -198,7 +197,7 @@ class PlaceSheet {
                           children: [
                             Text(
                               AppStrings.hereNow, 
-                              style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.w800)
+                              style: NeerTypography.h3.copyWith(fontWeight: FontWeight.w800)
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -252,7 +251,7 @@ class PlaceSheet {
                           children: [
                             Text(
                               AppStrings.friendsVisited, 
-                              style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.w800)
+                              style: NeerTypography.h3.copyWith(fontWeight: FontWeight.w800)
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -331,7 +330,7 @@ class PlaceSheet {
                                   }, 
                                   child: Text(
                                     AppStrings.details, 
-                                    style: AppTextStyles.button.copyWith(color: theme.textTheme.bodyLarge?.color)
+                                    style: NeerTypography.button.copyWith(color: theme.textTheme.bodyLarge?.color)
                                   ),
                                 ),
                               ),

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+// CORE
+import 'core/neer_design_system.dart';
+
 // WIDGETLAR
 import 'screens/custom_navbar.dart';
 import 'widgets/common/offline_banner.dart';
@@ -46,10 +49,7 @@ class _MainLayoutState extends State<MainLayout> {
     // Geçiş yönü: sola mı sağa mı kayıyor
     final bool slideRight = _currentIndex > _previousIndex;
 
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
-      resizeToAvoidBottomInset: false,
+    return GradientScaffold(
       body: OfflineAwareBody(
         child: Stack(
           children: [

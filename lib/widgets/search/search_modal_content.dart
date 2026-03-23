@@ -3,8 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 
 import '../../models/user_model.dart';
@@ -123,17 +122,17 @@ class _SearchModalContentState extends State<SearchModalContent> with SingleTick
                         color: theme.cardColor, 
                         borderRadius: BorderRadius.circular(16),
                         border: isDark ? Border.all(color: Colors.white12) : null,
-                        boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+                        boxShadow: isDark ? [] : NeerShadows.soft(),
                       ),
                       child: TextField(
                         controller: _searchController,
                         autofocus: true, 
                         onChanged: _performSearch,
-                        style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700),
+                        style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700),
                         cursorColor: theme.primaryColor,
                         decoration: InputDecoration(
                           hintText: AppStrings.searchHint, 
-                          hintStyle: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),
+                          hintStyle: NeerTypography.bodySmall.copyWith(color: theme.disabledColor),
                           prefixIcon: Icon(Icons.search_rounded, color: theme.primaryColor),
                           suffixIcon: IconButton(
                             icon: Icon(Icons.close_rounded, color: theme.disabledColor),
@@ -166,7 +165,7 @@ class _SearchModalContentState extends State<SearchModalContent> with SingleTick
                       ),
                       labelColor: theme.textTheme.bodyLarge?.color, 
                       unselectedLabelColor: theme.disabledColor, 
-                      labelStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w800, fontSize: 13),
+                      labelStyle: NeerTypography.caption.copyWith(fontWeight: FontWeight.w800, fontSize: 13),
                       indicatorSize: TabBarIndicatorSize.tab,
                       dividerColor: Colors.transparent,
                       tabs: [
@@ -277,7 +276,7 @@ class _SearchModalContentState extends State<SearchModalContent> with SingleTick
             child: Icon(icon, size: 40, color: theme.disabledColor)
           ), 
           const SizedBox(height: 15), 
-          Text(text, style: AppTextStyles.bodyLarge.copyWith(color: theme.disabledColor, fontWeight: FontWeight.bold))
+          Text(text, style: NeerTypography.bodyLarge.copyWith(color: theme.disabledColor, fontWeight: FontWeight.bold))
         ]
       )
     );

@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // 🔥 CORE IMPORTLARI
-import '../../core/constants.dart';
-import '../../core/text_styles.dart';
-import '../../core/theme_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../screens/group_chat_screen.dart'; // Chat Ekranını Import Et
 
 class CheckInDialog extends StatefulWidget {
@@ -103,11 +101,11 @@ class _CheckInDialogState extends State<CheckInDialog> {
     final isDark = theme.brightness == Brightness.dark;
 
     final Color iconBgColor = widget.isSuccess 
-        ? AppColors.accent.withValues(alpha: 0.15) 
+        ? NeerColors.accent.withValues(alpha: 0.15) 
         : theme.colorScheme.error.withValues(alpha: 0.1);
     
     final Color iconColor = widget.isSuccess 
-        ? AppColors.accent 
+        ? NeerColors.accent 
         : theme.colorScheme.error;
 
     final IconData iconData = widget.isSuccess 
@@ -123,8 +121,8 @@ class _CheckInDialogState extends State<CheckInDialog> {
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
             color: theme.cardColor,
-            borderRadius: AppThemeStyles.radius32,
-            boxShadow: AppThemeStyles.shadowMedium,
+            borderRadius: NeerRadius.sheetRadius,
+            boxShadow: NeerShadows.medium(),
             border: Border.all(
               color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
               width: 1,
@@ -142,13 +140,13 @@ class _CheckInDialogState extends State<CheckInDialog> {
               Text(
                 widget.title,
                 textAlign: TextAlign.center,
-                style: AppTextStyles.h2.copyWith(color: theme.textTheme.displayLarge?.color),
+                style: NeerTypography.h2.copyWith(color: theme.textTheme.displayLarge?.color),
               ),
               const SizedBox(height: 12),
               Text(
                 widget.message,
                 textAlign: TextAlign.center,
-                style: AppTextStyles.bodyLarge.copyWith(color: theme.textTheme.bodyMedium?.color, height: 1.5),
+                style: NeerTypography.bodyLarge.copyWith(color: theme.textTheme.bodyMedium?.color, height: 1.5),
               ),
               const SizedBox(height: 32),
               SizedBox(
@@ -163,15 +161,15 @@ class _CheckInDialogState extends State<CheckInDialog> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: widget.isSuccess ? AppColors.primary : theme.disabledColor,
+                    backgroundColor: widget.isSuccess ? NeerColors.primary : theme.disabledColor,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
+                    shape: RoundedRectangleBorder(borderRadius: NeerRadius.buttonRadius),
                   ),
                   child: Text(
                     widget.isSuccess ? "Sohbete Katıl" : "Tamam",
-                    style: AppTextStyles.button.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: NeerTypography.button.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -181,7 +179,7 @@ class _CheckInDialogState extends State<CheckInDialog> {
                   onTap: () => Navigator.pop(context),
                   child: Text(
                     "Kapat",
-                    style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w500),
+                    style: NeerTypography.bodySmall.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w500),
                   ),
                 ),
               ]

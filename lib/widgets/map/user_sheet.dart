@@ -3,9 +3,7 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart';
-import '../../core/text_styles.dart';
-import '../../core/constants.dart'; // AppColors için
+import '../../core/neer_design_system.dart';
 import '../../core/app_router.dart';
 
 // WIDGETS
@@ -108,7 +106,7 @@ class UserSheet {
                                     decoration: BoxDecoration(
                                       color: isDark ? Colors.black45 : Colors.white.withValues(alpha: 0.5), 
                                       shape: BoxShape.circle,
-                                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1),
+                                      border: Border.all(color: NeerColors.primary.withValues(alpha: 0.3), width: 1),
                                     ),
                                     child: CachedAvatar(
                                       imageUrl: profileImage,
@@ -136,7 +134,7 @@ class UserSheet {
                               
                               Text(
                                 displayName, 
-                                style: AppTextStyles.h2.copyWith(
+                                style: NeerTypography.h2.copyWith(
                                   fontWeight: FontWeight.w800, 
                                   color: theme.textTheme.displayLarge?.color,
                                 )
@@ -147,11 +145,11 @@ class UserSheet {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.location_on_rounded, size: 16, color: AppColors.primary),
+                                  Icon(Icons.location_on_rounded, size: 16, color: NeerColors.primary),
                                   const SizedBox(width: 4),
                                   Text(
                                     "Yakınlarda", 
-                                    style: AppTextStyles.bodySmall.copyWith(
+                                    style: NeerTypography.bodySmall.copyWith(
                                       color: theme.disabledColor, 
                                       fontWeight: FontWeight.w600
                                     )
@@ -159,7 +157,7 @@ class UserSheet {
                                   Container(margin: const EdgeInsets.symmetric(horizontal: 8), width: 1, height: 12, color: theme.dividerColor),
                                   Text(
                                     "@$username", 
-                                    style: AppTextStyles.bodySmall.copyWith(
+                                    style: NeerTypography.bodySmall.copyWith(
                                       color: theme.disabledColor,
                                       fontWeight: FontWeight.bold
                                     )
@@ -185,7 +183,7 @@ class UserSheet {
                           children: [
                             _buildStatCard(trustScore, "Güven Skoru", Icons.shield_rounded, const Color(0xFF34C759), theme),
                             const SizedBox(width: 10),
-                            _buildStatCard(followers, "Takipçi", Icons.group_rounded, AppColors.accent, theme),
+                            _buildStatCard(followers, "Takipçi", Icons.group_rounded, NeerColors.accent, theme),
                             const SizedBox(width: 10),
                             _buildStatCard("5. Lv", "Seviye", Icons.star_rounded, Colors.blue, theme),
                           ],
@@ -194,11 +192,11 @@ class UserSheet {
                         const SizedBox(height: 30),
 
                         // Hakkında
-                        Text("Hakkında", style: AppTextStyles.h3.copyWith(fontSize: 18)),
+                        Text("Hakkında", style: NeerTypography.h3.copyWith(fontSize: 18)),
                         const SizedBox(height: 8),
                         Text(
                           bio,
-                          style: AppTextStyles.bodyLarge.copyWith(
+                          style: NeerTypography.bodyLarge.copyWith(
                             height: 1.5,
                             color: theme.textTheme.bodyMedium?.color
                           ),
@@ -207,7 +205,7 @@ class UserSheet {
                         const SizedBox(height: 30),
 
                         // Ortak Bağlantılar
-                        Text("Ortak Bağlantılar", style: AppTextStyles.h3.copyWith(fontSize: 18)),
+                        Text("Ortak Bağlantılar", style: NeerTypography.h3.copyWith(fontSize: 18)),
                         const SizedBox(height: 12),
                         Row(
                           children: [
@@ -226,7 +224,7 @@ class UserSheet {
                             Expanded(
                               child: RichText(
                                 text: TextSpan(
-                                  style: AppTextStyles.caption.copyWith(color: theme.disabledColor),
+                                  style: NeerTypography.caption.copyWith(color: theme.disabledColor),
                                   children: [
                                     const TextSpan(text: "Sen ve "),
                                     TextSpan(text: "3 ortak arkadaşınız", style: TextStyle(fontWeight: FontWeight.bold, color: theme.textTheme.bodyLarge?.color)),
@@ -246,12 +244,12 @@ class UserSheet {
                           children: [
                             Text(
                               "Son Gittiği Yerler", 
-                              style: AppTextStyles.h3.copyWith(fontSize: 18)
+                              style: NeerTypography.h3.copyWith(fontSize: 18)
                             ),
                             Text(
                               "Tümünü Gör", 
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.primary, 
+                              style: NeerTypography.caption.copyWith(
+                                color: NeerColors.primary, 
                                 fontWeight: FontWeight.bold
                               )
                             ),
@@ -289,7 +287,7 @@ class UserSheet {
                                     const SizedBox(height: 8),
                                     Text(
                                       "Henüz bir check-in yapmamış.", 
-                                      style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor)
+                                      style: NeerTypography.bodySmall.copyWith(color: theme.disabledColor)
                                     ),
                                   ],
                                 ),
@@ -336,12 +334,12 @@ class UserSheet {
                               flex: 3,
                               child: ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
+                                  backgroundColor: NeerColors.primary,
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(vertical: 18),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                                   elevation: 8,
-                                  shadowColor: AppColors.primary.withValues(alpha: 0.4),
+                                  shadowColor: NeerColors.primary.withValues(alpha: 0.4),
                                 ),
                                 onPressed: () {
                                   HapticFeedback.mediumImpact();
@@ -349,7 +347,7 @@ class UserSheet {
                                   context.push(AppRoutes.chat, extra: {'userId': targetUid, 'userName': displayName, 'userImage': null});
                                 },
                                 icon: const Icon(Icons.chat_bubble_rounded, size: 22),
-                                label: Text("Mesaj Gönder", style: AppTextStyles.button),
+                                label: Text("Mesaj Gönder", style: NeerTypography.button),
                               ),
                             ),
                             const SizedBox(width: 15),
@@ -369,7 +367,7 @@ class UserSheet {
                                   Navigator.pop(context);
                                   context.push('/profile/$targetUid');
                                 }, 
-                                child: Text("Profili Gör", style: AppTextStyles.button.copyWith(color: theme.textTheme.bodyLarge?.color)),
+                                child: Text("Profili Gör", style: NeerTypography.button.copyWith(color: theme.textTheme.bodyLarge?.color)),
                               ),
                             ),
                           ],
@@ -406,14 +404,14 @@ class UserSheet {
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(16), 
           border: isDark ? Border.all(color: Colors.white12) : null,
-          boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+          boxShadow: isDark ? [] : NeerShadows.soft(),
         ),
         child: Column(
           children: [
             Icon(icon, size: 18, color: color), 
             const SizedBox(height: 6),
-            Text(val, style: AppTextStyles.h3.copyWith(fontSize: 16)), 
-            Text(label, style: AppTextStyles.caption.copyWith(color: theme.disabledColor, fontWeight: FontWeight.bold)), 
+            Text(val, style: NeerTypography.h3.copyWith(fontSize: 16)), 
+            Text(label, style: NeerTypography.caption.copyWith(color: theme.disabledColor, fontWeight: FontWeight.bold)), 
           ],
         ),
       ),
@@ -435,7 +433,7 @@ class UserSheet {
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(16),
           border: isDark ? Border.all(color: Colors.white12) : null,
-          boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+          boxShadow: isDark ? [] : NeerShadows.soft(),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,13 +448,13 @@ class UserSheet {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold)),
+                  Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 2),
                   Row(
                     children: [
                       Icon(Icons.access_time_rounded, size: 10, color: theme.disabledColor),
                       const SizedBox(width: 3),
-                      Text(time, style: AppTextStyles.caption.copyWith(color: theme.disabledColor, fontSize: 10)),
+                      Text(time, style: NeerTypography.caption.copyWith(color: theme.disabledColor, fontSize: 10)),
                     ],
                   )
                 ],

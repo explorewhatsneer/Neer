@@ -3,10 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 
 // CORE IMPORTLAR
-import '../../core/constants.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
-import '../../core/theme_styles.dart';
 
 import '../../services/supabase_service.dart';
 import '../../widgets/dialogs/check_in_dialog.dart';
@@ -158,16 +156,16 @@ class _CheckInButtonState extends State<CheckInButton> {
       width: double.infinity,
       height: 56,
       decoration: BoxDecoration(
-        boxShadow: _isLoading ? [] : AppThemeStyles.shadowHigh,
-        borderRadius: AppThemeStyles.radius24,
+        boxShadow: _isLoading ? [] : NeerShadows.elevated(),
+        borderRadius: NeerRadius.cardRadius,
       ),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: NeerColors.primary,
           foregroundColor: Colors.white,
           elevation: 0,
           shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius24),
+          shape: RoundedRectangleBorder(borderRadius: NeerRadius.cardRadius),
           padding: EdgeInsets.zero,
         ),
         onPressed: _isLoading ? null : _handleCheckIn,
@@ -184,7 +182,7 @@ class _CheckInButtonState extends State<CheckInButton> {
                   const SizedBox(width: 8),
                   Text(
                     AppStrings.checkIn,
-                    style: AppTextStyles.button.copyWith(fontSize: 17, letterSpacing: -0.3),
+                    style: NeerTypography.button.copyWith(fontSize: 17, letterSpacing: -0.3),
                   ),
                 ],
               ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 
 // CORE IMPORTLARI 
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/common/animated_list_item.dart';
@@ -79,8 +79,7 @@ class _PollsScreenState extends State<PollsScreen> with SingleTickerProviderStat
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return GradientScaffold(
 
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -89,7 +88,7 @@ class _PollsScreenState extends State<PollsScreen> with SingleTickerProviderStat
         title: Text(
           AppStrings.reviewsTitle, // 🔥 Core String
           // 🔥 Core Style: H3
-          style: AppTextStyles.h3.copyWith(fontSize: 20)
+          style: NeerTypography.h3.copyWith(fontSize: 20)
         ),
         leading: Center(
           child: Container(
@@ -128,7 +127,7 @@ class _PollsScreenState extends State<PollsScreen> with SingleTickerProviderStat
               labelColor: theme.textTheme.bodyLarge?.color,
               unselectedLabelColor: theme.disabledColor,
               // 🔥 Core Style: Caption (Bold)
-              labelStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w800, fontSize: 13),
+              labelStyle: NeerTypography.caption.copyWith(fontWeight: FontWeight.w800, fontSize: 13),
               indicatorSize: TabBarIndicatorSize.tab,
               dividerColor: Colors.transparent,
               onTap: (index) => HapticFeedback.selectionClick(),

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -6,8 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../main.dart';
 
 // CORE IMPORTLARI
-import '../core/constants.dart';
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
 import '../core/snackbar_helper.dart';
@@ -83,10 +81,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return GradientScaffold(
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -103,10 +99,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   height: 70,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: AppColors.primaryGradient,
+                    gradient: NeerGradients.purplePink,
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.30),
+                        color: NeerColors.primary.withValues(alpha: 0.30),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -131,93 +127,72 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Text(
                 AppStrings.joinUs,
                 textAlign: TextAlign.center,
-                style: AppTextStyles.bodySmall.copyWith(
+                style: NeerTypography.bodySmall.copyWith(
                   color: theme.disabledColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 36),
 
-              // --- GLASS FORM CARD (VisionOS sigma 45) ---
-              ClipRRect(
-                borderRadius: BorderRadius.circular(28),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
-                  child: Container(
-                    padding: const EdgeInsets.all(28),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.darkSurface.withValues(alpha: 0.14)
-                          : Colors.white.withValues(alpha: 0.22),
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.18),
-                        width: 1,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.10),
-                          blurRadius: 30,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
+              // --- GLASS FORM CARD ---
+              GlassCard(
+                padding: const EdgeInsets.all(28),
+                borderRadius: 28,
+                blurAmount: 45,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      AppStrings.registerTitle,
+                      style: NeerTypography.h2.copyWith(fontWeight: FontWeight.w800),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          AppStrings.registerTitle,
-                          style: AppTextStyles.h2.copyWith(fontWeight: FontWeight.w800),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          AppStrings.createAccountSubtitle,
-                          style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),
-                        ),
-                        const SizedBox(height: 24),
-
-                        NeerAuthInput(
-                          controller: _nameController,
-                          hint: AppStrings.fullName,
-                          icon: Icons.person_outline_rounded,
-                          inputType: TextInputType.name,
-                        ),
-                        const SizedBox(height: 14),
-
-                        NeerAuthInput(
-                          controller: _usernameController,
-                          hint: AppStrings.username,
-                          icon: Icons.alternate_email_rounded,
-                        ),
-                        const SizedBox(height: 14),
-
-                        NeerAuthInput(
-                          controller: _emailController,
-                          hint: AppStrings.emailHint,
-                          icon: Icons.email_outlined,
-                          inputType: TextInputType.emailAddress,
-                        ),
-                        const SizedBox(height: 14),
-
-                        NeerAuthInput(
-                          controller: _passwordController,
-                          hint: AppStrings.passwordHint,
-                          icon: Icons.lock_outline_rounded,
-                          isPassword: true,
-                          isPasswordVisible: _isPasswordVisible,
-                          onVisibilityToggle: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-                        ),
-
-                        const SizedBox(height: 28),
-
-                        LoadingButton(
-                          onPressed: _register,
-                          label: AppStrings.registerTitle,
-                          height: 56,
-                        ),
-                      ],
+                    const SizedBox(height: 6),
+                    Text(
+                      AppStrings.createAccountSubtitle,
+                      style: NeerTypography.bodySmall.copyWith(color: theme.disabledColor),
                     ),
-                  ),
+                    const SizedBox(height: 24),
+
+                    NeerAuthInput(
+                      controller: _nameController,
+                      hint: AppStrings.fullName,
+                      icon: Icons.person_outline_rounded,
+                      inputType: TextInputType.name,
+                    ),
+                    const SizedBox(height: 14),
+
+                    NeerAuthInput(
+                      controller: _usernameController,
+                      hint: AppStrings.username,
+                      icon: Icons.alternate_email_rounded,
+                    ),
+                    const SizedBox(height: 14),
+
+                    NeerAuthInput(
+                      controller: _emailController,
+                      hint: AppStrings.emailHint,
+                      icon: Icons.email_outlined,
+                      inputType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 14),
+
+                    NeerAuthInput(
+                      controller: _passwordController,
+                      hint: AppStrings.passwordHint,
+                      icon: Icons.lock_outline_rounded,
+                      isPassword: true,
+                      isPasswordVisible: _isPasswordVisible,
+                      onVisibilityToggle: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                    ),
+
+                    const SizedBox(height: 28),
+
+                    LoadingButton(
+                      onPressed: _register,
+                      label: AppStrings.registerTitle,
+                      height: 56,
+                    ),
+                  ],
                 ),
               ),
 
@@ -229,7 +204,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   Text(
                     AppStrings.haveAccount,
-                    style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),
+                    style: NeerTypography.bodySmall.copyWith(color: theme.disabledColor),
                   ),
                   TextButton(
                     onPressed: () {
@@ -238,7 +213,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                     child: Text(
                       AppStrings.loginTitle,
-                      style: AppTextStyles.button.copyWith(
+                      style: NeerTypography.button.copyWith(
                         color: theme.primaryColor,
                         fontWeight: FontWeight.bold,
                       ),

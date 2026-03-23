@@ -2,8 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/constants.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 
 // ==========================================
 // 1. AYARLAR GRUBU (Glass Morphism - Floating Island)
@@ -27,7 +26,7 @@ class SettingsGroup extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 10),
             child: Text(
               title!.toUpperCase(),
-              style: AppTextStyles.caption.copyWith(
+              style: NeerTypography.caption.copyWith(
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.0,
                 fontSize: 11,
@@ -42,7 +41,7 @@ class SettingsGroup extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: isDark
-                    ? AppColors.darkSurface.withValues(alpha: 0.55)
+                    ? NeerColors.darkSurface.withValues(alpha: 0.55)
                     : Colors.white.withValues(alpha: 0.60),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
@@ -51,7 +50,7 @@ class SettingsGroup extends StatelessWidget {
                       : Colors.white.withValues(alpha: 0.80),
                   width: 1,
                 ),
-                boxShadow: AppColors.adaptiveShadow(isDark, blur: 16, alpha: 0.05),
+                boxShadow: NeerShadows.soft(),
               ),
               child: Column(
                 children: [
@@ -140,7 +139,7 @@ class SettingsItem extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: AppTextStyles.bodySmall.copyWith(
+                  style: NeerTypography.bodySmall.copyWith(
                     color: isDestructive
                         ? theme.colorScheme.error
                         : theme.textTheme.bodyLarge?.color,
@@ -225,7 +224,7 @@ class SettingsSwitch extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: AppTextStyles.bodySmall.copyWith(
+              style: NeerTypography.bodySmall.copyWith(
                 fontWeight: FontWeight.w600,
                 fontSize: 15,
               ),

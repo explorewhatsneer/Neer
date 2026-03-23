@@ -1,8 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../core/constants.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 
 /// Glass morphism confirmation dialog — VisionOS style.
 ///
@@ -48,7 +47,7 @@ class AppConfirmDialog {
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? AppColors.darkSurface.withValues(alpha: 0.25)
+                        ? NeerColors.darkSurface.withValues(alpha: 0.25)
                         : Colors.white.withValues(alpha: 0.35),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
@@ -69,9 +68,9 @@ class AppConfirmDialog {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(title, style: AppTextStyles.h3),
+                        Text(title, style: NeerTypography.h3),
                         const SizedBox(height: 12),
-                        Text(content, style: AppTextStyles.bodySmall),
+                        Text(content, style: NeerTypography.bodySmall),
                         const SizedBox(height: 24),
                         Row(
                           children: [
@@ -80,7 +79,7 @@ class AppConfirmDialog {
                                 onPressed: () => Navigator.of(ctx).pop(false),
                                 child: Text(
                                   cancelText ?? 'İptal',
-                                  style: AppTextStyles.button.copyWith(
+                                  style: NeerTypography.button.copyWith(
                                     color: isDark
                                         ? Colors.white.withValues(alpha: 0.5)
                                         : Colors.black.withValues(alpha: 0.45),
@@ -101,7 +100,7 @@ class AppConfirmDialog {
                                   onPressed: () => Navigator.of(ctx).pop(true),
                                   child: Text(
                                     confirmText,
-                                    style: AppTextStyles.button.copyWith(
+                                    style: NeerTypography.button.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
                                     ),

@@ -3,9 +3,7 @@ import 'package:flutter/services.dart'; // Haptic Feedback için
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // CORE IMPORTLARI
-import '../core/constants.dart';
-import '../core/theme_styles.dart';
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/snackbar_helper.dart';
 
@@ -109,13 +107,12 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      
+    return GradientScaffold(
+
       appBar: AppBar(
         title: Text(
           AppStrings.accountInfoTitle, 
-          style: AppTextStyles.h3.copyWith(fontSize: 20) 
+          style: NeerTypography.h3.copyWith(fontSize: 20) 
         ),
         centerTitle: true,
         leading: IconButton(
@@ -132,7 +129,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
           children: [
             Text(
               AppStrings.contactInfo, 
-              style: AppTextStyles.caption.copyWith(
+              style: NeerTypography.caption.copyWith(
                 fontWeight: FontWeight.w700, 
                 letterSpacing: 1.2,
                 color: theme.disabledColor
@@ -167,7 +164,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.2 : 0.08), 
-                borderRadius: AppThemeStyles.radius16,
+                borderRadius: NeerRadius.buttonRadius,
                 border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3), width: 1),
               ),
               child: Row(
@@ -178,8 +175,8 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                   Expanded(
                     child: Text(
                       AppStrings.emailChangeWarning, 
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: isDark ? Colors.white70 : AppColors.primaryDark,
+                      style: NeerTypography.bodySmall.copyWith(
+                        color: isDark ? Colors.white70 : NeerColors.primaryDark,
                         height: 1.4
                       ),
                     ),
@@ -201,13 +198,13 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                   foregroundColor: Colors.white,
                   elevation: _isLoading ? 0 : 8,
                   shadowColor: theme.primaryColor.withValues(alpha: 0.4),
-                  shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
+                  shape: RoundedRectangleBorder(borderRadius: NeerRadius.buttonRadius),
                 ),
                 child: _isLoading 
                   ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5)) 
                   : Text(
                       AppStrings.saveChanges, 
-                      style: AppTextStyles.button.copyWith(fontSize: 16)
+                      style: NeerTypography.button.copyWith(fontSize: 16)
                     ),
               ),
             ),
@@ -230,23 +227,23 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
     return Container(
       decoration: BoxDecoration(
         color: theme.cardColor, 
-        borderRadius: AppThemeStyles.radius16,
+        borderRadius: NeerRadius.buttonRadius,
         boxShadow: isDark 
             ? [] 
-            : AppThemeStyles.shadowLow, 
+            : NeerShadows.soft(), 
         border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: TextField(
         controller: controller,
         keyboardType: inputType,
-        style: AppTextStyles.bodyLarge.copyWith(color: theme.textTheme.bodyLarge?.color), 
+        style: NeerTypography.bodyLarge.copyWith(color: theme.textTheme.bodyLarge?.color), 
         cursorColor: theme.primaryColor,
         decoration: InputDecoration(
           icon: Icon(icon, color: theme.colorScheme.primary.withValues(alpha: 0.8)),
           border: InputBorder.none,
           labelText: label,
-          labelStyle: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),
+          labelStyle: NeerTypography.bodySmall.copyWith(color: theme.disabledColor),
           floatingLabelStyle: TextStyle(color: theme.primaryColor, fontWeight: FontWeight.w600),
         ),
       ),

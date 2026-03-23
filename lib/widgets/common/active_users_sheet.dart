@@ -3,9 +3,7 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart';
-import '../../core/text_styles.dart';
-import '../../core/constants.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 import 'app_cached_image.dart';
 
@@ -58,7 +56,7 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
         child: Center(
           child: Text(
             "${AppStrings.error}: Grup ID bulunamadı.", 
-            style: AppTextStyles.bodyLarge.copyWith(color: theme.colorScheme.error)
+            style: NeerTypography.bodyLarge.copyWith(color: theme.colorScheme.error)
           )
         ),
       );
@@ -71,7 +69,7 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
       builder: (_, controller) => GlassPanel.sheet(
             darkAlpha: 0.7,
             lightAlpha: 0.8,
-            boxShadow: AppThemeStyles.shadowHigh,
+            boxShadow: NeerShadows.elevated(),
             border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1)),
             child: Column(
               children: [
@@ -84,15 +82,15 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkDivider : AppColors.lightDivider,
+                          color: isDark ? NeerColors.gray700 : NeerColors.gray200,
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                       const SizedBox(height: 15),
                       Text(
                         AppStrings.activeMembers, 
-                        style: AppTextStyles.h3.copyWith(
-                          color: isDark ? AppColors.darkTextHeading : AppColors.lightTextHeading
+                        style: NeerTypography.h3.copyWith(
+                          color: isDark ? Colors.white : NeerColors.gray900
                         ),
                       ),
                     ],
@@ -176,9 +174,9 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: theme.cardColor.withValues(alpha: 0.5), 
-          borderRadius: AppThemeStyles.radius16,
+          borderRadius: NeerRadius.buttonRadius,
           border: isDark ? Border.all(color: Colors.white.withValues(alpha: 0.05), width: 0.5) : null,
-          boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+          boxShadow: isDark ? [] : NeerShadows.soft(),
         ),
         child: Row(
           children: [
@@ -201,16 +199,16 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
                   Text(
                     // 🔥 Supabase sütun isimleri: full_name
                     isMe ? "${user['full_name']} ${AppStrings.you}" : (user['full_name'] ?? "Kullanıcı"),
-                    style: AppTextStyles.bodyLarge.copyWith(
+                    style: NeerTypography.bodyLarge.copyWith(
                       fontWeight: FontWeight.w600, 
-                      color: isDark ? AppColors.darkTextHeading : AppColors.lightTextHeading
+                      color: isDark ? Colors.white : NeerColors.gray900
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     "@${user['username'] ?? 'gizliuye'}",
-                    style: AppTextStyles.caption.copyWith(
-                      color: isDark ? AppColors.darkTextSub : AppColors.lightTextSub,
+                    style: NeerTypography.caption.copyWith(
+                      color: isDark ? NeerColors.gray500 : NeerColors.gray400,
                     ),
                   ),
                 ],
@@ -240,8 +238,8 @@ class _ActiveUsersSheetState extends State<ActiveUsersSheet> {
           const SizedBox(height: 10),
           Text(
             AppStrings.noMembers, 
-            style: AppTextStyles.bodyLarge.copyWith(
-              color: isDark ? AppColors.darkTextSub : AppColors.lightTextSub,
+            style: NeerTypography.bodyLarge.copyWith(
+              color: isDark ? NeerColors.gray500 : NeerColors.gray400,
               fontWeight: FontWeight.bold
             )
           ),

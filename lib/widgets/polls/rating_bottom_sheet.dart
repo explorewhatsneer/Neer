@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 
 // CORE IMPORTLARI
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 import '../../core/snackbar_helper.dart';
 import '../common/glass_panel.dart'; 
@@ -109,7 +109,7 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
                       Text(
                         widget.placeName, 
                         // 🔥 Core Style: H2
-                        style: AppTextStyles.h2.copyWith(fontWeight: FontWeight.w900), 
+                        style: NeerTypography.h2.copyWith(fontWeight: FontWeight.w900), 
                         textAlign: TextAlign.center
                       ),
                       
@@ -131,7 +131,7 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
                         alignment: Alignment.centerLeft, 
                         child: Text(
                           AppStrings.highlights, 
-                          style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)
+                          style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.bold)
                         )
                       ),
                       const SizedBox(height: 15),
@@ -151,11 +151,11 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
                           border: isDark ? Border.all(color: Colors.white12) : null,
                         ),
                         child: TextField(
-                          style: AppTextStyles.bodyLarge,
+                          style: NeerTypography.bodyLarge,
                           cursorColor: theme.primaryColor,
                           decoration: InputDecoration(
                             hintText: AppStrings.commentHint,
-                            hintStyle: AppTextStyles.bodyLarge.copyWith(color: theme.disabledColor),
+                            hintStyle: NeerTypography.bodyLarge.copyWith(color: theme.disabledColor),
                             border: InputBorder.none,
                             contentPadding: const EdgeInsets.all(20),
                             prefixIcon: Icon(Icons.edit_note_rounded, color: theme.disabledColor),
@@ -185,7 +185,7 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
                           },
                           child: Text(
                             AppStrings.submitRating, 
-                            style: AppTextStyles.button.copyWith(letterSpacing: 1)
+                            style: NeerTypography.button.copyWith(letterSpacing: 1)
                           ),
                         ),
                       ),
@@ -236,7 +236,7 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
                 Text(
                   _averageRating == 0 ? "-" : _averageRating.toStringAsFixed(1), 
                   // 🔥 Core Style: H1 (Çok Büyük)
-                  style: AppTextStyles.h1.copyWith(
+                  style: NeerTypography.h1.copyWith(
                     fontSize: 28, 
                     fontWeight: FontWeight.w900, 
                     color: _averageScoreColor, 
@@ -253,7 +253,7 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
           child: Text(
             _scoreTitle, 
             key: ValueKey(_scoreTitle), 
-            style: AppTextStyles.h3.copyWith(
+            style: NeerTypography.h3.copyWith(
               fontSize: 16,
               color: _averageScoreColor, 
               letterSpacing: 0.5
@@ -300,7 +300,7 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
           const SizedBox(width: 12),
           Text(
             label, 
-            style: AppTextStyles.bodyLarge.copyWith(
+            style: NeerTypography.bodyLarge.copyWith(
               fontWeight: FontWeight.bold, 
               fontSize: 15,
               color: isRated ? theme.textTheme.bodyLarge?.color : theme.disabledColor
@@ -363,7 +363,7 @@ class _RatingBottomSheetState extends State<RatingBottomSheet> {
         ), 
         child: Text(
           tag, 
-          style: AppTextStyles.bodySmall.copyWith(
+          style: NeerTypography.bodySmall.copyWith(
             color: isSelected ? Colors.white : theme.textTheme.bodyMedium?.color, 
             fontWeight: FontWeight.w600, 
             fontSize: 13

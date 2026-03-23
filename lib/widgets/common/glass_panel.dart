@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../../core/constants.dart';
+import '../../core/neer_design_system.dart';
 
 /// Premium Glassmorphism container — Apple VisionOS style.
 ///
@@ -114,7 +114,7 @@ class GlassPanel extends StatelessWidget {
 
     final bgColor = backgroundColor ??
         (isDark
-            ? AppColors.darkSurface.withValues(alpha: darkAlpha)
+            ? NeerColors.darkSurface.withValues(alpha: darkAlpha)
             : Colors.white.withValues(alpha: lightAlpha));
 
     // Jilet kenarlar — always 1px, alpha 0.18
@@ -125,7 +125,7 @@ class GlassPanel extends StatelessWidget {
         );
 
     final resolvedShadow = boxShadow ??
-        AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06);
+        NeerShadows.soft();
 
     Widget container = Container(
       width: width,

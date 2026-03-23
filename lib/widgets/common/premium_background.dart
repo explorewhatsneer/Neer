@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-import '../../core/constants.dart';
+import '../../core/neer_design_system.dart';
 
 /// Premium animated mesh gradient background — Apple VisionOS / Siri style.
 ///
@@ -43,8 +43,8 @@ class _PremiumBackgroundState extends State<PremiumBackground>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final baseGradient = isDark
-        ? AppColors.darkBackgroundGradient
-        : AppColors.backgroundGradient;
+        ? NeerGradients.backgroundDark
+        : NeerGradients.backgroundLight;
 
     if (!widget.animate) {
       return RepaintBoundary(

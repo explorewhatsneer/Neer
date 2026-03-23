@@ -2,8 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/constants.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 import '../common/app_cached_image.dart';
 
@@ -65,7 +64,7 @@ class NotificationTile extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: isDark
-                  ? AppColors.darkSurface.withValues(alpha: isRead ? 0.12 : 0.18)
+                  ? NeerColors.darkSurface.withValues(alpha: isRead ? 0.12 : 0.18)
                   : Colors.white.withValues(alpha: isRead ? 0.18 : 0.28),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
@@ -75,7 +74,7 @@ class NotificationTile extends StatelessWidget {
                 width: 1,
               ),
               boxShadow: [
-                ...AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
+                ...NeerShadows.soft(),
                 if (!isRead)
                   BoxShadow(
                     color: theme.primaryColor.withValues(alpha: 0.08),
@@ -116,13 +115,13 @@ class NotificationTile extends StatelessWidget {
                           Expanded(
                             child: Text(
                               title,
-                              style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold),
+                              style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.bold),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           Text(
                             time,
-                            style: AppTextStyles.caption.copyWith(
+                            style: NeerTypography.caption.copyWith(
                               color: isDark
                                   ? Colors.white.withValues(alpha: 0.4)
                                   : Colors.black.withValues(alpha: 0.35),
@@ -134,7 +133,7 @@ class NotificationTile extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         body,
-                        style: AppTextStyles.bodyLarge.copyWith(
+                        style: NeerTypography.bodyLarge.copyWith(
                           height: 1.4,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -178,7 +177,7 @@ class NotificationTile extends StatelessWidget {
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
               color: isDark
-                  ? AppColors.darkSurface
+                  ? NeerColors.darkSurface
                   : Colors.white,
               shape: BoxShape.circle,
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4)],

@@ -5,10 +5,9 @@ import 'package:provider/provider.dart';
 import '../main.dart';
 
 // CORE
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
-import '../core/constants.dart';
 
 // MODELS & SERVICES
 import '../models/post_model.dart';
@@ -97,15 +96,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     final user = profileProvider.profile;
 
     if (profileProvider.isLoading) {
-      return Scaffold(backgroundColor: Colors.transparent, body: const ShimmerList(itemCount: 5));
+      return GradientScaffold(body: const ShimmerList(itemCount: 5));
     }
 
     final String displayImage = (user?.profileImage != null && user!.profileImage.isNotEmpty)
         ? user.profileImage
         : "https://i.pravatar.cc/150?img=60";
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return GradientScaffold(
       body: NestedScrollView(
         controller: _scrollController,
         headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -536,7 +534,7 @@ class _BentoDashboard extends StatelessWidget {
                           title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.bodySmall.copyWith(
+                          style: NeerTypography.bodySmall.copyWith(
                             fontWeight: FontWeight.w700,
                             fontSize: 14,
                           ),
@@ -544,7 +542,7 @@ class _BentoDashboard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           "${(progress * 100).toInt()}%",
-                          style: AppTextStyles.caption.copyWith(
+                          style: NeerTypography.caption.copyWith(
                             color: theme.primaryColor,
                             fontWeight: FontWeight.w800,
                           ),
@@ -592,7 +590,7 @@ class _BentoDashboard extends StatelessWidget {
                                   const SizedBox(width: 6),
                                   Text(
                                     AppStrings.myNotes,
-                                    style: AppTextStyles.caption.copyWith(
+                                    style: NeerTypography.caption.copyWith(
                                       fontWeight: FontWeight.w700,
                                       color: theme.primaryColor,
                                       fontSize: 11,
@@ -605,7 +603,7 @@ class _BentoDashboard extends StatelessWidget {
                                 noteText,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: AppTextStyles.caption.copyWith(
+                                style: NeerTypography.caption.copyWith(
                                   fontStyle: FontStyle.italic,
                                   fontSize: 12,
                                   height: 1.3,
@@ -649,17 +647,17 @@ class _BentoDashboard extends StatelessWidget {
                                   Icon(
                                     Icons.star_rounded,
                                     size: 16,
-                                    color: AppColors.warning,
+                                    color: NeerColors.warning,
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
                                     score > 0
                                         ? score.toStringAsFixed(1)
                                         : "-",
-                                    style: AppTextStyles.h3.copyWith(
+                                    style: NeerTypography.h3.copyWith(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w800,
-                                      color: AppColors.warning,
+                                      color: NeerColors.warning,
                                     ),
                                   ),
                                 ],
@@ -669,7 +667,7 @@ class _BentoDashboard extends StatelessWidget {
                                 placeName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: AppTextStyles.caption.copyWith(
+                                style: NeerTypography.caption.copyWith(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 12,
                                   color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.7),

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart'; 
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 import '../common/app_cached_image.dart';
 
@@ -39,8 +38,8 @@ class ReviewCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: AppThemeStyles.radius24,
-        boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+        borderRadius: NeerRadius.cardRadius,
+        boxShadow: isDark ? [] : NeerShadows.soft(),
         border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
       ),
       child: Column(
@@ -74,7 +73,7 @@ class ReviewCard extends StatelessWidget {
                           child: Text(
                             placeName, 
                             // 🔥 Core Style: BodyLarge (ExtraBold)
-                            style: AppTextStyles.bodyLarge.copyWith(
+                            style: NeerTypography.bodyLarge.copyWith(
                               fontWeight: FontWeight.w800, 
                               fontSize: 16
                             ),
@@ -96,7 +95,7 @@ class ReviewCard extends StatelessWidget {
                                 const SizedBox(width: 4),
                                 Text(
                                   "$rating", 
-                                  style: AppTextStyles.caption.copyWith(
+                                  style: NeerTypography.caption.copyWith(
                                     fontWeight: FontWeight.bold, 
                                     color: const Color(0xFFFFB400), 
                                     fontSize: 12
@@ -113,7 +112,7 @@ class ReviewCard extends StatelessWidget {
                       Text(
                         category!, 
                         // 🔥 Core Style: LabelSmall / Caption
-                        style: AppTextStyles.caption.copyWith(
+                        style: NeerTypography.caption.copyWith(
                           color: theme.disabledColor, 
                           fontWeight: FontWeight.bold
                         )
@@ -127,7 +126,7 @@ class ReviewCard extends StatelessWidget {
                         if (!isCompleted) const SizedBox(width: 4),
                         Text(
                           date, 
-                          style: AppTextStyles.caption.copyWith(
+                          style: NeerTypography.caption.copyWith(
                             color: isCompleted ? theme.disabledColor : theme.textTheme.bodyMedium?.color, 
                             fontWeight: FontWeight.w600
                           )
@@ -161,7 +160,7 @@ class ReviewCard extends StatelessWidget {
                     child: Text(
                       desc, 
                       // 🔥 Core Style: BodySmall
-                      style: AppTextStyles.bodySmall
+                      style: NeerTypography.bodySmall
                     )
                   ),
                 ],
@@ -187,7 +186,7 @@ class ReviewCard extends StatelessWidget {
                 },
                 child: Text(
                   AppStrings.rateNow, // 🔥 Core String
-                  style: AppTextStyles.button.copyWith(fontSize: 15)
+                  style: NeerTypography.button.copyWith(fontSize: 15)
                 ),
               ),
             )
@@ -196,7 +195,7 @@ class ReviewCard extends StatelessWidget {
             Text(
               desc, 
               // 🔥 Core Style: BodyMedium (Okunabilirlik)
-              style: AppTextStyles.bodyLarge.copyWith(
+              style: NeerTypography.bodyLarge.copyWith(
                 height: 1.4, 
                 fontSize: 15,
                 color: theme.textTheme.bodyMedium?.color

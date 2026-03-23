@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'text_styles.dart';
+import 'neer_design_system.dart';
 
 /// Glass morphism SnackBar — floating toast style.
 ///
@@ -44,7 +44,7 @@ class AppSnackBar {
             Expanded(
               child: Text(
                 message,
-                style: AppTextStyles.bodySmall.copyWith(
+                style: NeerTypography.bodySmall.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),

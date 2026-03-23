@@ -8,10 +8,11 @@ import 'core/theme_manager.dart';
 import 'core/language_manager.dart';
 import 'core/app_router.dart';
 import 'core/connectivity_service.dart';
+import 'core/neer_design_system.dart';
+import 'core/app_lifecycle_manager.dart';
 import 'providers/auth_provider.dart';
 import 'providers/profile_provider.dart';
 import 'providers/catch_provider.dart';
-import 'widgets/common/premium_background.dart';
 
 // GLOBAL YÖNETİCİLER (geriye uyumluluk — yeni kodda Provider kullanın)
 final ThemeManager themeManager = ThemeManager();
@@ -61,8 +62,8 @@ class MyApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             title: 'Neer',
             themeMode: theme.themeMode,
-            theme: theme.lightTheme,
-            darkTheme: theme.darkTheme,
+            theme: NeerTheme.light(),
+            darkTheme: NeerTheme.dark(),
             locale: lang.locale,
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
@@ -75,12 +76,8 @@ class MyApp extends StatelessWidget {
             ],
             routerConfig: appRouter,
             builder: (context, child) {
-              // Premium animated mesh gradient — tüm ekranlar bu arka planı devralır
-              return Stack(
-                children: [
-                  const PremiumBackground(),
-                  if (child != null) child,
-                ],
+              return AppLifecycleManager(
+                child: child ?? const SizedBox.shrink(),
               );
             },
           );

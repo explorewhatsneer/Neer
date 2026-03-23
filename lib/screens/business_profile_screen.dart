@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // CORE
-import '../core/constants.dart';
-import '../core/theme_styles.dart';
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 
 // SERVICES
@@ -128,8 +126,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return GradientScaffold(
 
       // SABİT ALT AKSİYON BARI (DOCK)
       bottomNavigationBar: Container(
@@ -150,7 +147,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
             Container(
               decoration: BoxDecoration(
                 color: theme.dividerColor.withValues(alpha: 0.1),
-                borderRadius: AppThemeStyles.radius16
+                borderRadius: NeerRadius.buttonRadius
               ),
               child: IconButton(
                 icon: Icon(Icons.navigation_rounded, color: theme.iconTheme.color),
@@ -264,7 +261,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                               ),
                               child: Text(
                                 _category,
-                                style: AppTextStyles.caption.copyWith(
+                                style: NeerTypography.caption.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: 0.5,
@@ -274,7 +271,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                           const SizedBox(height: 8),
                           Text(
                             widget.venueName,
-                            style: AppTextStyles.h1.copyWith(
+                            style: NeerTypography.h1.copyWith(
                               color: Colors.white,
                               fontSize: 28,
                               fontWeight: FontWeight.w800,
@@ -298,7 +295,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                                 const SizedBox(width: 6),
                                 Text(
                                   "$_liveUserCount ${AppStrings.peopleCount}",
-                                  style: AppTextStyles.caption.copyWith(
+                                  style: NeerTypography.caption.copyWith(
                                     color: Colors.white.withValues(alpha: 0.80),
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
@@ -393,7 +390,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                           const Spacer(),
                           Text(
                             "$_liveUserCount",
-                            style: AppTextStyles.h1.copyWith(
+                            style: NeerTypography.h1.copyWith(
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
                               color: _liveUserCount > 0 ? const Color(0xFF30D158) : theme.disabledColor,
@@ -401,7 +398,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                           ),
                           Text(
                             AppStrings.peopleCount,
-                            style: AppTextStyles.caption.copyWith(
+                            style: NeerTypography.caption.copyWith(
                               color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.5),
                               fontSize: 12,
                             ),
@@ -433,7 +430,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                                 const SizedBox(height: 6),
                                 Text(
                                   "Check-in",
-                                  style: AppTextStyles.bodySmall.copyWith(
+                                  style: NeerTypography.bodySmall.copyWith(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 14,
                                   ),
@@ -455,20 +452,20 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                             padding: const EdgeInsets.all(14),
                             child: Row(
                               children: [
-                                Icon(Icons.star_rounded, color: AppColors.warning, size: 22),
+                                Icon(Icons.star_rounded, color: NeerColors.warning, size: 22),
                                 const SizedBox(width: 8),
                                 Text(
                                   _rating > 0 ? _rating.toStringAsFixed(1) : "-",
-                                  style: AppTextStyles.h2.copyWith(
+                                  style: NeerTypography.h2.copyWith(
                                     fontSize: 22,
                                     fontWeight: FontWeight.w800,
-                                    color: AppColors.warning,
+                                    color: NeerColors.warning,
                                   ),
                                 ),
                                 const Spacer(),
                                 Text(
                                   "${_reviews.length}",
-                                  style: AppTextStyles.caption.copyWith(
+                                  style: NeerTypography.caption.copyWith(
                                     color: theme.disabledColor,
                                     fontWeight: FontWeight.w600,
                                   ),

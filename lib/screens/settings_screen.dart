@@ -4,8 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../core/constants.dart';
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/theme_manager.dart';
 import '../core/language_manager.dart';
@@ -101,7 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               Text(
                 AppStrings.themeSelection, 
-                style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold)
+                style: NeerTypography.h3.copyWith(fontWeight: FontWeight.bold)
               ),
               const SizedBox(height: 20),
               
@@ -163,7 +162,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               Text(
                 AppStrings.languageSelection, 
-                style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.bold)
+                style: NeerTypography.h3.copyWith(fontWeight: FontWeight.bold)
               ),
               const SizedBox(height: 20),
               
@@ -278,8 +277,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // Şu anki dil adını al
     String currentLangName = lm.locale.languageCode == 'tr' ? "Türkçe (TR)" : "English (US)";
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return GradientScaffold(
 
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -287,7 +285,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         centerTitle: true,
         title: Text(
           AppStrings.settingsTitle,
-          style: AppTextStyles.h3.copyWith(fontSize: 20, fontWeight: FontWeight.w700),
+          style: NeerTypography.h3.copyWith(fontSize: 20, fontWeight: FontWeight.w700),
         ),
         leading: Padding(
           padding: const EdgeInsets.only(left: 12),
@@ -329,7 +327,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: AppColors.primaryGradient,
+                  gradient: NeerGradients.purplePink,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.25),
@@ -337,7 +335,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.30),
+                      color: NeerColors.primary.withValues(alpha: 0.30),
                       blurRadius: 24,
                       offset: const Offset(0, 8),
                       spreadRadius: -4,
@@ -365,7 +363,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         children: [
                           Text(
                             userName,
-                            style: AppTextStyles.h3.copyWith(
+                            style: NeerTypography.h3.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w800,
                               fontSize: 19,
@@ -383,7 +381,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             child: Text(
                               "Free",
-                              style: AppTextStyles.caption.copyWith(
+                              style: NeerTypography.caption.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 11,
@@ -429,7 +427,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               SettingsItem(
                 icon: Icons.link_rounded, color: Colors.blueAccent, title: AppStrings.linkedAccounts,
-                trailing: Text("Google", style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor)),
+                trailing: Text("Google", style: NeerTypography.bodySmall.copyWith(color: theme.disabledColor)),
                 onTap: () => context.push(AppRoutes.loginMethods),
               ),
 
@@ -468,7 +466,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           children: [
                             Text(
                               AppStrings.goPremiumBtn,
-                              style: AppTextStyles.bodySmall.copyWith(
+                              style: NeerTypography.bodySmall.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 14,
@@ -476,7 +474,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             Text(
                               AppStrings.unlimitedFeatures,
-                              style: AppTextStyles.caption.copyWith(
+                              style: NeerTypography.caption.copyWith(
                                 color: Colors.white.withValues(alpha: 0.80),
                                 fontSize: 11,
                               ),
@@ -492,7 +490,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         child: Text(
                           AppStrings.upgrade,
-                          style: AppTextStyles.caption.copyWith(
+                          style: NeerTypography.caption.copyWith(
                             fontWeight: FontWeight.w900,
                             fontSize: 10,
                             color: const Color(0xFFFF8C00),
@@ -512,12 +510,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               SettingsItem(
                 icon: Icons.dark_mode_outlined, color: Colors.deepPurple, title: AppStrings.theme,
-                trailing: Text(currentThemeName, style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor)),
+                trailing: Text(currentThemeName, style: NeerTypography.bodySmall.copyWith(color: theme.disabledColor)),
                 onTap: _showThemeSelector, 
               ),
               SettingsItem(
                 icon: Icons.language_rounded, color: Colors.deepPurple, title: AppStrings.language,
-                trailing: Text(currentLangName, style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor)),
+                trailing: Text(currentLangName, style: NeerTypography.bodySmall.copyWith(color: theme.disabledColor)),
                 onTap: _showLanguageSelector, 
               ),
               SettingsSwitch(
@@ -606,7 +604,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 Text(
                   AppStrings.appName,
-                  style: AppTextStyles.h3.copyWith(
+                  style: NeerTypography.h3.copyWith(
                     color: theme.primaryColor.withValues(alpha: 0.6),
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
@@ -615,7 +613,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 4),
                 Text(
                   "v1.0.8",
-                  style: AppTextStyles.caption.copyWith(
+                  style: NeerTypography.caption.copyWith(
                     color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.25),
                     fontSize: 11,
                   ),

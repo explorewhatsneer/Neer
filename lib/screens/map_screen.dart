@@ -7,10 +7,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 
 import '../services/supabase_service.dart';
-import '../core/theme_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/snackbar_helper.dart';
-import '../core/constants.dart';
 
 import '../widgets/map/balloon_menu.dart';
 import '../widgets/map/map_floating_buttons.dart';
@@ -151,7 +150,7 @@ class _MapScreenState extends State<MapScreen>
     bool showDotsOnly = _currentZoom >= 14.0 && _currentZoom < 16.0;
     bool showClustersAndPins = _currentZoom >= 16.0;
 
-    return Scaffold(
+    return GradientScaffold(
       extendBody: true,
       resizeToAvoidBottomInset: false,
       body: Stack(
@@ -210,7 +209,7 @@ class _MapScreenState extends State<MapScreen>
                       width: 50, height: 60,
                       child: PremiumPinMarker(place: p),
                     )).toList(),
-                    builder: (context, markers) => PremiumCluster(count: markers.length, color: AppColors.primary),
+                    builder: (context, markers) => PremiumCluster(count: markers.length, color: NeerColors.primary),
                     animationsOptions: const AnimationsOptions(
                       zoom: Duration(milliseconds: 300),
                       fitBound: Duration(milliseconds: 300),
@@ -319,7 +318,7 @@ class _MapScreenState extends State<MapScreen>
                         color: isDark ? Colors.black.withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.7),
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
-                        boxShadow: AppThemeStyles.shadowLow,
+                        boxShadow: NeerShadows.soft(),
                       ),
                       child: Icon(
                         _isMenuOpen ? Icons.close_rounded : Icons.grid_view_rounded,

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/connectivity_service.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 
 /// Ekranın üstünde çevrimdışı uyarısı gösteren widget.
@@ -102,7 +102,7 @@ class _OfflineBanner extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               text,
-              style: AppTextStyles.caption.copyWith(
+              style: NeerTypography.caption.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
               ),

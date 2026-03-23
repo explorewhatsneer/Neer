@@ -4,8 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 // CORE IMPORTLARI
-import '../../core/text_styles.dart';
-import '../../core/constants.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 
 import '../../models/post_model.dart';
@@ -64,13 +63,13 @@ class StoryItem extends StatelessWidget {
               gradient: isMe
                   ? null
                   : const LinearGradient(
-                      colors: [AppColors.primary, AppColors.accent],
+                      colors: [NeerColors.primary, NeerColors.accent],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
               border: isMe
                   ? Border.all(
-                      color: isDark ? Colors.white.withValues(alpha: 0.15) : AppColors.primary.withValues(alpha: 0.25),
+                      color: isDark ? Colors.white.withValues(alpha: 0.15) : NeerColors.primary.withValues(alpha: 0.25),
                       width: 2,
                       strokeAlign: BorderSide.strokeAlignOutside,
                     )
@@ -128,7 +127,7 @@ class StoryItem extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: AppTextStyles.caption.copyWith(
+              style: NeerTypography.caption.copyWith(
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
               ),
@@ -170,7 +169,7 @@ class FeedActionRow extends StatelessWidget {
             isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
             likes,
             () => onAction("like"),
-            color: isLiked ? AppColors.error : theme.textTheme.bodyLarge?.color ?? Colors.grey,
+            color: isLiked ? NeerColors.error : theme.textTheme.bodyLarge?.color ?? Colors.grey,
           ),
           const SizedBox(width: 20),
           _buildButton(
@@ -213,7 +212,7 @@ class FeedActionRow extends StatelessWidget {
             const SizedBox(width: 5),
             Text(
               label,
-              style: AppTextStyles.caption.copyWith(
+              style: NeerTypography.caption.copyWith(
                 fontWeight: FontWeight.w700,
                 color: color,
               ),
@@ -260,12 +259,12 @@ class FeedCardHeader extends StatelessWidget {
               children: [
                 Text(
                   userName,
-                  style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w700),
+                  style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   time,
-                  style: AppTextStyles.caption.copyWith(
+                  style: NeerTypography.caption.copyWith(
                     color: theme.disabledColor,
                     fontSize: 12,
                   ),
@@ -333,14 +332,14 @@ class _FeedPostCardState extends State<FeedPostCard> {
         child: Container(
           decoration: BoxDecoration(
             color: isDark
-                ? AppColors.darkSurface.withValues(alpha: 0.14)
+                ? NeerColors.darkSurface.withValues(alpha: 0.14)
                 : Colors.white.withValues(alpha: 0.22),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.18),
               width: 1,
             ),
-            boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
+            boxShadow: NeerShadows.soft(),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,7 +375,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     text: TextSpan(
-                      style: AppTextStyles.bodySmall.copyWith(
+                      style: NeerTypography.bodySmall.copyWith(
                         height: 1.4,
                         color: theme.textTheme.bodyLarge?.color,
                       ),
@@ -439,14 +438,14 @@ class _FeedReviewCardState extends State<FeedReviewCard> {
         child: Container(
           decoration: BoxDecoration(
             color: isDark
-                ? AppColors.darkSurface.withValues(alpha: 0.14)
+                ? NeerColors.darkSurface.withValues(alpha: 0.14)
                 : Colors.white.withValues(alpha: 0.22),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.18),
               width: 1,
             ),
-            boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
+            boxShadow: NeerShadows.soft(),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -468,7 +467,7 @@ class _FeedReviewCardState extends State<FeedReviewCard> {
                   decoration: BoxDecoration(
                     color: isDark
                         ? Colors.white.withValues(alpha: 0.06)
-                        : AppColors.gradientStart.withValues(alpha: 0.15),
+                        : NeerColors.gradientStart.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: Colors.white.withValues(alpha: 0.12),
@@ -482,7 +481,7 @@ class _FeedReviewCardState extends State<FeedReviewCard> {
                           padding: const EdgeInsets.only(right: 2),
                           child: Icon(
                             Icons.star_rounded,
-                            color: index < rating ? AppColors.warning : theme.disabledColor.withValues(alpha: 0.2),
+                            color: index < rating ? NeerColors.warning : theme.disabledColor.withValues(alpha: 0.2),
                             size: 20,
                           ),
                         )),
@@ -490,7 +489,7 @@ class _FeedReviewCardState extends State<FeedReviewCard> {
                       const SizedBox(height: 10),
                       Text(
                         widget.post.reviewComment ?? AppStrings.noComment,
-                        style: AppTextStyles.bodySmall.copyWith(height: 1.5),
+                        style: NeerTypography.bodySmall.copyWith(height: 1.5),
                       ),
                     ],
                   ),

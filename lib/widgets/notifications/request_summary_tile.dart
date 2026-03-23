@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 
 import '../../services/supabase_service.dart';
@@ -34,14 +33,14 @@ class RequestSummaryTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: AppThemeStyles.radius16,
-        boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+        borderRadius: NeerRadius.buttonRadius,
+        boxShadow: isDark ? [] : NeerShadows.soft(),
         border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: AppThemeStyles.radius16,
+          borderRadius: NeerRadius.buttonRadius,
           onTap: () {
             HapticFeedback.lightImpact(); 
             onTap();
@@ -114,7 +113,7 @@ class RequestSummaryTile extends StatelessWidget {
                               ),
                               child: Text(
                                 "${requests.length}",
-                                style: AppTextStyles.caption.copyWith(
+                                style: NeerTypography.caption.copyWith(
                                   color: Colors.white, 
                                   fontSize: 10, 
                                   fontWeight: FontWeight.bold
@@ -135,7 +134,7 @@ class RequestSummaryTile extends StatelessWidget {
                         children: [
                           Text(
                             titleText, 
-                            style: AppTextStyles.bodyLarge.copyWith(
+                            style: NeerTypography.bodyLarge.copyWith(
                               fontWeight: FontWeight.bold,
                               color: theme.primaryColor
                             )
@@ -145,7 +144,7 @@ class RequestSummaryTile extends StatelessWidget {
                             subtitleText, 
                             maxLines: 2, 
                             overflow: TextOverflow.ellipsis, 
-                            style: AppTextStyles.bodySmall.copyWith(
+                            style: NeerTypography.bodySmall.copyWith(
                               color: theme.disabledColor,
                               fontSize: 13
                             )

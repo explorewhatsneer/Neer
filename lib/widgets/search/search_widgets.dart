@@ -2,8 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/constants.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 import '../common/app_cached_image.dart';
 
@@ -34,14 +33,14 @@ class ModernSearchBar extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               color: isDark
-                  ? AppColors.darkSurface.withValues(alpha: 0.14)
+                  ? NeerColors.darkSurface.withValues(alpha: 0.14)
                   : Colors.white.withValues(alpha: 0.22),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.18),
                 width: 1,
               ),
-              boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
+              boxShadow: NeerShadows.soft(),
             ),
             child: Row(
               children: [
@@ -49,7 +48,7 @@ class ModernSearchBar extends StatelessWidget {
                 const SizedBox(width: 12),
                 Text(
                   AppStrings.searchHint, 
-                  style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w500, fontSize: 15),
+                  style: NeerTypography.bodySmall.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w500, fontSize: 15),
                 ),
               ],
             ),
@@ -96,11 +95,11 @@ class PersonResultCard extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             color: isDark
-                ? AppColors.darkSurface.withValues(alpha: 0.14)
+                ? NeerColors.darkSurface.withValues(alpha: 0.14)
                 : Colors.white.withValues(alpha: 0.22),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Colors.white.withValues(alpha: 0.18), width: 1),
-            boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
+            boxShadow: NeerShadows.soft(),
           ),
           child: Material(
             color: Colors.transparent,
@@ -137,14 +136,14 @@ class PersonResultCard extends StatelessWidget {
                     children: [
                       Text(
                         name, 
-                        style: AppTextStyles.h3.copyWith(fontSize: 16, letterSpacing: -0.3),
+                        style: NeerTypography.h3.copyWith(fontSize: 16, letterSpacing: -0.3),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Text(
                         "@$username", 
-                        style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w600),
+                        style: NeerTypography.bodySmall.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w600),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -236,11 +235,11 @@ class PlaceResultCard extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             color: isDark
-                ? AppColors.darkSurface.withValues(alpha: 0.14)
+                ? NeerColors.darkSurface.withValues(alpha: 0.14)
                 : Colors.white.withValues(alpha: 0.22),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Colors.white.withValues(alpha: 0.18), width: 1),
-            boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
+            boxShadow: NeerShadows.soft(),
           ),
           child: Material(
             color: Colors.transparent,
@@ -271,17 +270,17 @@ class PlaceResultCard extends StatelessWidget {
                     children: [
                       Text(
                         name, 
-                        style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w800, fontSize: 16, letterSpacing: -0.3),
+                        style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.w800, fontSize: 16, letterSpacing: -0.3),
                         maxLines: 1, overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Text(category, style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, fontSize: 12, color: theme.primaryColor)),
+                          Text(category, style: NeerTypography.caption.copyWith(fontWeight: FontWeight.bold, fontSize: 12, color: theme.primaryColor)),
                           const SizedBox(width: 5),
                           Icon(Icons.circle, size: 4, color: theme.disabledColor),
                           const SizedBox(width: 5),
-                          Expanded(child: Text(address, style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                          Expanded(child: Text(address, style: NeerTypography.bodySmall.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w500), maxLines: 1, overflow: TextOverflow.ellipsis)),
                         ],
                       ),
                     ],

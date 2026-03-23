@@ -7,7 +7,7 @@ import '../widgets/common/glass_button.dart';
 import '../services/supabase_service.dart';
 
 // CORE
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
 
@@ -201,14 +201,14 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
     final color = isDestructive ? Colors.redAccent : theme.textTheme.bodyLarge?.color;
     return ListTile(
       leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: (isDestructive ? Colors.red : theme.primaryColor).withValues(alpha: 0.1), shape: BoxShape.circle), child: Icon(icon, color: isDestructive ? Colors.red : theme.primaryColor, size: 20)),
-      title: Text(text, style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600, color: color)),
+      title: Text(text, style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w600, color: color)),
       onTap: () { Navigator.pop(context); onTap(); },
     );
   }
 
 
   void _genericBottomSheet(BuildContext context, String title, Widget content) { 
-    showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => DraggableScrollableSheet(initialChildSize: 0.6, builder: (_, c) => Container(decoration: BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor, borderRadius: const BorderRadius.vertical(top: Radius.circular(24))), child: Column(children: [const SizedBox(height: 10), Padding(padding: const EdgeInsets.all(20), child: Text(title, style: AppTextStyles.h3)), Expanded(child: content)])))); 
+    showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => DraggableScrollableSheet(initialChildSize: 0.6, builder: (_, c) => Container(decoration: BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor, borderRadius: const BorderRadius.vertical(top: Radius.circular(24))), child: Column(children: [const SizedBox(height: 10), Padding(padding: const EdgeInsets.all(20), child: Text(title, style: NeerTypography.h3)), Expanded(child: content)])))); 
   }
   
   void _showAllMutualHistory(BuildContext context) => _genericBottomSheet(context, AppStrings.mutualHistory, FutureBuilder(future: _mutualHistoryFuture, builder: (c, s) => MutualHistoryList(items: s.data ?? [])));
@@ -451,8 +451,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return GradientScaffold(
       body: Stack(
         children: [
           StreamBuilder<List<Map<String, dynamic>>>(
@@ -536,7 +535,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text("$_incomingRequestName seni takip etmek istiyor.", style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w700), textAlign: TextAlign.center),
+                        Text("$_incomingRequestName seni takip etmek istiyor.", style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w700), textAlign: TextAlign.center),
                         const SizedBox(height: 12),
                         Row(children: [
                             Expanded(child: SizedBox(height: 40, child: ElevatedButton(onPressed: () => _handleIncomingRequest(true), style: ElevatedButton.styleFrom(backgroundColor: theme.primaryColor, foregroundColor: Colors.white, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text(AppStrings.accept, style: const TextStyle(fontWeight: FontWeight.bold))))),

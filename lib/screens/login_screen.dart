@@ -1,11 +1,9 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../core/constants.dart';
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
 import '../core/snackbar_helper.dart';
@@ -55,10 +53,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return GradientScaffold(
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -75,10 +71,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 80,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: AppColors.primaryGradient,
+                    gradient: NeerGradients.purplePink,
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.35),
+                        color: NeerColors.primary.withValues(alpha: 0.35),
                         blurRadius: 24,
                         offset: const Offset(0, 8),
                       ),
@@ -103,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Text(
                 AppStrings.slogan,
                 textAlign: TextAlign.center,
-                style: AppTextStyles.bodySmall.copyWith(
+                style: NeerTypography.bodySmall.copyWith(
                   color: theme.disabledColor,
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.w500,
@@ -111,86 +107,65 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 50),
 
-              // --- GLASS FORM CARD (VisionOS sigma 45) ---
-              ClipRRect(
-                borderRadius: BorderRadius.circular(28),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
-                  child: Container(
-                    padding: const EdgeInsets.all(28),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.darkSurface.withValues(alpha: 0.14)
-                          : Colors.white.withValues(alpha: 0.22),
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.18),
-                        width: 1,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.10),
-                          blurRadius: 30,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
+              // --- GLASS FORM CARD ---
+              GlassCard(
+                padding: const EdgeInsets.all(28),
+                borderRadius: 28,
+                blurAmount: 45,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      AppStrings.loginTitle,
+                      style: NeerTypography.h2.copyWith(fontWeight: FontWeight.w800),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          AppStrings.loginTitle,
-                          style: AppTextStyles.h2.copyWith(fontWeight: FontWeight.w800),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          AppStrings.loginSubtitle,
-                          style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),
-                        ),
-                        const SizedBox(height: 28),
+                    const SizedBox(height: 6),
+                    Text(
+                      AppStrings.loginSubtitle,
+                      style: NeerTypography.bodySmall.copyWith(color: theme.disabledColor),
+                    ),
+                    const SizedBox(height: 28),
 
-                        NeerAuthInput(
-                          controller: _emailController,
-                          hint: AppStrings.emailHint,
-                          icon: Icons.alternate_email_rounded,
-                          inputType: TextInputType.emailAddress,
-                        ),
-                        const SizedBox(height: 16),
+                    NeerAuthInput(
+                      controller: _emailController,
+                      hint: AppStrings.emailHint,
+                      icon: Icons.alternate_email_rounded,
+                      inputType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 16),
 
-                        NeerAuthInput(
-                          controller: _passwordController,
-                          hint: AppStrings.passwordHint,
-                          icon: Icons.lock_outline_rounded,
-                          isPassword: true,
-                          isPasswordVisible: _isPasswordVisible,
-                          onVisibilityToggle: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-                        ),
+                    NeerAuthInput(
+                      controller: _passwordController,
+                      hint: AppStrings.passwordHint,
+                      icon: Icons.lock_outline_rounded,
+                      isPassword: true,
+                      isPasswordVisible: _isPasswordVisible,
+                      onVisibilityToggle: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                    ),
 
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () => HapticFeedback.selectionClick(),
-                            child: Text(
-                              AppStrings.forgotPassword,
-                              style: AppTextStyles.caption.copyWith(
-                                color: theme.primaryColor,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () => HapticFeedback.selectionClick(),
+                        child: Text(
+                          AppStrings.forgotPassword,
+                          style: NeerTypography.caption.copyWith(
+                            color: theme.primaryColor,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-
-                        const SizedBox(height: 8),
-
-                        LoadingButton(
-                          onPressed: _login,
-                          label: AppStrings.loginTitle,
-                          height: 56,
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+
+                    const SizedBox(height: 8),
+
+                    LoadingButton(
+                      onPressed: _login,
+                      label: AppStrings.loginTitle,
+                      height: 56,
+                    ),
+                  ],
                 ),
               ),
 
@@ -202,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Text(
                     AppStrings.noAccount,
-                    style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),
+                    style: NeerTypography.bodySmall.copyWith(color: theme.disabledColor),
                   ),
                   TextButton(
                     onPressed: () {
@@ -211,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     child: Text(
                       AppStrings.signUp,
-                      style: AppTextStyles.button.copyWith(
+                      style: NeerTypography.button.copyWith(
                         color: theme.primaryColor,
                         fontWeight: FontWeight.bold,
                       ),

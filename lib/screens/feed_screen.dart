@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // CORE IMPORTLARI
-import '../core/constants.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 
 // MODELLER
@@ -27,29 +27,81 @@ class FeedScreen extends StatefulWidget {
 
 class _FeedScreenState extends State<FeedScreen> {
   final _service = SupabaseService();
+  final ScrollController _scrollController = ScrollController();
 
-  Future<List<PostModel>>? _feedFuture;
+  final List<PostModel> _posts = [];
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  bool _isInitialLoading = true;
+  static const int _pageSize = 20;
+
   String _selectedFilter = 'all';
 
   @override
   void initState() {
     super.initState();
-    _feedFuture = _fetchFeed();
+    _scrollController.addListener(_onScroll);
+    _fetchFeed();
   }
 
-  Future<List<PostModel>> _fetchFeed() async {
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _fetchFeed() async {
     try {
       final uid = _service.client.auth.currentUser?.id ?? '';
       final response = await _service.getFeedPosts(
         userId: uid,
         filterMode: _selectedFilter,
-        limit: 50,
+        limit: _pageSize,
         offset: 0,
       );
-      return response.map((e) => PostModel.fromMap(e)).toList();
+      if (mounted) {
+        setState(() {
+          _posts.clear();
+          _posts.addAll(response.map((e) => PostModel.fromMap(e)));
+          _hasMore = response.length >= _pageSize;
+          _isInitialLoading = false;
+        });
+      }
     } catch (e) {
       debugPrint("Feed Hatasi: $e");
-      return [];
+      if (mounted) setState(() => _isInitialLoading = false);
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || !_hasMore) return;
+    _isLoadingMore = true;
+
+    try {
+      final uid = _service.client.auth.currentUser?.id ?? '';
+      final response = await _service.getFeedPosts(
+        userId: uid,
+        filterMode: _selectedFilter,
+        limit: _pageSize,
+        offset: _posts.length,
+      );
+      if (mounted) {
+        setState(() {
+          _posts.addAll(response.map((e) => PostModel.fromMap(e)));
+          _hasMore = response.length >= _pageSize;
+          _isLoadingMore = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Feed loadMore hatası: $e");
+      _isLoadingMore = false;
     }
   }
 
@@ -58,15 +110,16 @@ class _FeedScreenState extends State<FeedScreen> {
     HapticFeedback.mediumImpact();
     setState(() {
       _selectedFilter = newFilter;
-      _feedFuture = _fetchFeed();
+      _isInitialLoading = true;
+      _hasMore = true;
     });
+    _fetchFeed();
   }
 
   Future<void> _refreshFeed() async {
     HapticFeedback.lightImpact();
-    setState(() {
-      _feedFuture = _fetchFeed();
-    });
+    _hasMore = true;
+    await _fetchFeed();
   }
 
   void _showFilterMenu(BuildContext context, Offset offset) async {
@@ -79,11 +132,11 @@ class _FeedScreenState extends State<FeedScreen> {
       context: context,
       position: RelativeRect.fromLTRB(left, top, left + 100, top + 100),
       color: isDark
-          ? AppColors.darkSurface.withValues(alpha: 0.90)
+          ? NeerColors.darkSurface.withValues(alpha: 0.90)
           : Colors.white.withValues(alpha: 0.92),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       elevation: 0,
-      shadowColor: AppColors.primary.withValues(alpha: 0.15),
+      shadowColor: NeerColors.primary.withValues(alpha: 0.15),
       items: [
         PopupMenuItem(
           value: 'all',
@@ -124,11 +177,7 @@ class _FeedScreenState extends State<FeedScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    _feedFuture ??= _fetchFeed();
-
-    return Scaffold(
-      backgroundColor: Colors.transparent, // Gradient arka plan MainLayout'tan gelir
-
+    return GradientScaffold(
       // --- GLASS HEADER ---
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
@@ -169,67 +218,77 @@ class _FeedScreenState extends State<FeedScreen> {
         ),
       ),
 
-      // --- AKIŞ LİSTESİ ---
-      body: FutureBuilder<List<PostModel>>(
-        future: _feedFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const ShimmerList(itemCount: 6);
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return RefreshIndicator(
-              onRefresh: _refreshFeed,
-              color: theme.primaryColor,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  _buildStoryArea(theme, isDark),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                  EmptyState(
-                    icon: _selectedFilter == 'friends' ? Icons.star_border_rounded : Icons.diversity_1_rounded,
-                    title: _selectedFilter == 'friends'
-                        ? "Henüz karşılıklı takipleştiğin arkadaşın yok"
-                        : "Akışın çok sessiz!",
-                    description: _selectedFilter == 'friends'
-                        ? "Arkadaşların paylaşım yapmamışlar."
-                        : "Arkadaşlarını takip ederek başla.",
+      // --- AKIŞ LİSTESİ (infinite scroll) ---
+      body: _isInitialLoading
+          ? const ShimmerList(itemCount: 6)
+          : _posts.isEmpty
+              ? RefreshIndicator(
+                  onRefresh: _refreshFeed,
+                  color: theme.primaryColor,
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      _buildStoryArea(theme, isDark),
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                      EmptyState(
+                        icon: _selectedFilter == 'friends' ? Icons.star_border_rounded : Icons.diversity_1_rounded,
+                        title: _selectedFilter == 'friends'
+                            ? "Henüz karşılıklı takipleştiğin arkadaşın yok"
+                            : "Akışın çok sessiz!",
+                        description: _selectedFilter == 'friends'
+                            ? "Arkadaşların paylaşım yapmamışlar."
+                            : "Arkadaşlarını takip ederek başla.",
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          }
+                )
+              : RefreshIndicator(
+                  onRefresh: _refreshFeed,
+                  color: theme.primaryColor,
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.only(bottom: 120),
+                    itemCount: _posts.length + 2, // +1 story area, +1 loading indicator
+                    physics: const BouncingScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return _buildStoryArea(theme, isDark);
+                      }
 
-          List<PostModel> posts = snapshot.data!;
+                      // Son eleman: loading indicator veya boş
+                      if (index == _posts.length + 1) {
+                        if (_isLoadingMore) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: Center(
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: theme.primaryColor,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }
 
-          return RefreshIndicator(
-            onRefresh: _refreshFeed,
-            color: theme.primaryColor,
-            child: ListView.builder(
-              padding: const EdgeInsets.only(bottom: 120),
-              itemCount: posts.length + 1,
-              physics: const BouncingScrollPhysics(),
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return _buildStoryArea(theme, isDark);
-                }
+                      final post = _posts[index - 1];
 
-                PostModel post = posts[index - 1];
-
-                return AnimatedListItem(
-                  index: index - 1,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    child: post.type == 'review'
-                        ? FeedReviewCard(post: post)
-                        : FeedPostCard(post: post),
+                      return AnimatedListItem(
+                        index: index - 1,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          child: post.type == 'review'
+                              ? FeedReviewCard(post: post)
+                              : FeedPostCard(post: post),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-          );
-        },
-      ),
+                ),
     );
   }
 

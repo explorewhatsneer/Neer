@@ -4,8 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart';
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
 
@@ -59,9 +58,7 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
     // Supabase Auth ID
     String myUid = _service.client.auth.currentUser?.id ?? "";
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-
+    return GradientScaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -69,7 +66,7 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
           padding: const EdgeInsets.only(top: 10),
           child: Text(
             AppStrings.messagesTitle, 
-            style: AppTextStyles.h1.copyWith(fontSize: 32) 
+            style: NeerTypography.h1.copyWith(fontSize: 32) 
           ),
         ),
         centerTitle: false,
@@ -87,19 +84,19 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
                 height: 50,
                 decoration: BoxDecoration(
                   color: theme.cardColor,
-                  borderRadius: AppThemeStyles.radius16,
-                  boxShadow: isDark ? [] : AppThemeStyles.shadowLow, 
+                  borderRadius: NeerRadius.buttonRadius,
+                  boxShadow: isDark ? [] : NeerShadows.soft(), 
                   border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
                 ),
                 child: TextField(
                   controller: _searchController,
                   textAlignVertical: TextAlignVertical.center,
                   onChanged: (val) => setState(() => _searchText = val.trim().toLowerCase()),
-                  style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+                  style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.w600),
                   cursorColor: theme.primaryColor,
                   decoration: InputDecoration(
                     hintText: AppStrings.searchChatsHint, 
-                    hintStyle: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),
+                    hintStyle: NeerTypography.bodySmall.copyWith(color: theme.disabledColor),
                     border: InputBorder.none,
                     prefixIcon: Icon(Icons.search_rounded, color: theme.primaryColor),
                     suffixIcon: _searchText.isNotEmpty 
@@ -134,7 +131,7 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
                   ),
                   labelColor: theme.textTheme.bodyLarge?.color,
                   unselectedLabelColor: theme.disabledColor,
-                  labelStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w800, fontSize: 13),
+                  labelStyle: NeerTypography.caption.copyWith(fontWeight: FontWeight.w800, fontSize: 13),
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
                   overlayColor: WidgetStateProperty.all(Colors.transparent), 
@@ -337,7 +334,7 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
         alignment: Alignment.centerRight,
         decoration: BoxDecoration(
           color: const Color(0xFFFF3B30), // iOS System Red
-          borderRadius: AppThemeStyles.radius16,
+          borderRadius: NeerRadius.buttonRadius,
         ),
         child: const Icon(Icons.delete_forever_rounded, color: Colors.white, size: 28),
       ),
@@ -374,8 +371,8 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: theme.cardColor,
-            borderRadius: AppThemeStyles.radius16,
-            boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+            borderRadius: NeerRadius.buttonRadius,
+            boxShadow: isDark ? [] : NeerShadows.soft(),
             border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
           ),
           child: Row(
@@ -402,13 +399,13 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
                         Expanded(
                           child: Text(
                             name, 
-                            style: AppTextStyles.bodyLarge.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
+                            style: NeerTypography.bodyLarge.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Text(
                           timeText, 
-                          style: AppTextStyles.caption.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w600)
+                          style: NeerTypography.caption.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w600)
                         ),
                       ],
                     ),
@@ -417,7 +414,7 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
                       lastMsg,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.bodySmall.copyWith(
+                      style: NeerTypography.bodySmall.copyWith(
                         color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                         height: 1.2
                       ),

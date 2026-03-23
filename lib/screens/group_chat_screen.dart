@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // CORE IMPORTLARI
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/snackbar_helper.dart';
 
@@ -219,9 +219,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       );
     }
 
-    return Scaffold(
+    return GradientScaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: Colors.transparent,
 
       // --- APP BAR ---
       appBar: AppBar(
@@ -260,11 +259,11 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   Text(
                     widget.groupName,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+                    style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.w600),
                   ),
                   Text(
                     AppStrings.venueChat,
-                    style: AppTextStyles.caption.copyWith(color: theme.primaryColor, fontWeight: FontWeight.w600),
+                    style: NeerTypography.caption.copyWith(color: theme.primaryColor, fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
@@ -349,7 +348,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   const SizedBox(width: 8),
                   Text(
                     "$_cooldownSeconds saniye bekle",
-                    style: AppTextStyles.caption.copyWith(
+                    style: NeerTypography.caption.copyWith(
                       color: Colors.orange,
                       fontWeight: FontWeight.w700,
                     ),

@@ -3,8 +3,9 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 import 'dart:ui'; // ImageFilter
 
 // CORE IMPORTLARI
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
-import '../core/snackbar_helper.dart'; 
+import '../core/snackbar_helper.dart';
 
 class PremiumScreen extends StatefulWidget {
   const PremiumScreen({super.key});
@@ -245,40 +246,19 @@ class _PremiumScreenState extends State<PremiumScreen> {
                   // --- SATIN AL BUTONU ---
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                    child: Container(
+                    child: GradientButton(
+                      text: AppStrings.goPremium,
+                      onTap: () {
+                        HapticFeedback.heavyImpact();
+                        AppSnackBar.info(context, "Ödeme sistemi hazırlanıyor...");
+                      },
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFFD700), Color(0xFFFFA000)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
                       height: 56,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFFD700), Color(0xFFFFA000)], // Altın Gradyan
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(color: const Color(0xFFFFD700).withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 8))
-                        ]
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          HapticFeedback.heavyImpact();
-                          AppSnackBar.info(context, "Ödeme sistemi hazırlanıyor...");
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                        child: Text(
-                          AppStrings.goPremium, // "PREMIUM'A GEÇ"
-                          style: const TextStyle(
-                            fontSize: 16, 
-                            fontWeight: FontWeight.w900, 
-                            color: Colors.black, 
-                            letterSpacing: 1
-                          )
-                        ),
-                      ),
+                      borderRadius: 16,
                     ),
                   ),
 

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart';
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 
 import '../services/supabase_service.dart';
@@ -69,12 +68,11 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
 
     if (myUid == null) return const SizedBox();
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return GradientScaffold(
       appBar: AppBar(
         title: Text(
           AppStrings.blockedUsersTitle,
-          style: AppTextStyles.h3.copyWith(fontSize: 20)
+          style: NeerTypography.h3.copyWith(fontSize: 20)
         ),
         centerTitle: true,
         leading: IconButton(
@@ -159,7 +157,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
         margin: const EdgeInsets.only(bottom: 15),
         decoration: BoxDecoration(
           color: const Color(0xFF34C759), // iOS Green
-          borderRadius: AppThemeStyles.radius16
+          borderRadius: NeerRadius.buttonRadius
         ),
         child: const Icon(Icons.lock_open_rounded, color: Colors.white, size: 28),
       ),
@@ -177,8 +175,8 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: theme.cardColor,
-          borderRadius: AppThemeStyles.radius16,
-          boxShadow: isDark ? [] : AppThemeStyles.shadowLow, 
+          borderRadius: NeerRadius.buttonRadius,
+          boxShadow: isDark ? [] : NeerShadows.soft(), 
           border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
         ),
         child: Row(
@@ -194,12 +192,12 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                 children: [
                   Text(
                     name, 
-                    style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700)
+                    style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700)
                   ),
                   const SizedBox(height: 4),
                   Text(
                     "@$username", 
-                    style: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor)
+                    style: NeerTypography.bodySmall.copyWith(color: theme.disabledColor)
                   ),
                 ],
               ),

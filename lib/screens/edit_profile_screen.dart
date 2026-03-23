@@ -4,8 +4,7 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:image_picker/image_picker.dart';
 
 // CORE & MODELLER
-import '../core/theme_styles.dart';
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/snackbar_helper.dart';
 
@@ -111,7 +110,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   leading: Icon(Icons.photo_library_rounded, color: theme.primaryColor),
                   title: Text(
                     AppStrings.pickFromGallery, 
-                    style: AppTextStyles.bodyLarge
+                    style: NeerTypography.bodyLarge
                   ),
                   onTap: () { Navigator.pop(context); _pickImage(ImageSource.gallery); },
                 ),
@@ -119,7 +118,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   leading: Icon(Icons.camera_alt_rounded, color: theme.primaryColor),
                   title: Text(
                     AppStrings.takePhoto, 
-                    style: AppTextStyles.bodyLarge
+                    style: NeerTypography.bodyLarge
                   ),
                   onTap: () { Navigator.pop(context); _pickImage(ImageSource.camera); },
                 ),
@@ -184,8 +183,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return GradientScaffold(
       body: _isLoading && _nameController.text.isEmpty
           ? Center(child: CircularProgressIndicator(color: theme.primaryColor))
           : CustomScrollView(
@@ -216,7 +214,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   
                   title: Text(
                     AppStrings.editProfileTitle,
-                    style: AppTextStyles.h3.copyWith(
+                    style: NeerTypography.h3.copyWith(
                       color: theme.textTheme.bodyLarge?.color,
                     )
                   ),
@@ -283,14 +281,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 foregroundColor: Colors.white,
                                 elevation: 8,
                                 shadowColor: theme.primaryColor.withValues(alpha: 0.4),
-                                shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius24),
+                                shape: RoundedRectangleBorder(borderRadius: NeerRadius.cardRadius),
                               ),
                               onPressed: _isLoading ? null : _saveProfile,
                               child: _isLoading
                                   ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
                                   : Text(
                                       AppStrings.saveChanges, 
-                                      style: AppTextStyles.button.copyWith(fontSize: 18)
+                                      style: NeerTypography.button.copyWith(fontSize: 18)
                                     ),
                             ),
                           ),

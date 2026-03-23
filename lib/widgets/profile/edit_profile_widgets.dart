@@ -5,8 +5,7 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:cached_network_image/cached_network_image.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 
 // 1. NEER TEXT FIELD (Premium Giriş Alanı)
@@ -34,8 +33,8 @@ class NeerTextField extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: AppThemeStyles.radius16,
-        boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+        borderRadius: NeerRadius.buttonRadius,
+        boxShadow: isDark ? [] : NeerShadows.soft(),
         border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -44,7 +43,7 @@ class NeerTextField extends StatelessWidget {
         maxLines: maxLines,
         keyboardType: inputType,
         // 🔥 Core Style: BodyLarge (SF Pro Regular)
-        style: AppTextStyles.bodyLarge.copyWith(
+        style: NeerTypography.bodyLarge.copyWith(
           color: theme.textTheme.bodyLarge?.color
         ),
         cursorColor: theme.primaryColor,
@@ -52,7 +51,7 @@ class NeerTextField extends StatelessWidget {
           border: InputBorder.none,
           labelText: label,
           // 🔥 Core Style: BodySmall (Label)
-          labelStyle: AppTextStyles.bodySmall.copyWith(
+          labelStyle: NeerTypography.bodySmall.copyWith(
             color: theme.disabledColor, 
             fontWeight: FontWeight.bold
           ),
@@ -80,7 +79,7 @@ class EditSectionTitle extends StatelessWidget {
         child: Text(
           title, 
           // 🔥 Core Style: H3 (Semibold)
-          style: AppTextStyles.h3.copyWith(
+          style: NeerTypography.h3.copyWith(
             color: theme.textTheme.bodyLarge?.color,
             fontSize: 18
           )
@@ -198,7 +197,7 @@ class EditAvatarArea extends StatelessWidget {
                   child: Text(
                     AppStrings.changePhoto, // 🔥 Core String
                     // 🔥 Core Style: Caption (Bold White)
-                    style: AppTextStyles.caption.copyWith(
+                    style: NeerTypography.caption.copyWith(
                       color: Colors.white, 
                       fontWeight: FontWeight.bold
                     )

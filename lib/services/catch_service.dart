@@ -66,33 +66,25 @@ class CatchService {
   }
 
   /// Cooldown kontrolü: kalan süreyi saniye olarak döndürür (0 = atılabilir)
+  /// Sunucu saati kullanır — telefon saati manipüle edilemez
   Future<int> getCooldownRemaining(String receiverId) async {
     final senderId = _supabase.auth.currentUser?.id;
     if (senderId == null) return 0;
 
     try {
-      final response = await _supabase
-          .from('catches')
-          .select('created_at')
-          .eq('sender_id', senderId)
-          .eq('receiver_id', receiverId)
-          .order('created_at', ascending: false)
-          .limit(1)
-          .maybeSingle();
-
-      if (response == null) return 0;
-
-      final lastCatchTime = DateTime.parse(response['created_at']);
-      final elapsed = DateTime.now().toUtc().difference(lastCatchTime).inSeconds;
-      final remaining = cooldownSeconds - elapsed;
-
-      return remaining > 0 ? remaining : 0;
+      final result = await _supabase.rpc('get_catch_cooldown_remaining', params: {
+        'p_sender_id': senderId,
+        'p_receiver_id': receiverId,
+        'p_cooldown_seconds': cooldownSeconds,
+      });
+      return (result as int?) ?? 0;
     } catch (e) {
       return 0;
     }
   }
 
   /// Gelen pending catch'leri dinle (realtime)
+  /// NOT: Supabase stream tek .eq() destekler — 'status' filtresi client tarafında zorunlu
   Stream<List<Map<String, dynamic>>> streamIncomingCatches(String userId) {
     return _supabase
         .from('catches')

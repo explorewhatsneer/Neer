@@ -3,8 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart';
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 
 import '../services/supabase_service.dart';
@@ -79,14 +78,13 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      
+    return GradientScaffold(
+
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
-        title: Text(AppStrings.followRequestsTitle, style: AppTextStyles.h2.copyWith(fontSize: 24)),
+        title: Text(AppStrings.followRequestsTitle, style: NeerTypography.h2.copyWith(fontSize: 24)),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.iconTheme.color, size: 20),
           onPressed: () => Navigator.pop(context),
@@ -197,7 +195,7 @@ class _RequestCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: theme.cardColor,
               borderRadius: BorderRadius.circular(16),
-              boxShadow: AppThemeStyles.shadowLow,
+              boxShadow: NeerShadows.soft(),
               border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
             ),
             child: Row(
@@ -208,8 +206,8 @@ class _RequestCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(name, style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold, fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
-                      Text("@$username", style: AppTextStyles.caption.copyWith(color: theme.disabledColor)),
+                      Text(name, style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.bold, fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text("@$username", style: NeerTypography.caption.copyWith(color: theme.disabledColor)),
                     ],
                   ),
                 ),

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 import '../common/app_cached_image.dart';
 import '../common/empty_state.dart';
@@ -33,7 +32,7 @@ class SectionHeader extends StatelessWidget {
           const SizedBox(width: 10),
           Text(
             title,
-            style: AppTextStyles.h3.copyWith(
+            style: NeerTypography.h3.copyWith(
               color: theme.textTheme.bodyLarge?.color,
               fontSize: 18
             )
@@ -69,8 +68,8 @@ class PlaceStatsRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: AppThemeStyles.radius24,
-        boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+        borderRadius: NeerRadius.cardRadius,
+        boxShadow: isDark ? [] : NeerShadows.soft(),
         border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
       ),
       child: Row(
@@ -126,7 +125,7 @@ class PlaceStatsRow extends StatelessWidget {
               Flexible(
                 child: Text(
                   value,
-                  style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700, fontSize: 16),
+                  style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700, fontSize: 16),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -136,7 +135,7 @@ class PlaceStatsRow extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: AppTextStyles.caption.copyWith(
+            style: NeerTypography.caption.copyWith(
               color: theme.disabledColor,
               fontWeight: FontWeight.w600
             ),
@@ -162,8 +161,8 @@ class EventTicketCard extends StatelessWidget {
       height: 100,
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: AppThemeStyles.radius16,
-        boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+        borderRadius: NeerRadius.buttonRadius,
+        boxShadow: isDark ? [] : NeerShadows.soft(),
         border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
       ),
       child: Row(
@@ -178,7 +177,7 @@ class EventTicketCard extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(AppStrings.comingSoon, style: AppTextStyles.caption.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+                Text(AppStrings.comingSoon, style: NeerTypography.caption.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 const Icon(Icons.event_rounded, color: Colors.white, size: 28),
               ],
@@ -195,7 +194,7 @@ class EventTicketCard extends StatelessWidget {
                 children: [
                   Text(
                     AppStrings.upcomingEvents,
-                    style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700)
+                    style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700)
                   ),
                   const SizedBox(height: 5),
                   Row(
@@ -205,7 +204,7 @@ class EventTicketCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           AppStrings.noEventsYet,
-                          style: AppTextStyles.caption.copyWith(color: theme.disabledColor),
+                          style: NeerTypography.caption.copyWith(color: theme.disabledColor),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -256,7 +255,7 @@ class InteractionStatsGrid extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 15),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: AppThemeStyles.radius16,
+        borderRadius: NeerRadius.buttonRadius,
         boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5)],
         border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
       ),
@@ -264,8 +263,8 @@ class InteractionStatsGrid extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 24),
           const SizedBox(height: 8),
-          Text(val, style: AppTextStyles.h3.copyWith(fontSize: 18)),
-          Text(label, style: AppTextStyles.caption.copyWith(fontSize: 11, color: theme.disabledColor)),
+          Text(val, style: NeerTypography.h3.copyWith(fontSize: 18)),
+          Text(label, style: NeerTypography.caption.copyWith(fontSize: 11, color: theme.disabledColor)),
         ],
       ),
     );
@@ -294,7 +293,7 @@ class VenueLeaderboard extends StatelessWidget {
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: AppThemeStyles.radius16,
+        borderRadius: NeerRadius.buttonRadius,
         border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
       ),
       child: Column(
@@ -331,7 +330,7 @@ class VenueLeaderboard extends StatelessWidget {
       children: [
         Text(
           "#$rank",
-          style: AppTextStyles.bodyLarge.copyWith(
+          style: NeerTypography.bodyLarge.copyWith(
             fontWeight: FontWeight.w900,
             color: rank == 1 ? Colors.orange : theme.disabledColor,
           )
@@ -341,12 +340,12 @@ class VenueLeaderboard extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: Text("@$name",
-            style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600)
+            style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w600)
           )
         ),
         Text(
           detail,
-          style: AppTextStyles.caption.copyWith(color: theme.primaryColor, fontWeight: FontWeight.bold)
+          style: NeerTypography.caption.copyWith(color: theme.primaryColor, fontWeight: FontWeight.bold)
         ),
       ],
     );
@@ -400,7 +399,7 @@ class FriendNoteBubble extends StatelessWidget {
             children: [
               Text(
                 "\"$comment\"",
-                style: AppTextStyles.bodySmall.copyWith(fontStyle: FontStyle.italic)
+                style: NeerTypography.bodySmall.copyWith(fontStyle: FontStyle.italic)
               ),
               const SizedBox(height: 10),
               Row(
@@ -408,7 +407,7 @@ class FriendNoteBubble extends StatelessWidget {
                 children: [
                   Text(
                     "- ${authorName ?? '?'}",
-                    style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, color: theme.disabledColor),
+                    style: NeerTypography.caption.copyWith(fontWeight: FontWeight.bold, color: theme.disabledColor),
                   )
                 ]
               )
@@ -463,7 +462,7 @@ class DetailedRatingBars extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: AppThemeStyles.radius16,
+        borderRadius: NeerRadius.buttonRadius,
         border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
       ),
       child: Column(
@@ -486,10 +485,10 @@ class DetailedRatingBars extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600)),
+            Text(label, style: NeerTypography.caption.copyWith(fontWeight: FontWeight.w600)),
             Text(
               (percent * 5).toStringAsFixed(1),
-              style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold, color: theme.primaryColor)
+              style: NeerTypography.caption.copyWith(fontWeight: FontWeight.bold, color: theme.primaryColor)
             ),
           ],
         ),
@@ -530,7 +529,7 @@ class LocationQrRow extends StatelessWidget {
             height: 120,
             decoration: BoxDecoration(
               color: theme.dividerColor.withValues(alpha: 0.1),
-              borderRadius: AppThemeStyles.radius16,
+              borderRadius: NeerRadius.buttonRadius,
             ),
             child: Center(
               child: Column(
@@ -540,7 +539,7 @@ class LocationQrRow extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     "${lat.toStringAsFixed(4)}, ${lng.toStringAsFixed(4)}",
-                    style: AppTextStyles.caption.copyWith(color: theme.disabledColor),
+                    style: NeerTypography.caption.copyWith(color: theme.disabledColor),
                   ),
                 ],
               ),
@@ -556,7 +555,7 @@ class LocationQrRow extends StatelessWidget {
             height: 120,
             decoration: BoxDecoration(
               color: theme.cardColor,
-              borderRadius: AppThemeStyles.radius16,
+              borderRadius: NeerRadius.buttonRadius,
               border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
             ),
             child: Column(
@@ -564,7 +563,7 @@ class LocationQrRow extends StatelessWidget {
               children: [
                 Icon(Icons.qr_code_2_rounded, size: 40, color: theme.textTheme.bodyLarge?.color),
                 const SizedBox(height: 5),
-                Text(AppStrings.menu, style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold)),
+                Text(AppStrings.menu, style: NeerTypography.caption.copyWith(fontWeight: FontWeight.bold)),
               ],
             ),
           ),

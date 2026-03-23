@@ -3,8 +3,7 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../core/theme_styles.dart';
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
 
@@ -45,9 +44,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
     // Supabase User ID
     String myUid = _service.client.auth.currentUser?.id ?? "";
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      
+    return GradientScaffold(
+
       // --- FLOATING ACTION BUTTON ---
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 90), 
@@ -61,7 +59,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
           icon: const Icon(Icons.person_add_alt_1_rounded, color: Colors.white),
           label: Text(
             AppStrings.findOnMap, 
-            style: AppTextStyles.button.copyWith(fontSize: 14)
+            style: NeerTypography.button.copyWith(fontSize: 14)
           ),
         ),
       ),
@@ -73,7 +71,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
           padding: const EdgeInsets.only(top: 10),
           child: Text(
             AppStrings.friendsTitle, 
-            style: AppTextStyles.h1.copyWith(fontSize: 32) 
+            style: NeerTypography.h1.copyWith(fontSize: 32) 
           ),
         ),
         centerTitle: false,
@@ -88,19 +86,19 @@ class _FriendsScreenState extends State<FriendsScreen> {
             height: 50,
             decoration: BoxDecoration(
               color: theme.cardColor,
-              borderRadius: AppThemeStyles.radius16,
-              boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+              borderRadius: NeerRadius.buttonRadius,
+              boxShadow: isDark ? [] : NeerShadows.soft(),
               border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
             ),
             child: TextField(
               controller: _searchController,
               textAlignVertical: TextAlignVertical.center,
               onChanged: (val) => setState(() => _searchText = val.toLowerCase()),
-              style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+              style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.w600),
               cursorColor: theme.primaryColor,
               decoration: InputDecoration(
                 hintText: AppStrings.searchFriendsHint, 
-                hintStyle: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w500),
+                hintStyle: NeerTypography.bodySmall.copyWith(color: theme.disabledColor, fontWeight: FontWeight.w500),
                 border: InputBorder.none,
                 prefixIcon: Icon(Icons.search_rounded, color: theme.primaryColor),
                 suffixIcon: _searchText.isNotEmpty 
@@ -225,7 +223,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
         margin: const EdgeInsets.only(bottom: 15),
         decoration: BoxDecoration(
           color: const Color(0xFFFF3B30), // iOS Red
-          borderRadius: AppThemeStyles.radius16
+          borderRadius: NeerRadius.buttonRadius
         ),
         child: const Icon(Icons.person_remove_rounded, color: Colors.white, size: 28),
       ),
@@ -265,8 +263,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: theme.cardColor,
-            borderRadius: AppThemeStyles.radius16,
-            boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+            borderRadius: NeerRadius.buttonRadius,
+            boxShadow: isDark ? [] : NeerShadows.soft(),
             border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
           ),
           child: Row(
@@ -289,12 +287,12 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   children: [
                     Text(
                       name, 
-                      style: AppTextStyles.bodyLarge.copyWith(fontSize: 16, fontWeight: FontWeight.w600)
+                      style: NeerTypography.bodyLarge.copyWith(fontSize: 16, fontWeight: FontWeight.w600)
                     ),
                     const SizedBox(height: 4),
                     Text(
                       isOnline ? AppStrings.online : AppStrings.offline, 
-                      style: AppTextStyles.caption.copyWith(
+                      style: NeerTypography.caption.copyWith(
                         color: isOnline ? const Color(0xFF34C759) : theme.disabledColor, 
                         fontWeight: FontWeight.w600
                       )

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/constants.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 
 /// Premium empty state with glass icon container — VisionOS style.
 class EmptyState extends StatelessWidget {
@@ -43,7 +42,7 @@ class EmptyState extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.15),
                   width: 1,
                 ),
-                boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.04),
+                boxShadow: NeerShadows.soft(),
               ),
               child: Icon(
                 icon,
@@ -57,7 +56,7 @@ class EmptyState extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: AppTextStyles.h3.copyWith(
+              style: NeerTypography.h3.copyWith(
                 color: isDark
                     ? Colors.white.withValues(alpha: 0.45)
                     : Colors.black.withValues(alpha: 0.40),
@@ -69,7 +68,7 @@ class EmptyState extends StatelessWidget {
               Text(
                 description!,
                 textAlign: TextAlign.center,
-                style: AppTextStyles.bodySmall.copyWith(
+                style: NeerTypography.bodySmall.copyWith(
                   color: isDark
                       ? Colors.white.withValues(alpha: 0.30)
                       : Colors.black.withValues(alpha: 0.30),

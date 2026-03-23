@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 
 import '../services/supabase_service.dart';
@@ -122,8 +122,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return GradientScaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: isDark
@@ -147,7 +146,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ),
         title: Text(
           AppStrings.notifications,
-          style: AppTextStyles.h3.copyWith(fontWeight: FontWeight.w700),
+          style: NeerTypography.h3.copyWith(fontWeight: FontWeight.w700),
         ),
         actions: [
           IconButton(
@@ -256,7 +255,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   Expanded(
                                     child: Text(
                                       notif['title'] ?? style.label,
-                                      style: AppTextStyles.bodySmall.copyWith(
+                                      style: NeerTypography.bodySmall.copyWith(
                                         fontWeight: isRead ? FontWeight.w500 : FontWeight.w700,
                                       ),
                                       maxLines: 1,
@@ -266,7 +265,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   const SizedBox(width: 8),
                                   Text(
                                     _formatTime(notif['created_at']?.toString()),
-                                    style: AppTextStyles.caption.copyWith(
+                                    style: NeerTypography.caption.copyWith(
                                       color: theme.disabledColor,
                                       fontSize: 11,
                                     ),
@@ -277,7 +276,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                 const SizedBox(height: 4),
                                 Text(
                                   notif['body'],
-                                  style: AppTextStyles.bodySmall.copyWith(
+                                  style: NeerTypography.bodySmall.copyWith(
                                     color: theme.disabledColor,
                                     height: 1.3,
                                   ),

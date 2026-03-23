@@ -50,6 +50,8 @@ class CatchProvider with ChangeNotifier {
 
   /// Initialize: verileri yükle ve realtime başlat
   Future<void> init(String userId) async {
+    clear(); // Eski timer/stream'leri temizle — memory leak önlemi
+    _lastUserId = userId;
     _isLoading = true;
     notifyListeners();
 
@@ -216,6 +218,36 @@ class CatchProvider with ChangeNotifier {
     return _catchService.streamIncomingCatches(userId);
   }
 
+  // ═══ LIFECYCLE (Batarya Kalkanı) ═══
+
+  String? _lastUserId;
+  bool _isPaused = false;
+
+  /// Arka plana atıldığında: timer'ları ve stream'leri durdur
+  void pauseStreams() {
+    if (_isPaused) return;
+    _isPaused = true;
+    _cooldownTimer?.cancel();
+    _statusTimer?.cancel();
+    _profileSub?.cancel();
+    _catchesSub?.cancel();
+    _sentCatchesSub?.cancel();
+    _friendsSub?.cancel();
+    debugPrint('[CatchProvider] Stream\'ler duraklatıldı');
+  }
+
+  /// Ön plana dönünce: stream'leri ve timer'ları yeniden başlat
+  void resumeStreams() {
+    if (!_isPaused) return;
+    _isPaused = false;
+    final userId = _lastUserId;
+    if (userId != null) {
+      _startRealtimeListeners(userId);
+      _startTimers();
+      debugPrint('[CatchProvider] Stream\'ler yeniden başlatıldı');
+    }
+  }
+
   void clear() {
     _cooldownTimer?.cancel();
     _statusTimer?.cancel();
@@ -229,6 +261,7 @@ class CatchProvider with ChangeNotifier {
     _myStatus = 'busy';
     _availableUntil = null;
     _isLoading = true;
+    _isPaused = false;
     notifyListeners();
   }
 

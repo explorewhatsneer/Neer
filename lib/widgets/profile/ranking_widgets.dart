@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../common/app_cached_image.dart';
 
 // ==========================================
@@ -165,7 +165,7 @@ class _RankAvatar extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.bodySmall.copyWith(
+              style: NeerTypography.bodySmall.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: isCenter ? 14 : 12,
               ),
@@ -213,12 +213,12 @@ class SimpleRankRow extends StatelessWidget {
         // Sıra No
         leading: SizedBox(
           width: 30,
-          child: Text("#$rank", style: AppTextStyles.h3.copyWith(fontSize: 16, color: Theme.of(context).disabledColor.withValues(alpha: 0.5))),
+          child: Text("#$rank", style: NeerTypography.h3.copyWith(fontSize: 16, color: Theme.of(context).disabledColor.withValues(alpha: 0.5))),
         ),
         
         // İsim ve Ziyaret
-        title: Text(name, style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold)),
-        subtitle: Text("$count ziyaret", style: AppTextStyles.caption),
+        title: Text(name, style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.bold)),
+        subtitle: Text("$count ziyaret", style: NeerTypography.caption),
         
         // Resim
         trailing: SizedBox(
@@ -247,14 +247,14 @@ class SectionHeader extends StatelessWidget {
         Row(children: [
           Icon(icon, size: 18, color: Theme.of(context).primaryColor),
           const SizedBox(width: 8),
-          Text(title, style: AppTextStyles.h3.copyWith(fontSize: 17, letterSpacing: -0.5))
+          Text(title, style: NeerTypography.h3.copyWith(fontSize: 17, letterSpacing: -0.5))
         ]), 
         if (onActionTap != null) 
           GestureDetector(
             onTap: (){HapticFeedback.lightImpact(); onActionTap!();}, 
             child: Padding(
               padding: const EdgeInsets.all(4.0),
-              child: Text("Tümü", style: AppTextStyles.bodySmall.copyWith(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w600, fontSize: 13)),
+              child: Text("Tümü", style: NeerTypography.bodySmall.copyWith(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w600, fontSize: 13)),
             )
           )
       ]

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'constants.dart';
-import 'text_styles.dart';
+import 'neer_design_system.dart';
 
 class ThemeManager with ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
@@ -37,21 +36,21 @@ class ThemeManager with ChangeNotifier {
   // --- LIGHT THEME (Glass Morphism) ---
   ThemeData get lightTheme => ThemeData(
     brightness: Brightness.light,
-    primaryColor: AppColors.primary,
-    scaffoldBackgroundColor: AppColors.lightBackground,
+    primaryColor: NeerColors.primary,
+    scaffoldBackgroundColor: NeerColors.gray50,
     cardColor: Colors.white.withValues(alpha: 0.70),
-    dividerColor: AppColors.lightDivider,
+    dividerColor: NeerColors.gray200,
 
     fontFamily: 'SFPro',
 
     textTheme: TextTheme(
-      displayLarge: AppTextStyles.h1.copyWith(color: AppColors.lightTextHeading),
-      displayMedium: AppTextStyles.h2.copyWith(color: AppColors.lightTextHeading),
-      displaySmall: AppTextStyles.h3.copyWith(color: AppColors.lightTextHeading),
+      displayLarge: NeerTypography.h1.copyWith(color: NeerColors.gray900),
+      displayMedium: NeerTypography.h2.copyWith(color: NeerColors.gray900),
+      displaySmall: NeerTypography.h3.copyWith(color: NeerColors.gray900),
 
-      bodyLarge: AppTextStyles.bodyLarge.copyWith(color: AppColors.lightTextHeading),
-      bodyMedium: AppTextStyles.bodySmall.copyWith(color: AppColors.lightTextBody),
-      labelSmall: AppTextStyles.caption.copyWith(color: AppColors.lightTextSub),
+      bodyLarge: NeerTypography.bodyLarge.copyWith(color: NeerColors.gray900),
+      bodyMedium: NeerTypography.bodySmall.copyWith(color: NeerColors.gray600),
+      labelSmall: NeerTypography.caption.copyWith(color: NeerColors.gray400),
     ),
 
     appBarTheme: const AppBarTheme(
@@ -62,10 +61,10 @@ class ThemeManager with ChangeNotifier {
       ),
       backgroundColor: Colors.transparent,
       elevation: 0,
-      iconTheme: IconThemeData(color: AppColors.lightTextHeading),
+      iconTheme: IconThemeData(color: NeerColors.gray900),
       titleTextStyle: TextStyle(
         fontFamily: 'SFPro',
-        color: AppColors.lightTextHeading,
+        color: NeerColors.gray900,
         fontWeight: FontWeight.w700,
         fontSize: 17,
         letterSpacing: -0.5,
@@ -73,11 +72,11 @@ class ThemeManager with ChangeNotifier {
     ),
 
     colorScheme: const ColorScheme.light(
-      primary: AppColors.primary,
-      secondary: AppColors.accent,
+      primary: NeerColors.primary,
+      secondary: NeerColors.accent,
       surface: Colors.white,
       onPrimary: Colors.white,
-      onSurface: AppColors.lightTextHeading,
+      onSurface: NeerColors.gray900,
     ),
 
     bottomSheetTheme: const BottomSheetThemeData(
@@ -93,21 +92,21 @@ class ThemeManager with ChangeNotifier {
   // --- DARK THEME (Glass Morphism) ---
   ThemeData get darkTheme => ThemeData(
     brightness: Brightness.dark,
-    primaryColor: AppColors.primary,
-    scaffoldBackgroundColor: AppColors.darkBackground,
-    cardColor: AppColors.darkSurface.withValues(alpha: 0.65),
-    dividerColor: AppColors.darkDivider,
+    primaryColor: NeerColors.primary,
+    scaffoldBackgroundColor: NeerColors.darkSurface,
+    cardColor: NeerColors.darkSurface.withValues(alpha: 0.65),
+    dividerColor: NeerColors.gray700,
 
     fontFamily: 'SFPro',
 
     textTheme: TextTheme(
-      displayLarge: AppTextStyles.h1.copyWith(color: AppColors.darkTextHeading),
-      displayMedium: AppTextStyles.h2.copyWith(color: AppColors.darkTextHeading),
-      displaySmall: AppTextStyles.h3.copyWith(color: AppColors.darkTextHeading),
+      displayLarge: NeerTypography.h1.copyWith(color: Colors.white),
+      displayMedium: NeerTypography.h2.copyWith(color: Colors.white),
+      displaySmall: NeerTypography.h3.copyWith(color: Colors.white),
 
-      bodyLarge: AppTextStyles.bodyLarge.copyWith(color: AppColors.darkTextHeading),
-      bodyMedium: AppTextStyles.bodySmall.copyWith(color: AppColors.darkTextBody),
-      labelSmall: AppTextStyles.caption.copyWith(color: AppColors.darkTextSub),
+      bodyLarge: NeerTypography.bodyLarge.copyWith(color: Colors.white),
+      bodyMedium: NeerTypography.bodySmall.copyWith(color: NeerColors.gray300),
+      labelSmall: NeerTypography.caption.copyWith(color: NeerColors.gray500),
     ),
 
     appBarTheme: const AppBarTheme(
@@ -118,10 +117,10 @@ class ThemeManager with ChangeNotifier {
       ),
       backgroundColor: Colors.transparent,
       elevation: 0,
-      iconTheme: IconThemeData(color: AppColors.darkTextHeading),
+      iconTheme: IconThemeData(color: Colors.white),
       titleTextStyle: TextStyle(
         fontFamily: 'SFPro',
-        color: AppColors.darkTextHeading,
+        color: Colors.white,
         fontWeight: FontWeight.w700,
         fontSize: 17,
         letterSpacing: -0.5,
@@ -129,11 +128,11 @@ class ThemeManager with ChangeNotifier {
     ),
 
     colorScheme: const ColorScheme.dark(
-      primary: AppColors.primary,
-      secondary: AppColors.accent,
-      surface: AppColors.darkSurface,
+      primary: NeerColors.primary,
+      secondary: NeerColors.accent,
+      surface: NeerColors.darkSurface,
       onPrimary: Colors.white,
-      onSurface: AppColors.darkTextHeading,
+      onSurface: Colors.white,
     ),
 
     bottomSheetTheme: const BottomSheetThemeData(
@@ -141,7 +140,7 @@ class ThemeManager with ChangeNotifier {
     ),
 
     dialogTheme: DialogThemeData(
-      backgroundColor: AppColors.darkSurface.withValues(alpha: 0.90),
+      backgroundColor: NeerColors.darkSurface.withValues(alpha: 0.90),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
     ),
   );

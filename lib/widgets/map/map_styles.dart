@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
-import '../../core/constants.dart'; // AppColors için
+import '../../core/neer_design_system.dart'; // NeerColors için
 
 // --- CLUSTER TASARIMI (Bulanık Top) ---
 class PremiumCluster extends StatelessWidget { 
@@ -48,7 +48,7 @@ Color getCategoryColor(String category) { // _getCategoryColor -> getCategoryCol
     case 'bar': return Colors.purpleAccent;
     case 'sanat': return Colors.teal;
     case 'spor': return Colors.blueAccent;
-    default: return AppColors.primary;
+    default: return NeerColors.primary;
   }
 }
 

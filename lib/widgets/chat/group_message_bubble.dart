@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // CORE IMPORTLARI
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../common/app_cached_image.dart';
 
 class GroupMessageBubble extends StatelessWidget {
@@ -95,7 +95,7 @@ class GroupMessageBubble extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 4),
                       child: Text(
                         senderName,
-                        style: AppTextStyles.caption.copyWith(
+                        style: NeerTypography.caption.copyWith(
                           color: theme.primaryColor, // Temanın ana rengi
                           fontWeight: FontWeight.w700, // Kalın olsun ki isim olduğu belli olsun
                           fontSize: 12
@@ -106,7 +106,7 @@ class GroupMessageBubble extends StatelessWidget {
                   // MESAJ METNİ
                   Text(
                     message,
-                    style: AppTextStyles.bodyLarge.copyWith(
+                    style: NeerTypography.bodyLarge.copyWith(
                       color: textColor,
                       height: 1.4 // Satır aralığı
                     ),
@@ -121,7 +121,7 @@ class GroupMessageBubble extends StatelessWidget {
                     children: [
                       Text(
                         time,
-                        style: AppTextStyles.caption.copyWith(
+                        style: NeerTypography.caption.copyWith(
                           color: timeColor,
                           fontSize: 10,
                           fontWeight: FontWeight.w600

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../core/text_styles.dart';
-import '../../core/theme_styles.dart';
+import '../../core/neer_design_system.dart';
 
 /// A button that shows a loading spinner during async operations.
 ///
@@ -74,7 +73,7 @@ class _LoadingButtonState extends State<LoadingButton> {
     final theme = Theme.of(context);
     final bg = widget.backgroundColor ?? theme.primaryColor;
     final fg = widget.foregroundColor ?? Colors.white;
-    final radius = widget.borderRadius ?? AppThemeStyles.radius16;
+    final radius = widget.borderRadius ?? NeerRadius.buttonRadius;
     final isDisabled = _isLoading || !widget.enabled;
 
     return SizedBox(
@@ -107,7 +106,7 @@ class _LoadingButtonState extends State<LoadingButton> {
                       ],
                       Text(
                         widget.label,
-                        style: AppTextStyles.button.copyWith(
+                        style: NeerTypography.button.copyWith(
                           color: fg,
                           fontWeight: FontWeight.w700,
                         ),

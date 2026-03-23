@@ -2,8 +2,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../core/text_styles.dart';
-import '../../core/constants.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 
 /// Premium Glassmorphism Profile Header — VisionOS style.
@@ -48,8 +47,8 @@ class ProfileHeader extends StatelessWidget {
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
-          placeholder: (_, __) => Container(color: AppColors.darkBackground),
-          errorWidget: (_, __, ___) => Container(color: AppColors.darkBackground),
+          placeholder: (_, __) => Container(color: NeerColors.darkSurface),
+          errorWidget: (_, __, ___) => Container(color: NeerColors.darkSurface),
         ),
 
         // 2. HEAVY BLUR — sigma 45, ambient glow
@@ -125,7 +124,7 @@ class ProfileHeader extends StatelessWidget {
                       name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.h2.copyWith(
+                      style: NeerTypography.h2.copyWith(
                         color: Colors.white,
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
@@ -135,7 +134,7 @@ class ProfileHeader extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       "@$username",
-                      style: AppTextStyles.caption.copyWith(
+                      style: NeerTypography.caption.copyWith(
                         color: Colors.white.withValues(alpha: 0.65),
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -148,7 +147,7 @@ class ProfileHeader extends StatelessWidget {
                         bio,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.bodySmall.copyWith(
+                        style: NeerTypography.bodySmall.copyWith(
                           color: Colors.white.withValues(alpha: 0.80),
                           fontSize: 14,
                           height: 1.4,
@@ -244,7 +243,7 @@ class _StatColumn extends StatelessWidget {
       children: [
         Text(
           count,
-          style: AppTextStyles.h3.copyWith(
+          style: NeerTypography.h3.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.w700,
             fontSize: 18,
@@ -254,7 +253,7 @@ class _StatColumn extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: AppTextStyles.caption.copyWith(
+          style: NeerTypography.caption.copyWith(
             color: Colors.white.withValues(alpha: 0.55),
             fontSize: 11,
             fontWeight: FontWeight.w500,
@@ -375,7 +374,7 @@ class PillTabBar extends StatelessWidget {
               BoxShadow(
                 color: isDark
                     ? Colors.black.withValues(alpha: 0.35)
-                    : AppColors.primary.withValues(alpha: 0.12),
+                    : NeerColors.primary.withValues(alpha: 0.12),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
                 spreadRadius: -2,
@@ -392,8 +391,8 @@ class PillTabBar extends StatelessWidget {
               gradient: isDark
                   ? LinearGradient(
                       colors: [
-                        AppColors.primary.withValues(alpha: 0.35),
-                        AppColors.primaryDark.withValues(alpha: 0.25),
+                        NeerColors.primary.withValues(alpha: 0.35),
+                        NeerColors.primaryDark.withValues(alpha: 0.25),
                       ],
                     )
                   : const LinearGradient(
@@ -402,14 +401,14 @@ class PillTabBar extends StatelessWidget {
               boxShadow: [
                 BoxShadow(
                   color: isDark
-                      ? AppColors.primary.withValues(alpha: 0.25)
+                      ? NeerColors.primary.withValues(alpha: 0.25)
                       : Colors.black.withValues(alpha: 0.08),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
                 if (isDark)
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.10),
+                    color: NeerColors.primary.withValues(alpha: 0.10),
                     blurRadius: 20,
                     spreadRadius: 1,
                   ),
@@ -417,16 +416,16 @@ class PillTabBar extends StatelessWidget {
             ),
             indicatorSize: TabBarIndicatorSize.tab,
             dividerColor: Colors.transparent,
-            labelColor: isDark ? Colors.white : AppColors.lightTextHeading,
+            labelColor: isDark ? Colors.white : NeerColors.gray900,
             unselectedLabelColor: isDark
                 ? Colors.white.withValues(alpha: 0.50)
                 : Colors.black.withValues(alpha: 0.38),
-            labelStyle: AppTextStyles.caption.copyWith(
+            labelStyle: NeerTypography.caption.copyWith(
               fontWeight: FontWeight.w700,
               fontSize: 13,
               letterSpacing: 0.3,
             ),
-            unselectedLabelStyle: AppTextStyles.caption.copyWith(
+            unselectedLabelStyle: NeerTypography.caption.copyWith(
               fontWeight: FontWeight.w500,
               fontSize: 13,
             ),

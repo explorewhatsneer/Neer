@@ -8,9 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/text_styles.dart';
-import '../core/constants.dart';
-import '../core/theme_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/app_router.dart';
 import '../core/snackbar_helper.dart';
@@ -82,7 +80,7 @@ class _CatchScreenState extends State<CatchScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(AppStrings.selectDuration, style: AppTextStyles.h3),
+              Text(AppStrings.selectDuration, style: NeerTypography.h3),
               const SizedBox(height: 20),
               _durationOption(ctx, AppStrings.min30, 30),
               _durationOption(ctx, AppStrings.hour1, 60),
@@ -98,9 +96,9 @@ class _CatchScreenState extends State<CatchScreen> {
   Widget _durationOption(BuildContext ctx, String label, int minutes) {
     final theme = Theme.of(ctx);
     return ListTile(
-      title: Text(label, style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600)),
+      title: Text(label, style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.w600)),
       leading: Icon(Icons.timer_outlined, color: theme.primaryColor),
-      shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
+      shape: RoundedRectangleBorder(borderRadius: NeerRadius.buttonRadius),
       onTap: () async {
         Navigator.pop(ctx);
         HapticFeedback.mediumImpact();
@@ -182,11 +180,11 @@ class _CatchScreenState extends State<CatchScreen> {
             children: [
               CachedAvatar(imageUrl: senderAvatar, name: senderName, radius: 40),
               const SizedBox(height: 16),
-              Text(AppStrings.incomingCatch, style: AppTextStyles.h2),
+              Text(AppStrings.incomingCatch, style: NeerTypography.h2),
               const SizedBox(height: 8),
               Text(
                 '$senderName ${AppStrings.wantsToMeet}',
-                style: AppTextStyles.bodyLarge.copyWith(color: theme.disabledColor),
+                style: NeerTypography.bodyLarge.copyWith(color: theme.disabledColor),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -206,10 +204,10 @@ class _CatchScreenState extends State<CatchScreen> {
                           });
                         },
                         icon: const Icon(Icons.close_rounded, color: Color(0xFFEF4444)),
-                        label: Text(AppStrings.decline, style: AppTextStyles.button.copyWith(color: const Color(0xFFEF4444))),
+                        label: Text(AppStrings.decline, style: NeerTypography.button.copyWith(color: const Color(0xFFEF4444))),
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(color: Color(0xFFEF4444)),
-                          shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
+                          shape: RoundedRectangleBorder(borderRadius: NeerRadius.buttonRadius),
                         ),
                       ),
                     ),
@@ -232,10 +230,10 @@ class _CatchScreenState extends State<CatchScreen> {
                           }
                         },
                         icon: const Icon(Icons.check_rounded, color: Colors.white),
-                        label: Text(AppStrings.accept, style: AppTextStyles.button),
+                        label: Text(AppStrings.accept, style: NeerTypography.button),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF22C55E),
-                          shape: RoundedRectangleBorder(borderRadius: AppThemeStyles.radius16),
+                          shape: RoundedRectangleBorder(borderRadius: NeerRadius.buttonRadius),
                         ),
                       ),
                     ),
@@ -259,14 +257,13 @@ class _CatchScreenState extends State<CatchScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final provider = context.watch<CatchProvider>();
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return GradientScaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Padding(
           padding: const EdgeInsets.only(top: 10),
-          child: Text(AppStrings.catchTitle, style: AppTextStyles.h1.copyWith(fontSize: 32)),
+          child: Text(AppStrings.catchTitle, style: NeerTypography.h1.copyWith(fontSize: 32)),
         ),
         centerTitle: false,
         automaticallyImplyLeading: false,
@@ -337,12 +334,12 @@ class _CatchScreenState extends State<CatchScreen> {
               children: [
                 Text(
                   isAvailable ? AppStrings.youAreAvailable : AppStrings.youAreBusy,
-                  style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w700, fontSize: 17),
+                  style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700, fontSize: 17),
                 ),
                 if (remainingText.isNotEmpty)
                   Text(
                     '${AppStrings.remainingTime}: $remainingText',
-                    style: AppTextStyles.caption.copyWith(
+                    style: NeerTypography.caption.copyWith(
                       color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.45),
                     ),
                   ),
@@ -372,7 +369,7 @@ class _CatchScreenState extends State<CatchScreen> {
               child: Center(
                 child: Text(
                   isAvailable ? AppStrings.goBusy : AppStrings.beAvailable,
-                  style: AppTextStyles.button.copyWith(fontSize: 14, color: Colors.white),
+                  style: NeerTypography.button.copyWith(fontSize: 14, color: Colors.white),
                 ),
               ),
             ),
@@ -552,7 +549,7 @@ class _CatchCapsuleState extends State<_CatchCapsule>
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(22),
               color: widget.isDark
-                  ? AppColors.darkSurface.withValues(alpha: 0.14)
+                  ? NeerColors.darkSurface.withValues(alpha: 0.14)
                   : Colors.white.withValues(alpha: 0.22),
               border: Border.all(
                 color: isAvailable
@@ -637,7 +634,7 @@ class _CatchCapsuleState extends State<_CatchCapsule>
                       children: [
                         Text(
                           name,
-                          style: AppTextStyles.bodyLarge.copyWith(
+                          style: NeerTypography.bodyLarge.copyWith(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
                             color: Colors.white,
@@ -663,7 +660,7 @@ class _CatchCapsuleState extends State<_CatchCapsule>
                               isAvailable
                                   ? AppStrings.available
                                   : (isPending ? AppStrings.pendingStatus : AppStrings.busy),
-                              style: AppTextStyles.caption.copyWith(
+                              style: NeerTypography.caption.copyWith(
                                 color: statusColor,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 11,
@@ -736,7 +733,7 @@ class _CatchCapsuleState extends State<_CatchCapsule>
 
   Widget _buildAvatarPlaceholder(String name) {
     return Container(
-      color: AppColors.darkSurface.withValues(alpha: 0.30),
+      color: NeerColors.darkSurface.withValues(alpha: 0.30),
       child: Center(
         child: Text(
           name.isNotEmpty ? name[0].toUpperCase() : '?',
@@ -831,7 +828,7 @@ class _GlassActionButton extends StatelessWidget {
           child: label != null
               ? Text(
                   label!,
-                  style: AppTextStyles.caption.copyWith(
+                  style: NeerTypography.caption.copyWith(
                     color: color,
                     fontWeight: FontWeight.w700,
                     fontSize: 12,

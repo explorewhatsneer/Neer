@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // CORE IMPORTLARI
-import '../../core/constants.dart';
-import '../../core/text_styles.dart';
-import '../../core/theme_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 
 import '../../services/supabase_service.dart';
@@ -107,7 +105,7 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
       children: [
         // 1. ANA KART (GLASS)
         ClipRRect(
-          borderRadius: AppThemeStyles.radius32,
+          borderRadius: NeerRadius.sheetRadius,
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
             child: Container(
@@ -115,7 +113,7 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
               decoration: BoxDecoration(
                 // Dinamik Glass Rengi
                 color: isDark ? Colors.black.withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.85),
-                borderRadius: AppThemeStyles.radius32,
+                borderRadius: NeerRadius.sheetRadius,
                 border: Border.all(color: Colors.white.withValues(alpha: isDark ? 0.1 : 0.6), width: 1.5),
                 boxShadow: [
                   BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 40, spreadRadius: 10, offset: const Offset(0, 10)),
@@ -148,7 +146,7 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
                         Text(
                           statusText.toUpperCase(), 
                           // 🔥 Core Style: Caption
-                          style: AppTextStyles.caption.copyWith(
+                          style: NeerTypography.caption.copyWith(
                             color: mainColor, 
                             fontWeight: FontWeight.w800, 
                             letterSpacing: 0.5
@@ -191,7 +189,7 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
                       widget.isAnonymous ? AppStrings.youAreHidden : AppStrings.everyoneSeesYou,
                       key: ValueKey(widget.isAnonymous),
                       // 🔥 Core Style: H2
-                      style: AppTextStyles.h2.copyWith(
+                      style: NeerTypography.h2.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
                       textAlign: TextAlign.center,
@@ -208,8 +206,8 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
                       key: ValueKey(widget.isAnonymous),
                       textAlign: TextAlign.center,
                       // 🔥 Core Style: BodyMedium
-                      style: AppTextStyles.bodyLarge.copyWith( 
-                        color: isDark ? AppColors.darkTextBody : AppColors.lightTextBody,
+                      style: NeerTypography.bodyLarge.copyWith( 
+                        color: isDark ? NeerColors.gray300 : NeerColors.gray600,
                         height: 1.5, 
                         fontWeight: FontWeight.w500
                       ),
@@ -233,7 +231,7 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isDark ? Colors.white : AppColors.primaryDark,
+                        backgroundColor: isDark ? Colors.white : NeerColors.primaryDark,
                         foregroundColor: isDark ? Colors.black : Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16), 
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -243,7 +241,7 @@ class _PremiumAnonymousCardState extends State<_PremiumAnonymousCard> with Singl
                       child: Text(
                         widget.isAnonymous ? AppStrings.goVisible : AppStrings.goHidden,
                         // 🔥 Core Style: Button
-                        style: AppTextStyles.button.copyWith(
+                        style: NeerTypography.button.copyWith(
                           color: isDark ? Colors.black : Colors.white
                         ),
                       ),

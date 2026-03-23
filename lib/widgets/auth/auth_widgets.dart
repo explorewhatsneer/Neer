@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../core/constants.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 
 // ==========================================
 // 1. PREMIUM AUTH HEADER (Logo + Title)
@@ -28,10 +27,10 @@ class AuthHeader extends StatelessWidget {
           height: 70,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: AppColors.primaryGradient,
+            gradient: NeerGradients.purplePink,
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.35),
+                color: NeerColors.primary.withValues(alpha: 0.35),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -55,7 +54,7 @@ class AuthHeader extends StatelessWidget {
         Text(
           subtitle,
           textAlign: TextAlign.center,
-          style: AppTextStyles.bodySmall.copyWith(
+          style: NeerTypography.bodySmall.copyWith(
             color: theme.disabledColor,
             letterSpacing: 1.0,
             fontWeight: FontWeight.w500,
@@ -129,14 +128,14 @@ class _NeerAuthInputState extends State<NeerAuthInput> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: _isFocused
-              ? AppColors.primary.withValues(alpha: 0.40)
+              ? NeerColors.primary.withValues(alpha: 0.40)
               : Colors.white.withValues(alpha: 0.18),
           width: _isFocused ? 1.5 : 1,
         ),
         boxShadow: _isFocused
             ? [
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.15),
+                  color: NeerColors.primary.withValues(alpha: 0.15),
                   blurRadius: 16,
                   spreadRadius: 1,
                 ),
@@ -149,11 +148,11 @@ class _NeerAuthInputState extends State<NeerAuthInput> {
         focusNode: _focusNode,
         obscureText: widget.isPassword && !widget.isPasswordVisible,
         keyboardType: widget.inputType,
-        style: AppTextStyles.bodyLarge,
+        style: NeerTypography.bodyLarge,
         cursorColor: theme.primaryColor,
         decoration: InputDecoration(
           hintText: widget.hint,
-          hintStyle: AppTextStyles.bodyLarge.copyWith(
+          hintStyle: NeerTypography.bodyLarge.copyWith(
             color: theme.disabledColor.withValues(alpha: 0.5),
           ),
           icon: Icon(
@@ -204,14 +203,14 @@ class AuthButton extends StatelessWidget {
       height: 56,
       child: Container(
         decoration: BoxDecoration(
-          gradient: isLoading ? null : AppColors.primaryGradient,
+          gradient: isLoading ? null : NeerGradients.purplePink,
           color: isLoading ? theme.disabledColor : null,
           borderRadius: BorderRadius.circular(16),
           boxShadow: isLoading
               ? []
               : [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.35),
+                    color: NeerColors.primary.withValues(alpha: 0.35),
                     blurRadius: 16,
                     offset: const Offset(0, 6),
                   ),

@@ -14,6 +14,7 @@ class WatcherService {
     }
 
     try {
+      // Mevcut durumu kontrol et
       final existing = await _supabase
           .from('watchers')
           .select('id, is_active')
@@ -21,21 +22,16 @@ class WatcherService {
           .eq('target_id', targetId)
           .maybeSingle();
 
-      if (existing == null) {
-        await _supabase.from('watchers').insert({
-          'watcher_id': watcherId,
-          'target_id': targetId,
-          'is_active': true,
-        });
-        return const Result.success(true);
-      } else {
-        final newState = !(existing['is_active'] as bool);
-        await _supabase
-            .from('watchers')
-            .update({'is_active': newState})
-            .eq('id', existing['id']);
-        return Result.success(newState);
-      }
+      final bool newState = existing == null ? true : !(existing['is_active'] as bool);
+
+      // Tek atomik işlem — race condition yok
+      await _supabase.from('watchers').upsert({
+        'watcher_id': watcherId,
+        'target_id': targetId,
+        'is_active': newState,
+      }, onConflict: 'watcher_id,target_id');
+
+      return Result.success(newState);
     } catch (e) {
       debugPrint('Watcher toggle hatası: $e');
       return Result.failure(AppException.fromSupabase(e));

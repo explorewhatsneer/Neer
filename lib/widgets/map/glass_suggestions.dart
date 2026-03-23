@@ -2,8 +2,7 @@ import 'dart:ui'; // ImageFilter
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
 
-import '../../core/constants.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 
 import '../../services/supabase_service.dart';
@@ -39,14 +38,14 @@ class GlassSuggestions extends StatelessWidget {
           margin: const EdgeInsets.only(top: 8),
           decoration: BoxDecoration(
             color: isDark
-                ? AppColors.darkSurface.withValues(alpha: 0.14)
+                ? NeerColors.darkSurface.withValues(alpha: 0.14)
                 : Colors.white.withValues(alpha: 0.22),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.18),
               width: 1,
             ),
-            boxShadow: AppColors.adaptiveShadow(isDark, blur: 20, alpha: 0.06),
+            boxShadow: NeerShadows.soft(),
           ),
           
           child: CustomScrollView(
@@ -139,7 +138,7 @@ class GlassSuggestions extends StatelessWidget {
       child: Text(
         title, 
         // 🔥 Core Style: Caption
-        style: AppTextStyles.caption.copyWith(
+        style: NeerTypography.caption.copyWith(
           fontWeight: FontWeight.w900, 
           color: theme.disabledColor,
           letterSpacing: 1.2
@@ -198,7 +197,7 @@ class GlassSuggestions extends StatelessWidget {
                     Text(
                       name,
                       // 🔥 Core Style: BodyLarge (Bold)
-                      style: AppTextStyles.bodyLarge.copyWith(
+                      style: NeerTypography.bodyLarge.copyWith(
                         fontWeight: FontWeight.w700, 
                       ), 
                       maxLines: 1, 
@@ -208,7 +207,7 @@ class GlassSuggestions extends StatelessWidget {
                     Text(
                       subText,
                       // 🔥 Core Style: Caption/BodySmall
-                      style: AppTextStyles.bodySmall.copyWith(
+                      style: NeerTypography.bodySmall.copyWith(
                         color: theme.disabledColor
                       )
                     ),

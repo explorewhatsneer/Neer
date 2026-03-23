@@ -2,8 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../core/constants.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 
 /// Glass Morphism Message Bubble — VisionOS style.
 ///
@@ -41,10 +40,10 @@ class MessageBubble extends StatelessWidget {
     // Glass colors
     final bgColor = isMe
         ? (isDark
-            ? AppColors.primary.withValues(alpha: 0.25)
-            : AppColors.primary.withValues(alpha: 0.18))
+            ? NeerColors.primary.withValues(alpha: 0.25)
+            : NeerColors.primary.withValues(alpha: 0.18))
         : (isDark
-            ? AppColors.darkSurface.withValues(alpha: 0.18)
+            ? NeerColors.darkSurface.withValues(alpha: 0.18)
             : Colors.white.withValues(alpha: 0.28));
 
     final textColor = isDark ? Colors.white : (isMe ? Colors.white : Colors.black87);
@@ -78,7 +77,7 @@ class MessageBubble extends StatelessWidget {
                 children: [
                   Text(
                     message,
-                    style: AppTextStyles.bodyLarge.copyWith(
+                    style: NeerTypography.bodyLarge.copyWith(
                       color: textColor,
                       height: 1.35,
                     ),
@@ -89,7 +88,7 @@ class MessageBubble extends StatelessWidget {
                     children: [
                       Text(
                         time,
-                        style: AppTextStyles.caption.copyWith(
+                        style: NeerTypography.caption.copyWith(
                           color: timeColor,
                           fontSize: 11,
                           fontWeight: FontWeight.w500,

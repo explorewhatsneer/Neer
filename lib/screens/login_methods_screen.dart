@@ -3,9 +3,7 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // CORE IMPORTLARI
-import '../core/constants.dart';
-import '../core/theme_styles.dart';
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/snackbar_helper.dart';
 
@@ -65,13 +63,12 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      
+    return GradientScaffold(
+
       appBar: AppBar(
         title: Text(
           AppStrings.loginMethodsTitle, 
-          style: AppTextStyles.h3.copyWith(fontSize: 20)
+          style: NeerTypography.h3.copyWith(fontSize: 20)
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -93,7 +90,7 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
               margin: const EdgeInsets.only(bottom: 30),
               decoration: BoxDecoration(
                 color: theme.primaryColor.withValues(alpha: isDark ? 0.2 : 0.08),
-                borderRadius: AppThemeStyles.radius24,
+                borderRadius: NeerRadius.cardRadius,
                 border: Border.all(color: theme.primaryColor.withValues(alpha: 0.3)),
               ),
               child: Column(
@@ -102,7 +99,7 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
                   const SizedBox(height: 12),
                   Text(
                     AppStrings.linkAccounts, 
-                    style: AppTextStyles.h3.copyWith(
+                    style: NeerTypography.h3.copyWith(
                       color: theme.primaryColor,
                       fontSize: 18
                     ),
@@ -111,8 +108,8 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
                   Text(
                     AppStrings.linkAccountsDesc, 
                     textAlign: TextAlign.center,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: isDark ? Colors.white70 : AppColors.primaryDark,
+                    style: NeerTypography.bodySmall.copyWith(
+                      color: isDark ? Colors.white70 : NeerColors.primaryDark,
                       height: 1.4,
                       fontSize: 13
                     ),
@@ -174,8 +171,8 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: AppThemeStyles.radius16,
-        boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+        borderRadius: NeerRadius.buttonRadius,
+        boxShadow: isDark ? [] : NeerShadows.soft(),
         border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
       ),
       child: ListTile(
@@ -190,11 +187,11 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
         ),
         title: Text(
           title, 
-          style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)
+          style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.bold)
         ),
         subtitle: Text(
           subtitle, 
-          style: AppTextStyles.bodySmall.copyWith(
+          style: NeerTypography.bodySmall.copyWith(
             color: theme.disabledColor, 
             fontWeight: FontWeight.w600
           )
@@ -208,7 +205,7 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
                 ),
                 child: Text(
                   AppStrings.connected, // "Bağlı"
-                  style: AppTextStyles.caption.copyWith(
+                  style: NeerTypography.caption.copyWith(
                     color: const Color(0xFF34C759), 
                     fontWeight: FontWeight.bold, 
                     fontSize: 12
@@ -227,7 +224,7 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
                 ),
                 child: Text(
                   AppStrings.connect, // "Bağla"
-                  style: AppTextStyles.button.copyWith(fontSize: 12)
+                  style: NeerTypography.button.copyWith(fontSize: 12)
                 ),
               ),
       ),

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 
 // CORE IMPORTLARI
-import '../../core/theme_styles.dart';
-import '../../core/text_styles.dart';
+import '../../core/neer_design_system.dart';
 
 // --- YARDIMCI: PREMIUM STİL (KART YAPISI) ---
 class _FriendPremiumContainer extends StatelessWidget {
@@ -29,9 +28,9 @@ class _FriendPremiumContainer extends StatelessWidget {
         padding: padding ?? const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: theme.cardColor,
-          borderRadius: AppThemeStyles.radius24,
+          borderRadius: NeerRadius.cardRadius,
           border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
-          boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+          boxShadow: isDark ? [] : NeerShadows.soft(),
         ),
         child: child,
       ),
@@ -98,11 +97,11 @@ class HistoryItemCard extends StatelessWidget {
                     children: [
                       Text(
                         title, 
-                        style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w800)
+                        style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w800)
                       ),
                       Text(
                         date, 
-                        style: AppTextStyles.caption.copyWith(
+                        style: NeerTypography.caption.copyWith(
                           fontWeight: FontWeight.w600, 
                           color: theme.disabledColor
                         )
@@ -114,7 +113,7 @@ class HistoryItemCard extends StatelessWidget {
                     desc, 
                     maxLines: 2, 
                     overflow: TextOverflow.ellipsis, 
-                    style: AppTextStyles.bodySmall.copyWith(
+                    style: NeerTypography.bodySmall.copyWith(
                       color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.8)
                     )
                   ),
@@ -185,7 +184,7 @@ class FriendEmptyCard extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 title, 
-                style: AppTextStyles.bodySmall.copyWith(
+                style: NeerTypography.bodySmall.copyWith(
                   fontWeight: FontWeight.w800,
                   color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.8)
                 ),
@@ -196,7 +195,7 @@ class FriendEmptyCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   subtitle, 
-                  style: AppTextStyles.caption.copyWith(
+                  style: NeerTypography.caption.copyWith(
                     color: theme.disabledColor,
                     height: 1.4
                   ),

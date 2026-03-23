@@ -3,9 +3,7 @@ import 'package:flutter/services.dart'; // Haptic Feedback
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // CORE IMPORTLARI
-import '../core/constants.dart';
-import '../core/theme_styles.dart';
-import '../core/text_styles.dart';
+import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/snackbar_helper.dart';
 
@@ -96,12 +94,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return GradientScaffold(
       appBar: AppBar(
         title: Text(
           AppStrings.changePasswordTitle, 
-          style: AppTextStyles.h3.copyWith(fontSize: 20)
+          style: NeerTypography.h3.copyWith(fontSize: 20)
         ),
         centerTitle: true,
         leading: IconButton(
@@ -122,7 +119,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 margin: const EdgeInsets.only(bottom: 30),
                 decoration: BoxDecoration(
                   color: theme.primaryColor.withValues(alpha: isDark ? 0.2 : 0.08),
-                  borderRadius: AppThemeStyles.radius16,
+                  borderRadius: NeerRadius.buttonRadius,
                   border: Border.all(color: theme.primaryColor.withValues(alpha: 0.3)),
                 ),
                 child: Row(
@@ -132,8 +129,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     Expanded(
                       child: Text(
                         AppStrings.passwordInfo, 
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: isDark ? Colors.white70 : AppColors.primaryDark,
+                        style: NeerTypography.bodySmall.copyWith(
+                          color: isDark ? Colors.white70 : NeerColors.primaryDark,
                           height: 1.4,
                           fontSize: 13
                         ),
@@ -209,8 +206,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     return Container(
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: AppThemeStyles.radius16,
-        boxShadow: isDark ? [] : AppThemeStyles.shadowLow,
+        borderRadius: NeerRadius.buttonRadius,
+        boxShadow: isDark ? [] : NeerShadows.soft(),
         border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
@@ -218,11 +215,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         controller: controller,
         obscureText: isObscure,
         validator: validator,
-        style: AppTextStyles.bodyLarge.copyWith(color: theme.textTheme.bodyLarge?.color),
+        style: NeerTypography.bodyLarge.copyWith(color: theme.textTheme.bodyLarge?.color),
         cursorColor: theme.primaryColor,
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: AppTextStyles.bodySmall.copyWith(color: theme.disabledColor),
+          labelStyle: NeerTypography.bodySmall.copyWith(color: theme.disabledColor),
           floatingLabelStyle: TextStyle(color: theme.primaryColor, fontWeight: FontWeight.w600),
           prefixIcon: Icon(Icons.lock_outline_rounded, color: theme.colorScheme.primary.withValues(alpha: 0.7)),
           suffixIcon: IconButton(

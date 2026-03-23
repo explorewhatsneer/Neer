@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../core/constants.dart';
+import '../core/neer_design_system.dart';
 
 /// Premium Floating Pill NavBar — Apple VisionOS style.
 ///
@@ -57,7 +57,7 @@ class CustomNavBar extends StatelessWidget {
             height: 68,
             decoration: BoxDecoration(
               color: isDark
-                  ? AppColors.darkSurface.withValues(alpha: 0.55)
+                  ? NeerColors.darkSurface.withValues(alpha: 0.55)
                   : Colors.white.withValues(alpha: 0.45),
               borderRadius: BorderRadius.circular(28),
               border: Border.all(
@@ -70,7 +70,7 @@ class CustomNavBar extends StatelessWidget {
                 BoxShadow(
                   color: isDark
                       ? Colors.black.withValues(alpha: 0.50)
-                      : AppColors.primary.withValues(alpha: 0.18),
+                      : NeerColors.primary.withValues(alpha: 0.18),
                   blurRadius: 30,
                   offset: const Offset(0, 8),
                   spreadRadius: -4,
@@ -160,20 +160,20 @@ class _CenterButtonState extends State<_CenterButton>
           height: 54,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: AppColors.primaryGradient,
+            gradient: NeerGradients.purplePink,
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.35),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: widget.isActive ? 0.55 : 0.30),
+                color: NeerColors.primary.withValues(alpha: widget.isActive ? 0.55 : 0.30),
                 blurRadius: widget.isActive ? 20 : 12,
                 offset: const Offset(0, 4),
                 spreadRadius: widget.isActive ? 2 : -2,
               ),
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.15),
+                color: NeerColors.primary.withValues(alpha: 0.15),
                 blurRadius: 40,
                 offset: const Offset(0, 8),
               ),
@@ -236,7 +236,7 @@ class _NavItemState extends State<_NavItem>
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = widget.isDark ? Colors.white : AppColors.primary;
+    final activeColor = widget.isDark ? Colors.white : NeerColors.primary;
     final inactiveColor = widget.isDark
         ? Colors.white.withValues(alpha: 0.40)
         : Colors.black.withValues(alpha: 0.35);
