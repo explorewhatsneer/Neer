@@ -65,9 +65,9 @@ class NeerColors {
   static Color glassBorderDark = Colors.white.withValues(alpha: 0.12);
 
   // Dark Mode Yüzeyler
-  static const Color darkSurface = Color(0xFF1A1A2E);
-  static const Color darkCard = Color(0xFF25253E);
-  static const Color darkElevated = Color(0xFF2D2D4A);
+  static const Color darkSurface  = Color(0xFF1A0F1A);
+  static const Color darkCard     = Color(0xFF241220);
+  static const Color darkElevated = Color(0xFF2C1A2C);
 }
 
 // ─── 2. GRADIENT TANIMLARI ──────────────────────────────────────
@@ -79,21 +79,15 @@ class NeerGradients {
   static const LinearGradient backgroundLight = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFFF3E8FF), // Çok açık lavanta
-      Color(0xFFFCE7F3), // Çok açık pembe
-      Color(0xFFFFF7ED), // Çok açık kayısı
-    ],
-    stops: [0.0, 0.5, 1.0],
+    colors: [Color(0xFFFDFBFF), Color(0xFFFDFBFF)],
   );
 
   static const LinearGradient backgroundDark = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF1A1A2E),
-      Color(0xFF16213E),
-      Color(0xFF0F3460),
+      Color(0xFF1A0F1A),
+      Color(0xFF1F0F20),
     ],
   );
 
@@ -358,7 +352,7 @@ class NeerTheme {
     return ThemeData(
       brightness: Brightness.light,
       primaryColor: NeerColors.primary,
-      scaffoldBackgroundColor: const Color(0xFFF8F5FF), // Çok hafif lavanta
+      scaffoldBackgroundColor: const Color(0xFFFDFBFF),
       cardColor: Colors.white,
       dividerColor: NeerColors.gray200,
       disabledColor: NeerColors.gray400,

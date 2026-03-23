@@ -21,6 +21,8 @@ import '../screens/group_chat_screen.dart';
 import '../screens/friend_profile_screen.dart';
 import '../screens/business_profile_screen.dart';
 import '../screens/quests_badges_screen.dart';
+import '../screens/quests_screen.dart';
+import '../screens/badges_screen.dart';
 import '../screens/notes_screen.dart';
 import '../screens/reviews_screen.dart';
 import '../screens/frequent_places_screen.dart';
@@ -47,6 +49,8 @@ class AppRoutes {
 
   // Yeni profil ekranları
   static const String questsBadges = '/quests-badges';
+  static const String quests = '/quests';
+  static const String badges = '/badges';
   static const String myNotes = '/my-notes';
   static const String myReviews = '/my-reviews';
   static const String frequentPlacesFull = '/frequent-places';
@@ -180,6 +184,14 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.questsBadges,
       pageBuilder: (context, state) => buildSlideTransition(context, state, const QuestsBadgesScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.quests,
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const QuestsScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.badges,
+      pageBuilder: (context, state) => buildSlideTransition(context, state, const BadgesScreen()),
     ),
     GoRoute(
       path: AppRoutes.myNotes,

@@ -138,35 +138,27 @@ class _CustomNavBarState extends State<CustomNavBar>
                     height: height,
                     decoration: BoxDecoration(
                       color: _isDot
-                          ? null
+                          ? (isDark
+                              ? NeerColors.darkSurface.withValues(alpha: 0.80)
+                              : Colors.white.withValues(alpha: 0.80))
                           : (isDark
                               ? NeerColors.darkSurface.withValues(alpha: 0.35)
                               : Colors.white.withValues(alpha: 0.35)),
-                      gradient: _isDot ? NeerGradients.purplePink : null,
                       borderRadius: BorderRadius.circular(radius),
                       border: Border.all(
-                        color: _isDot
-                            ? Colors.white.withValues(alpha: 0.22)
-                            : Colors.white.withValues(alpha: 0.12),
+                        color: Colors.white.withValues(alpha: _isDot ? 0.15 : 0.12),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: _isDot
-                              ? NeerColors.primary.withValues(alpha: 0.35)
-                              : Colors.black.withValues(alpha: 0.40),
-                          blurRadius: _isDot ? 16 : 28,
-                          offset: const Offset(0, 6),
+                          color: Colors.black.withValues(alpha: _isDot ? 0.28 : 0.40),
+                          blurRadius: _isDot ? 14 : 28,
+                          offset: Offset(0, _isDot ? 5 : 6),
                         ),
                       ],
                     ),
                     child: _isDot
-                        ? Center(
-                            child: Text(
-                              _emojis[widget.activeIndex],
-                              style: const TextStyle(fontSize: 13),
-                            ),
-                          )
+                        ? const SizedBox.shrink()
                         : Opacity(
                             opacity: t,
                             child: Row(

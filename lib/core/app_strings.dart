@@ -497,6 +497,7 @@ class AppStrings {
   static String get noEventsYet => lang == 'tr' ? "Henüz etkinlik planlanmadı." : "No events planned yet.";
   static String get noDataYet => lang == 'tr' ? "Henüz veri yok." : "No data yet.";
   static String get noReviewsYet => lang == 'tr' ? "Henüz yorum yok." : "No reviews yet.";
+  static String get noNotesYet => lang == 'tr' ? "Henüz not yok." : "No notes yet.";
   static String get noRatingsYet => lang == 'tr' ? "Henüz puan yok." : "No ratings yet.";
 
 // --- KAMERA & HARİTA ---

@@ -118,25 +118,25 @@ class _AnimatedBackground extends StatelessWidget {
 List<Widget> _buildOrbs(bool isDark, double t) {
   final colors = isDark
       ? [
-          const Color(0xFF8B3FA0), // Vivid purple
-          const Color(0xFF3A5FC4), // Electric blue
-          const Color(0xFFB83A70), // Hot pink / magenta
-          const Color(0xFF2855A0), // Rich cobalt
-          const Color(0xFF6B2D90), // Deep violet
+          const Color(0xFFB42878), // sıcak pembe-kırmızı
+          const Color(0xFFDC4632), // turuncu-kırmızı
+          const Color(0xFF961AB4), // mor
+          const Color(0xFFC83C50), // kırmızı-pembe
+          const Color(0xFFB43264), // magenta
         ]
       : [
-          const Color(0xFFFF85B0), // Vibrant rose
-          const Color(0xFFA080E0), // Saturated lavender
-          const Color(0xFFE080C0), // Hot pink
-          const Color(0xFF80A0F0), // Bright periwinkle
-          const Color(0xFFD090E8), // Orchid
+          const Color(0xFFB428B4),
+          const Color(0xFF8B5CF6),
+          const Color(0xFFDC4696),
+          const Color(0xFFA080E0),
+          const Color(0xFFD090E8),
         ];
 
-  // Dark modda 3 orb (daha az yük), light'ta 5 orb
-  final orbCount = isDark ? 3 : 5;
+  // Dark modda 4 orb, light'ta 5 orb
+  final orbCount = isDark ? 4 : 5;
   final alphas = isDark
-      ? [0.26, 0.22, 0.20, 0.0, 0.0]
-      : [0.55, 0.45, 0.50, 0.40, 0.42];
+      ? [0.52, 0.34, 0.38, 0.28, 0.0]
+      : [0.13, 0.12, 0.08, 0.10, 0.07];
 
   final basePositions = [
     const Alignment(-2.1, -1.5),  // sol üst köşe dışı

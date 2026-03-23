@@ -18,7 +18,6 @@ import '../providers/profile_provider.dart';
 import '../widgets/profile/profile_components.dart';
 import '../widgets/profile/profile_header.dart';
 import '../widgets/feed/feed_widgets.dart';
-import '../widgets/common/glass_button.dart';
 import '../widgets/common/glass_panel.dart';
 import '../widgets/common/animated_press.dart';
 import '../widgets/common/shimmer_loading.dart';
@@ -99,9 +98,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   void _showAllFavorites(BuildContext context) {}
 
+  void _showFollowersList(BuildContext context, String tab) {
+    // TODO: followers/following/friends sheet
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final profileProvider = context.watch<ProfileProvider>();
     final user = profileProvider.profile;
 
@@ -122,9 +126,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
               sliver: SliverAppBar(
-                expandedHeight: 300.0,
+                expandedHeight: 220,
                 pinned: true,
-                backgroundColor: Colors.black.withValues(alpha: 0.40),
+                floating: false,
+                backgroundColor: isDark
+                    ? const Color(0xFF1A0F1A).withValues(alpha: 0.92)
+                    : const Color(0xFFFDFBFF).withValues(alpha: 0.92),
                 elevation: 0,
                 automaticallyImplyLeading: false,
 
@@ -152,55 +159,31 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   ),
                 ),
 
-                actions: [
-                  Center(
-                    child: GlassButton.appBar(
-                      icon: Icons.edit_rounded,
-                      onTap: () async {
-                        HapticFeedback.lightImpact();
-                        await context.push(AppRoutes.editProfile);
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: GlassButton.appBar(
-                        icon: Icons.settings_rounded,
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          context.push(AppRoutes.settings);
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-
                 flexibleSpace: FlexibleSpaceBar(
                   stretchModes: const [StretchMode.zoomBackground],
-                  background: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withValues(alpha: 0.35),
-                          Colors.black.withValues(alpha: 0.60),
-                        ],
-                      ),
-                    ),
+                  background: ProfileHeaderBackground(
+                    imageUrl: displayImage,
+                    isDark: isDark,
                     child: ProfileHeader(
                       imageUrl: displayImage,
                       name: user?.name ?? AppStrings.nameless,
-                      username: user?.username ?? "kullanici",
-                      bio: user?.bio ?? "",
+                      username: user?.username ?? '',
+                      bio: user?.bio ?? '',
                       followersCount: (user?.followersCount ?? 0).toString(),
                       followingCount: (user?.followingCount ?? 0).toString(),
                       neerScore: (user?.neerScore ?? 5.0).toDouble(),
-                      checkInCount: user?.checkInCount ?? 0,
-                      activeDays: user?.activeDays ?? 0,
                       neerScoreLabel: user?.neerScoreLabel ?? AppStrings.neerScoreStandard,
+                      onEditTap: () async {
+                        HapticFeedback.lightImpact();
+                        await context.push(AppRoutes.editProfile);
+                      },
+                      onSettingsTap: () {
+                        HapticFeedback.lightImpact();
+                        context.push(AppRoutes.settings);
+                      },
+                      onFollowersTap: () => _showFollowersList(context, 'followers'),
+                      onFollowingTap: () => _showFollowersList(context, 'following'),
+                      onFriendsTap: () => _showFollowersList(context, 'friends'),
                     ),
                   ),
                 ),
@@ -297,7 +280,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       return _BadgeVitrin(
                         earnedBadges: earned,
                         allBadges: all,
-                        onSeeAll: () => context.push(AppRoutes.questsBadges),
+                        onSeeAll: () => context.push(AppRoutes.badges),
                       );
                     },
                   ),
@@ -313,7 +296,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
                       return _QuestPreview(
                         quests: snapshot.data!,
-                        onSeeAll: () => context.push(AppRoutes.questsBadges),
+                        onSeeAll: () => context.push(AppRoutes.quests),
                       );
                     },
                   ),
@@ -530,7 +513,7 @@ class _NeerIdentityCard extends StatelessWidget {
                 Row(
                   children: [
                     _IdentityStat(value: stats?['total_places']?.toString() ?? '—', label: 'mekan'),
-                    _IdentityStat(value: photoCount.toString(), label: 'kare'),
+                    _IdentityStat(value: photoCount.toString(), label: 'fotoğraf'),
                     _IdentityStat(value: stats?['total_cities']?.toString() ?? '—', label: 'şehir'),
                     _IdentityStat(value: stats?['active_days']?.toString() ?? '—', label: 'gün'),
                   ],
@@ -605,20 +588,26 @@ class _BadgeVitrin extends StatelessWidget {
                               ),
                             ),
                             child: Center(
-                              child: Text(
-                                isEarned ? (badge['icon'] ?? '🏅') : '?',
-                                style: TextStyle(
-                                  fontSize: isEarned ? 20 : 14,
-                                  color: isEarned ? null : Colors.white.withValues(alpha: 0.25),
-                                ),
-                              ),
+                              child: isEarned
+                                  ? Text(badge['icon'] ?? '🏅', style: const TextStyle(fontSize: 20))
+                                  : ColorFiltered(
+                                      colorFilter: const ColorFilter.matrix([
+                                        0.2126, 0.7152, 0.0722, 0, 0,
+                                        0.2126, 0.7152, 0.0722, 0, 0,
+                                        0.2126, 0.7152, 0.0722, 0, 0,
+                                        0, 0, 0, 0.30, 0,
+                                      ]),
+                                      child: Text(badge['icon'] ?? '🏅', style: const TextStyle(fontSize: 20)),
+                                    ),
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            isEarned ? (badge['name_tr'] ?? '') : '???',
+                            badge['name_tr'] ?? badge['name_en'] ?? '',
                             style: NeerTypography.caption.copyWith(
-                              color: isEarned ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
+                              color: isEarned
+                                  ? Theme.of(context).primaryColor
+                                  : Theme.of(context).disabledColor.withValues(alpha: 0.45),
                               fontSize: 9,
                             ),
                           ),
@@ -1064,66 +1053,7 @@ class _BentoDashboard extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                // Top card — Last Note
-                Expanded(
-                  child: StreamBuilder<List<Map<String, dynamic>>>(
-                    stream: notesStream,
-                    builder: (context, snapshot) {
-                      final note = (snapshot.hasData && snapshot.data!.isNotEmpty)
-                          ? snapshot.data!.first
-                          : null;
-                      final noteText = note?['content'] ?? AppStrings.notebookEmpty;
-
-                      return AnimatedPress(
-                        onTap: () => context.push(AppRoutes.myNotes),
-                        child: GlassPanel.bento(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(14),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.edit_note_rounded,
-                                    size: 16,
-                                    color: theme.primaryColor,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    AppStrings.myNotes,
-                                    style: NeerTypography.caption.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: theme.primaryColor,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                noteText,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: NeerTypography.caption.copyWith(
-                                  fontStyle: FontStyle.italic,
-                                  fontSize: 12,
-                                  height: 1.3,
-                                  color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                // Bottom card — Last Review
+                // Top card — Last Review (üste)
                 Expanded(
                   child: FutureBuilder<List<Map<String, dynamic>>>(
                     future: surveyHistoryFuture,
@@ -1174,6 +1104,52 @@ class _BentoDashboard extends StatelessWidget {
                                   fontWeight: FontWeight.w600,
                                   fontSize: 12,
                                   color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // Bottom card — Last Note (alta)
+                Expanded(
+                  child: StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: notesStream,
+                    builder: (context, snapshot) {
+                      final note = (snapshot.hasData && snapshot.data!.isNotEmpty)
+                          ? snapshot.data!.first
+                          : null;
+                      final noteText = note?['content'] ?? note?['text'] ?? AppStrings.noNotesYet;
+
+                      return AnimatedPress(
+                        onTap: () => context.push(AppRoutes.myNotes),
+                        child: GlassPanel.bento(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.edit_note_rounded,
+                                size: 16,
+                                color: theme.primaryColor.withValues(alpha: 0.75),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                noteText,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: NeerTypography.caption.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 11,
+                                  color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.65),
+                                  height: 1.4,
                                 ),
                               ),
                             ],
