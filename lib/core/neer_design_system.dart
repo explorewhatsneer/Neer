@@ -161,7 +161,7 @@ class NeerGradients {
 class NeerTypography {
   NeerTypography._();
 
-  static const String _fontFamily = '.SF Pro Display'; // iOS native
+  static const String _fontFamily = 'SFPro'; // iOS native
 
   // Başlıklar
   static const TextStyle displayLarge = TextStyle(

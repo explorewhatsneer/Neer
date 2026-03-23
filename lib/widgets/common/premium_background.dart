@@ -139,10 +139,10 @@ List<Widget> _buildOrbs(bool isDark, double t) {
       : [0.55, 0.45, 0.50, 0.40, 0.42];
 
   final basePositions = [
-    const Alignment(-1.1, -1.0),  // sol üst köşe dışı
-    const Alignment(1.1, -0.9),   // sağ üst köşe dışı
-    const Alignment(-1.0, 1.0),   // sol alt köşe dışı
-    const Alignment(1.0, 1.0),    // sağ alt köşe dışı
+    const Alignment(-2.1, -1.5),  // sol üst köşe dışı
+    const Alignment(1.6, -1.9),   // sağ üst köşe dışı
+    const Alignment(-2.0, 1.5),   // sol alt köşe dışı
+    const Alignment(1.4, 2.0),    // sağ alt köşe dışı
     const Alignment(0.0, 0.1),    // merkez (sabit)
   ];
 
