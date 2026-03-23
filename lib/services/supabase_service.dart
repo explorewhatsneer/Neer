@@ -781,6 +781,11 @@ class SupabaseService {
   // Aktif görevler (kullanıcı ilerlemesiyle birlikte)
   Future<List<Map<String, dynamic>>> getUserActiveQuests(String uid) async {
     try {
+      final today = DateTime.now();
+      final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      final weekNum = _getWeekNumber(today);
+      final weekStr = '${today.year}-W${weekNum.toString().padLeft(2, '0')}';
+      debugPrint('getUserActiveQuests: uid=$uid today=$todayStr week=$weekStr');
       final response = await _supabase
           .from('quest_definitions')
           .select('*, user_quests!left(progress, is_completed, period)')

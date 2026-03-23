@@ -150,7 +150,8 @@ class _MapScreenState extends State<MapScreen>
     bool showDotsOnly = _currentZoom >= 14.0 && _currentZoom < 16.0;
     bool showClustersAndPins = _currentZoom >= 16.0;
 
-    return GradientScaffold(
+    return Scaffold(
+      backgroundColor: Colors.transparent,
       extendBody: true,
       resizeToAvoidBottomInset: false,
       body: Stack(

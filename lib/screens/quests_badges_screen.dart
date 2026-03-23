@@ -26,8 +26,8 @@ class _QuestsBadgesScreenState extends State<QuestsBadgesScreen>
   late Future<List<Map<String, dynamic>>> _allBadgesFuture;
 
   String _questFilter = 'all';
-  static const _filters = ['all', 'daily', 'weekly', 'epic'];
-  static const _filterLabels = {'all': 'Tümü', 'daily': 'Günlük', 'weekly': 'Haftalık', 'epic': 'Epik'};
+  static const _filters = ['all', 'daily', 'weekly', 'epic', 'completed'];
+  static const _filterLabels = {'all': 'Tümü', 'daily': 'Günlük', 'weekly': 'Haftalık', 'epic': 'Epik', 'completed': 'Tamamlanan'};
 
   @override
   void initState() {
@@ -87,7 +87,13 @@ class _QuestsBadgesScreenState extends State<QuestsBadgesScreen>
         final all = snapshot.data!;
         final filtered = _questFilter == 'all'
             ? all
-            : all.where((q) => q['type'] == _questFilter).toList();
+            : _questFilter == 'completed'
+                ? all.where((q) {
+                    final uq = q['user_quests'];
+                    final first = (uq is List && uq.isNotEmpty) ? uq.first : null;
+                    return first?['is_completed'] == true;
+                  }).toList()
+                : all.where((q) => q['type'] == _questFilter).toList();
         return CustomScrollView(
           slivers: [
             SliverToBoxAdapter(

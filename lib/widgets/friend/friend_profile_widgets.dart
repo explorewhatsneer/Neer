@@ -7,25 +7,16 @@ import '../../core/neer_design_system.dart';
 // --- YARDIMCI: PREMIUM STİL (KART YAPISI) ---
 class _FriendPremiumContainer extends StatelessWidget {
   final Widget child;
-  final EdgeInsetsGeometry? padding;
-  final VoidCallback? onTap; 
-  
-  const _FriendPremiumContainer({required this.child, this.padding, this.onTap});
+
+  const _FriendPremiumContainer({required this.child});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return GestureDetector(
-      onTap: () {
-        if (onTap != null) {
-          HapticFeedback.lightImpact();
-          onTap!();
-        }
-      },
-      child: Container(
-        padding: padding ?? const EdgeInsets.all(16),
+    return Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: theme.cardColor,
           borderRadius: NeerRadius.cardRadius,
@@ -33,8 +24,7 @@ class _FriendPremiumContainer extends StatelessWidget {
           boxShadow: isDark ? [] : NeerShadows.soft(),
         ),
         child: child,
-      ),
-    );
+      );
   }
 }
 

@@ -95,11 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     return "";
   }
 
-  void _showAllQuests(BuildContext context) {}
   void _showAllFavorites(BuildContext context) {}
-  void _showAllFrequentPlaces(BuildContext context) {}
-  void _showAllNotes(BuildContext context) {}
-  void _showAllSurveys(BuildContext context) {}
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     final user = profileProvider.profile;
 
     if (profileProvider.isLoading) {
-      return GradientScaffold(body: const ShimmerList(itemCount: 5));
+      return GradientScaffold(animate: true, body: const ShimmerList(itemCount: 5));
     }
 
     final String displayImage = (user?.profileImage != null && user!.profileImage.isNotEmpty)
@@ -116,6 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         : "https://i.pravatar.cc/150?img=60";
 
     return GradientScaffold(
+      animate: true,
       body: NestedScrollView(
         controller: _scrollController,
         headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -123,7 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
               sliver: SliverAppBar(
-                expandedHeight: 340.0,
+                expandedHeight: 300.0,
                 pinned: true,
                 backgroundColor: Colors.transparent,
                 elevation: 0,
@@ -146,7 +143,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                         ),
                       ),
                       _NeerScoreRingSmall(
-                        score: user?.trustScore ?? 5.0,
+                        score: user?.neerScore ?? 5.0,
                         label: user?.neerScoreLabel ?? 'Standart',
                       ),
                     ],
@@ -187,8 +184,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     bio: user?.bio ?? "",
                     followersCount: (user?.followersCount ?? 0).toString(),
                     followingCount: (user?.followingCount ?? 0).toString(),
-                    friendsCount: "0",
-                    trustScore: (user?.trustScore ?? 5.0).toDouble(),
+                    neerScore: (user?.trustScore ?? 5.0).toDouble(),
                     checkInCount: user?.checkInCount ?? 0,
                     activeDays: user?.activeDays ?? 0,
                     neerScoreLabel: user?.neerScoreLabel ?? AppStrings.neerScoreStandard,
@@ -270,10 +266,19 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   // ==========================================
                   // C. ROZET VİTRİNİ
                   // ==========================================
-                  _BadgeVitrin(
-                    earnedFuture: _badgesFuture,
-                    allFuture: _allBadgeDefsFuture,
-                    onSeeAll: () {},
+                  FutureBuilder<List<dynamic>>(
+                    future: Future.wait([_badgesFuture, _allBadgeDefsFuture]),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return const SizedBox.shrink();
+                      final earned = snapshot.data![0] as List<Map<String, dynamic>>;
+                      final all = snapshot.data![1] as List<Map<String, dynamic>>;
+                      if (all.isEmpty) return const SizedBox.shrink();
+                      return _BadgeVitrin(
+                        earnedBadges: earned,
+                        allBadges: all,
+                        onSeeAll: () => context.push(AppRoutes.questsBadges),
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 16),
@@ -281,9 +286,15 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   // ==========================================
                   // D. GÖREVLER PREVİEW
                   // ==========================================
-                  _QuestPreviewWidget(
-                    questsFuture: _activeQuestsFuture,
-                    onSeeAll: () => _showAllQuests(context),
+                  FutureBuilder<List<Map<String, dynamic>>>(
+                    future: _activeQuestsFuture,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
+                      return _QuestPreview(
+                        quests: snapshot.data!,
+                        onSeeAll: () => context.push(AppRoutes.questsBadges),
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 28),
@@ -465,19 +476,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     super.dispose();
   }
 
-  String _formatDate(dynamic date) {
-    if (date == null) return "";
-    if (date is DateTime) return "${date.day}.${date.month}.${date.year}";
-    if (date is String) {
-      try {
-        final dt = DateTime.parse(date);
-        return "${dt.day}.${dt.month}.${dt.year}";
-      } catch (e) {
-        return date;
-      }
-    }
-    return "";
-  }
 }
 
 // ==========================================
@@ -545,20 +543,15 @@ class _IdentityStat extends StatelessWidget {
 // ROZET VİTRİNİ
 // ==========================================
 class _BadgeVitrin extends StatelessWidget {
-  final Future<List<Map<String, dynamic>>> earnedFuture;
-  final Future<List<Map<String, dynamic>>> allFuture;
+  final List<Map<String, dynamic>> earnedBadges;
+  final List<Map<String, dynamic>> allBadges;
   final VoidCallback onSeeAll;
-  const _BadgeVitrin({required this.earnedFuture, required this.allFuture, required this.onSeeAll});
+  const _BadgeVitrin({required this.earnedBadges, required this.allBadges, required this.onSeeAll});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<dynamic>>(
-      future: Future.wait([earnedFuture, allFuture]),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return const SizedBox.shrink();
-        final earned = snapshot.data![0] as List<Map<String, dynamic>>;
-        final all = snapshot.data![1] as List<Map<String, dynamic>>;
-        if (all.isEmpty) return const SizedBox.shrink();
+    final earned = earnedBadges;
+    final all = allBadges;
         return GlassPanel.card(
           padding: const EdgeInsets.all(14),
           child: Column(
@@ -616,54 +609,49 @@ class _BadgeVitrin extends StatelessWidget {
             ],
           ),
         );
-      },
-    );
   }
 }
 
 // ==========================================
 // GÖREVLER PREVİEW
 // ==========================================
-class _QuestPreviewWidget extends StatelessWidget {
-  final Future<List<Map<String, dynamic>>> questsFuture;
+class _QuestPreview extends StatelessWidget {
+  final List<Map<String, dynamic>> quests;
   final VoidCallback onSeeAll;
-  const _QuestPreviewWidget({required this.questsFuture, required this.onSeeAll});
+  const _QuestPreview({required this.quests, required this.onSeeAll});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: questsFuture,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
-        final quests = snapshot.data!;
-        final daily = quests.where((q) => q['type'] == 'daily').take(2).toList();
-        final weeklyList = quests.where((q) => q['type'] == 'weekly').toList();
-        final epic = quests.where((q) =>
-            q['type'] == 'epic' && (q['user_quests']?.first?['is_completed'] != true)).take(1).toList();
-        return GlassPanel.card(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SectionHeader(title: AppStrings.questsTitle, onActionTap: onSeeAll),
-              const SizedBox(height: 8),
-              ...daily.map((q) => _QuestRow(quest: q)),
-              if (weeklyList.isNotEmpty) _QuestRow(quest: weeklyList.first),
-              if (epic.isNotEmpty) ...[
-                const SizedBox(height: 6),
-                _EpicQuestCard(quest: epic.first),
-              ],
-            ],
-          ),
-        );
-      },
+    final daily = quests.where((q) => q['type'] == 'daily').take(2).toList();
+    final weeklyTop = quests.where((q) => q['type'] == 'weekly').toList()
+      ..sort((a, b) => ((b['user_quests']?.first?['progress'] ?? 0) as int)
+          .compareTo((a['user_quests']?.first?['progress'] ?? 0) as int));
+    final epicActive = quests.where((q) =>
+        q['type'] == 'epic' &&
+        (q['user_quests']?.first?['is_completed'] != true)).take(1).toList();
+    return GlassPanel.card(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SectionHeader(title: AppStrings.questsTitle, onActionTap: onSeeAll),
+          const SizedBox(height: 8),
+          ...daily.map((q) => _QuestRow(quest: q, type: 'daily')),
+          if (weeklyTop.isNotEmpty) _QuestRow(quest: weeklyTop.first, type: 'weekly'),
+          if (epicActive.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            _EpicQuestCard(quest: epicActive.first),
+          ],
+        ],
+      ),
     );
   }
 }
 
 class _QuestRow extends StatelessWidget {
   final Map<String, dynamic> quest;
-  const _QuestRow({required this.quest});
+  final String type;
+  const _QuestRow({required this.quest, required this.type});
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

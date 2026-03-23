@@ -15,6 +15,7 @@ class UserModel {
   final int checkInCount;
   final int photoCount;
   final double trustScore;
+  final double neerScore;     // neer_score (sync trigger ile güncelleniyor)
   final int followersCount;   // Takipçi Sayısı (SQL: followers_count)
   final int followingCount;   // Takip Edilen Sayısı (SQL: following_count)
   final double? latitude;
@@ -49,6 +50,7 @@ class UserModel {
     this.checkInCount = 0,
     this.photoCount = 0,
     this.trustScore = 5.0,
+    this.neerScore = 5.0,
     this.followersCount = 0,
     this.followingCount = 0,
     this.latitude,
@@ -118,6 +120,7 @@ class UserModel {
       checkInCount: map['check_in_count'] ?? 0,
       photoCount: map['photo_count'] ?? 0,
       trustScore: (map['trust_score'] ?? 5.0).toDouble(),
+      neerScore: (map['neer_score'] ?? map['trust_score'] ?? 5.0).toDouble(),
 
       // 🔥 'map' hatası burada çözüldü:
       followersCount: map['followers_count'] ?? 0,
@@ -159,6 +162,7 @@ class UserModel {
     int? checkInCount,
     int? photoCount,
     double? trustScore,
+    double? neerScore,
     int? followersCount,
     int? followingCount,
     String? catchStatus,
@@ -185,6 +189,7 @@ class UserModel {
       checkInCount: checkInCount ?? this.checkInCount,
       photoCount: photoCount ?? this.photoCount,
       trustScore: trustScore ?? this.trustScore,
+      neerScore: neerScore ?? this.neerScore,
       followersCount: followersCount ?? this.followersCount,
       followingCount: followingCount ?? this.followingCount,
       catchStatus: catchStatus ?? this.catchStatus,

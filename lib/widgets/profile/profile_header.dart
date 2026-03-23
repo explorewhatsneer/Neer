@@ -12,9 +12,7 @@ class ProfileHeader extends StatelessWidget {
   final String bio;
   final String followersCount;
   final String followingCount;
-  final String friendsCount;
-  final double trustScore;
-  // New fields (optional for backward compat)
+  final double neerScore;
   final int checkInCount;
   final int activeDays;
   final String neerScoreLabel;
@@ -27,8 +25,7 @@ class ProfileHeader extends StatelessWidget {
     required this.bio,
     required this.followersCount,
     required this.followingCount,
-    required this.friendsCount,
-    required this.trustScore,
+    required this.neerScore,
     this.checkInCount = 0,
     this.activeDays = 0,
     this.neerScoreLabel = 'Standart',
@@ -69,7 +66,7 @@ class ProfileHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              _NeerScoreRing(score: trustScore, label: neerScoreLabel, size: 52),
+              _NeerScoreRing(score: neerScore, label: neerScoreLabel, size: 52),
             ],
           ),
           // ROW 2: Bio

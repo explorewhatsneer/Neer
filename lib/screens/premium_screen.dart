@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Haptic Feedback
-import 'dart:ui'; // ImageFilter
-
 // CORE IMPORTLARI
 import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
@@ -68,44 +66,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black, // Temel renk siyah
-      body: Stack(
-        children: [
-          // --------------------------------------------------
-          // 1. KATMAN: AMBIENT BACKGROUND (Marka Renkleriyle)
-          // --------------------------------------------------
-          // Altın Işık (Sağ Üst)
-          Positioned(
-            top: -100, right: -50, 
-            child: _buildLightBlob(const Color(0xFFFFD700).withValues(alpha: 0.3))
-          ),
-          // Bordo Işık (Sol Alt - Marka Rengi)
-          Positioned(
-            bottom: -50, left: -50, 
-            child: _buildLightBlob(const Color(0xFF8C003A).withValues(alpha: 0.4))
-          ),
-          // Mavi Işık (Orta - Derinlik)
-          Positioned(
-            top: 200, left: -80, 
-            child: _buildLightBlob(Colors.blueAccent.withValues(alpha: 0.2), size: 200)
-          ),
-          
-          // Blur Efekti (Tüm ışıkları yumuşatır)
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
-              child: Container(color: Colors.white.withValues(alpha: 0.2)),
-            ),
-          ),
-
-          // --------------------------------------------------
-          // 2. KATMAN: İÇERİK
-          // --------------------------------------------------
-          SafeArea(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
+    return GradientScaffold(
+      animate: true,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
                 children: [
                   // --- HEADER (Kapat & Badge) ---
                   Padding(
@@ -276,24 +242,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
               ),
             ),
           ),
-        ],
-      ),
-    );
+        );
   }
 
   // --- YARDIMCI WIDGETLAR ---
-
-  // Arka plan ışık topu
-  Widget _buildLightBlob(Color color, {double size = 300}) {
-    return Container(
-      width: size, height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-        boxShadow: [BoxShadow(color: color, blurRadius: 120, spreadRadius: 60)]
-      ),
-    );
-  }
 
   // Özellik Kartı (Beyaz ve Şık)
   Widget _buildFeatureCard(Map<String, dynamic> item, bool isActive) {

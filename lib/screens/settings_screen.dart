@@ -278,7 +278,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     String currentLangName = lm.locale.languageCode == 'tr' ? "Türkçe (TR)" : "English (US)";
 
     return GradientScaffold(
-
+      animate: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
