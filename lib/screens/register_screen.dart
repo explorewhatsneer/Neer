@@ -11,6 +11,7 @@ import '../core/app_router.dart';
 import '../core/snackbar_helper.dart';
 import '../widgets/common/loading_button.dart';
 import '../widgets/auth/auth_widgets.dart';
+import '../widgets/common/glass_panel.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -135,10 +136,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 36),
 
               // --- GLASS FORM CARD ---
-              GlassCard(
+              GlassPanel(
                 padding: const EdgeInsets.all(28),
-                borderRadius: 28,
-                blurAmount: 45,
+                borderRadius: BorderRadius.circular(28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

@@ -23,6 +23,7 @@ import '../widgets/profile/profile_header.dart' show PillTabBar;
 import '../widgets/profile/profile_components.dart';
 import '../widgets/feed/feed_widgets.dart';
 import '../widgets/common/shimmer_loading.dart';
+import '../widgets/common/glass_panel.dart';
 import '../widgets/common/animated_list_item.dart';
 import '../widgets/common/masonry_gallery.dart';
 
@@ -272,32 +273,48 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                       FutureBuilder<List<Map<String, dynamic>>>(future: _frequentPlacesFuture, builder: (context, snapshot) {
                           if (!snapshot.hasData || snapshot.data!.isEmpty) return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(icon: Icons.explore_off_rounded, title: "Henüz Mekan Yok", subtitle: "Sık ziyaret ettiği mekanlar oluştuğunda burada görünecek."));
                           
-                          var places = snapshot.data!;
-                          var top3 = places.take(3).toList();
-                          var others = places.skip(3).toList();
+                          final places = snapshot.data!;
 
-                          return Column(
-                            children: [
-                              RankingPodium(
-                                top3Places: top3, 
-                                onTap: (id, name, img) => context.push('/venue/$id', extra: {'venueName': name, 'imageUrl': img})
-                              ),
-                              if (others.isNotEmpty) ...[
-                                const SizedBox(height: 10),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                                  child: Column(
-                                    children: others.asMap().entries.map((entry) => SimpleRankRow(
-                                      rank: entry.key + 4,
-                                      name: entry.value['place_name'] ?? "Bilinmeyen",
-                                      count: (entry.value['visit_count'] as num?)?.toInt() ?? 0,
-                                      imgUrl: entry.value['image_url'] ?? "https://picsum.photos/200",
-                                      onTap: () => context.push('/venue/${_findPlaceId(entry.value)}', extra: {'venueName': entry.value['place_name'] ?? "Mekan", 'imageUrl': entry.value['image_url'] ?? "https://picsum.photos/200"})
-                                    )).toList(),
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Column(
+                              children: places.asMap().entries.map((entry) {
+                                final rank = entry.key + 1;
+                                final place = entry.value;
+                                final name = place['place_name'] ?? '';
+                                final img = place['image_url'] ?? '';
+                                final visits = (place['visit_count'] as num?)?.toInt() ?? 0;
+                                final rankColors = [const Color(0xFFFFD700), const Color(0xFFC0C0C0), const Color(0xFFCD7F32)];
+                                final rankColor = rank <= 3 ? rankColors[rank - 1] : Colors.white.withValues(alpha: 0.35);
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: GlassPanel.card(
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                    child: Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 28,
+                                          child: Text('#$rank', style: NeerTypography.h3.copyWith(fontSize: 14, color: rankColor, fontWeight: FontWeight.w800)),
+                                        ),
+                                        if (img.isNotEmpty) ...[
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: Image.network(img, width: 38, height: 38, fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => Container(width: 38, height: 38, color: Colors.white.withValues(alpha: 0.1))),
+                                          ),
+                                          const SizedBox(width: 10),
+                                        ],
+                                        Expanded(
+                                          child: Text(name, style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w600),
+                                            maxLines: 1, overflow: TextOverflow.ellipsis),
+                                        ),
+                                        Text('$visits ziyaret', style: NeerTypography.caption.copyWith(color: Theme.of(context).disabledColor)),
+                                      ],
+                                    ),
                                   ),
-                                )
-                              ]
-                            ],
+                                );
+                              }).toList(),
+                            ),
                           );
                       }),
                       const SizedBox(height: 30),

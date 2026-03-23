@@ -9,6 +9,7 @@ import '../core/app_router.dart';
 import '../core/snackbar_helper.dart';
 import '../widgets/common/loading_button.dart';
 import '../widgets/auth/auth_widgets.dart';
+import '../widgets/common/glass_panel.dart';
 
 import 'package:neer/services/auth_service.dart';
 
@@ -108,10 +109,9 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 50),
 
               // --- GLASS FORM CARD ---
-              GlassCard(
+              GlassPanel(
                 padding: const EdgeInsets.all(28),
-                borderRadius: 28,
-                blurAmount: 45,
+                borderRadius: BorderRadius.circular(28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

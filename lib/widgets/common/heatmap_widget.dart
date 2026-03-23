@@ -122,8 +122,11 @@ class _HeatmapMap extends StatelessWidget {
           ),
           children: [
             TileLayer(
-              urlTemplate: 'https://api.maptiler.com/maps/dataviz-dark/{z}/{x}/{y}.png?key={api_key}',
-              additionalOptions: const {'api_key': 'YOUR_MAPTILER_KEY'},
+              urlTemplate: Theme.of(context).brightness == Brightness.dark
+                  ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                  : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+              userAgentPackageName: 'com.example.neer',
+              retinaMode: RetinaMode.isHighDensity(context),
             ),
             CircleLayer(
               circles: points.map((p) {

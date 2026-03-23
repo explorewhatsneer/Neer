@@ -26,6 +26,7 @@ import '../widgets/common/animated_list_item.dart';
 import '../widgets/common/masonry_gallery.dart';
 import '../widgets/friend/friend_profile_widgets.dart' show FriendEmptyCard;
 import '../widgets/common/app_cached_image.dart';
+import '../widgets/common/heatmap_widget.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -128,6 +129,30 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 elevation: 0,
                 automaticallyImplyLeading: false,
 
+                // Collapsed header — avatar + name when scrolled
+                title: AnimatedOpacity(
+                  opacity: innerBoxIsScrolled ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Row(
+                    children: [
+                      _AvatarRingSmall(imageUrl: displayImage),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(user?.name ?? '',
+                          style: NeerTypography.bodySmall.copyWith(
+                            color: Colors.white, fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      _NeerScoreRingSmall(
+                        score: user?.trustScore ?? 5.0,
+                        label: user?.neerScoreLabel ?? 'Standart',
+                      ),
+                    ],
+                  ),
+                ),
+
                 actions: [
                   Center(
                     child: GlassButton.appBar(
@@ -170,16 +195,13 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   ),
                 ),
 
-                // PILL TABS
+                // GRADIENT TAB BAR — sol hizalı
                 bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(60),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
-                    child: PillTabBar(
-                      controller: _mainTabController,
-                      tabs: [AppStrings.profileTab, AppStrings.activityTab, AppStrings.galleryTab],
-                      onTap: (_) => HapticFeedback.selectionClick(),
-                    ),
+                  preferredSize: const Size.fromHeight(44),
+                  child: ProfileTabBar(
+                    controller: _mainTabController,
+                    tabs: [AppStrings.profileTab, AppStrings.activityTab, AppStrings.galleryTab],
+                    onTap: (_) => HapticFeedback.selectionClick(),
                   ),
                 ),
               ),
@@ -325,10 +347,17 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       final places = snapshot.data ?? [];
                       return _FrequentPlacesSection(
                         places: places.take(3).toList(),
-                        onSeeAll: () => _showAllFrequentPlaces(context),
+                        onSeeAll: () => context.push(AppRoutes.frequentPlacesFull),
                       );
                     },
                   ),
+
+                  const SizedBox(height: 28),
+
+                  // ==========================================
+                  // G. ISI HARİTASI
+                  // ==========================================
+                  HeatmapWidget(userId: _uid),
 
                   const SizedBox(height: 120),
                 ],
@@ -816,7 +845,12 @@ class _FrequentCard extends StatelessWidget {
     final visits = (place['visit_count'] as num?)?.toInt() ?? 0;
 
     return AnimatedPress(
-      onTap: () {},
+      onTap: () {
+        final placeId = place['id']?.toString() ?? place['place_id']?.toString() ?? '';
+        if (placeId.isNotEmpty) {
+          context.push('/venue/$placeId', extra: {'venueName': name, 'imageUrl': img});
+        }
+      },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(rank == 1 ? 14 : 12),
         child: SizedBox(
@@ -1035,7 +1069,7 @@ class _BentoDashboard extends StatelessWidget {
                       final noteText = note?['content'] ?? AppStrings.notebookEmpty;
 
                       return AnimatedPress(
-                        onTap: () {},
+                        onTap: () => context.push(AppRoutes.myNotes),
                         child: GlassPanel.bento(
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
@@ -1097,7 +1131,7 @@ class _BentoDashboard extends StatelessWidget {
                       final placeName = review?['location_name'] ?? AppStrings.noReviewsYet;
 
                       return AnimatedPress(
-                        onTap: () {},
+                        onTap: () => context.push(AppRoutes.myReviews),
                         child: GlassPanel.bento(
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
@@ -1146,6 +1180,57 @@ class _BentoDashboard extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// ==========================================
+// COLLAPSED HEADER HELPERS
+// ==========================================
+class _AvatarRingSmall extends StatelessWidget {
+  final String imageUrl;
+  const _AvatarRingSmall({required this.imageUrl});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 28, height: 28,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 1.5),
+      ),
+      child: ClipOval(
+        child: Image.network(imageUrl, fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(color: Colors.white.withValues(alpha: 0.2))),
+      ),
+    );
+  }
+}
+
+class _NeerScoreRingSmall extends StatelessWidget {
+  final double score;
+  final String label;
+  const _NeerScoreRingSmall({required this.score, required this.label});
+  @override
+  Widget build(BuildContext context) {
+    final color = score >= 8.0 ? NeerColors.success : score >= 5.0 ? NeerColors.warning : NeerColors.error;
+    return SizedBox(
+      width: 32, height: 32,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          CircularProgressIndicator(
+            value: 1.0, strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.10)),
+          ),
+          CircularProgressIndicator(
+            value: (score / 10.0).clamp(0.0, 1.0), strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation(color),
+            strokeCap: StrokeCap.round,
+          ),
+          Text(score.toStringAsFixed(1),
+            style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w800)),
         ],
       ),
     );
