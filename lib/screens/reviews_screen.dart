@@ -17,12 +17,12 @@ class ReviewsScreen extends StatefulWidget {
 class _ReviewsScreenState extends State<ReviewsScreen> {
   final SupabaseService _service = SupabaseService();
   final String _uid = supabase.auth.currentUser!.id;
-  late Stream<List<PostModel>> _activityStream;
+  late Future<List<Map<String, dynamic>>> _reviewsFuture;
 
   @override
   void initState() {
     super.initState();
-    _activityStream = _service.getUserActivityFeed(_uid);
+    _reviewsFuture = _service.getSurveyHistory(_uid);
   }
 
   @override
@@ -46,14 +46,13 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
             ),
           ),
           Expanded(
-            child: StreamBuilder<List<PostModel>>(
-              stream: _activityStream,
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: _reviewsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const ShimmerList(itemCount: 5);
                 }
-                final reviews = snapshot.data?.where((p) => p.type == 'review').toList() ?? [];
-                if (reviews.isEmpty) {
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(
                     child: FriendEmptyCard(
                       icon: Icons.star_outline_rounded,
@@ -62,6 +61,9 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                     ),
                   );
                 }
+                final reviews = snapshot.data!
+                    .map((r) => PostModel.fromMap({...r, 'type': 'review', 'user_id': _uid}))
+                    .toList();
                 return ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
                   itemCount: reviews.length,

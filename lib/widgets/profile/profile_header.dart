@@ -40,9 +40,12 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+    return Align(
+      alignment: Alignment.bottomLeft,
+      child: Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 72),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ROW 1: Avatar + Meta + NeerScore
@@ -89,6 +92,7 @@ class ProfileHeader extends StatelessWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }

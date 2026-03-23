@@ -88,11 +88,7 @@ class _QuestsBadgesScreenState extends State<QuestsBadgesScreen>
         final filtered = _questFilter == 'all'
             ? all
             : _questFilter == 'completed'
-                ? all.where((q) {
-                    final uq = q['user_quests'];
-                    final first = (uq is List && uq.isNotEmpty) ? uq.first : null;
-                    return first?['is_completed'] == true;
-                  }).toList()
+                ? all.where((q) => q['is_completed'] == true).toList()
                 : all.where((q) => q['type'] == _questFilter).toList();
         return CustomScrollView(
           slivers: [
@@ -132,11 +128,9 @@ class _QuestsBadgesScreenState extends State<QuestsBadgesScreen>
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate((context, i) {
                   final q = filtered[i];
-                  final userQuests = q['user_quests'];
-                  final first = (userQuests is List && userQuests.isNotEmpty) ? userQuests.first : null;
-                  final progress = (first?['progress'] ?? 0) as int;
+                  final progress = (q['current_progress'] ?? 0) as int;
                   final target = (q['target_count'] ?? 1) as int;
-                  final isCompleted = first?['is_completed'] == true;
+                  final isCompleted = q['is_completed'] == true;
                   final ratio = target > 0 ? progress / target : 0.0;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),

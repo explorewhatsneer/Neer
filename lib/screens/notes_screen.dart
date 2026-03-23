@@ -67,6 +67,9 @@ class _NotesScreenState extends State<NotesScreen> {
                   separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, i) {
                     final note = notes[i];
+                    final placeName = (note['places'] as Map?)?['name'] as String? ??
+                        note['place_name'] as String? ?? '';
+                    final content = note['content'] as String? ?? note['note'] as String? ?? '';
                     return GestureDetector(
                       onTap: () => _showNoteDetail(context, note),
                       child: GlassPanel.card(
@@ -76,11 +79,13 @@ class _NotesScreenState extends State<NotesScreen> {
                           children: [
                             Row(
                               children: [
-                                const Icon(Icons.location_on_rounded, size: 12, color: Colors.white54),
-                                const SizedBox(width: 4),
-                                Text(note['place_name'] ?? 'Mekan', style: NeerTypography.caption.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.55), fontSize: 11,
-                                )),
+                                if (placeName.isNotEmpty) ...[
+                                  const Icon(Icons.location_on_rounded, size: 12, color: Colors.white54),
+                                  const SizedBox(width: 4),
+                                  Text(placeName, style: NeerTypography.caption.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.55), fontSize: 11,
+                                  )),
+                                ],
                                 const Spacer(),
                                 Text(note['created_at'] != null
                                     ? _formatDate(note['created_at'].toString()) : '',
@@ -90,7 +95,7 @@ class _NotesScreenState extends State<NotesScreen> {
                               ],
                             ),
                             const SizedBox(height: 6),
-                            Text(note['note'] ?? note['content'] ?? '',
+                            Text(content,
                               maxLines: 2, overflow: TextOverflow.ellipsis,
                               style: NeerTypography.bodySmall.copyWith(color: Colors.white.withValues(alpha: 0.85))),
                           ],
@@ -120,13 +125,20 @@ class _NotesScreenState extends State<NotesScreen> {
             Center(child: Container(width: 40, height: 4,
               decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)))),
             const SizedBox(height: 16),
-            Row(children: [
-              const Icon(Icons.location_on_rounded, size: 14, color: Colors.white54),
-              const SizedBox(width: 4),
-              Text(note['place_name'] ?? 'Mekan', style: NeerTypography.caption.copyWith(color: Colors.white.withValues(alpha: 0.6))),
-            ]),
-            const SizedBox(height: 12),
-            Text(note['note'] ?? note['content'] ?? '',
+            Builder(builder: (ctx) {
+              final pn = (note['places'] as Map?)?['name'] as String? ??
+                  note['place_name'] as String? ?? '';
+              if (pn.isEmpty) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(children: [
+                  const Icon(Icons.location_on_rounded, size: 14, color: Colors.white54),
+                  const SizedBox(width: 4),
+                  Text(pn, style: NeerTypography.caption.copyWith(color: Colors.white.withValues(alpha: 0.6))),
+                ]),
+              );
+            }),
+            Text(note['content'] as String? ?? note['note'] as String? ?? '',
               style: NeerTypography.bodySmall.copyWith(color: Colors.white.withValues(alpha: 0.9), height: 1.5)),
             const SizedBox(height: 32),
           ],

@@ -87,6 +87,28 @@ class SupabaseService {
         .map((data) => List<Map<String, dynamic>>.from(data));
   }
 
+  Future<List<Map<String, dynamic>>> getUserNotesWithPlace(String uid) async {
+    try {
+      final response = await _supabase
+          .from('notes')
+          .select('*, places(name)')
+          .eq('user_id', uid)
+          .order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(response);
+    } catch (_) {
+      try {
+        final response = await _supabase
+            .from('notes')
+            .select()
+            .eq('user_id', uid)
+            .order('created_at', ascending: false);
+        return List<Map<String, dynamic>>.from(response);
+      } catch (e) {
+        return [];
+      }
+    }
+  }
+
   // ════════════════════════════════════════════
   // 5. GALERİ / FOTOĞRAFLAR
   // ════════════════════════════════════════════
@@ -781,17 +803,48 @@ class SupabaseService {
   // Aktif görevler (kullanıcı ilerlemesiyle birlikte)
   Future<List<Map<String, dynamic>>> getUserActiveQuests(String uid) async {
     try {
-      final today = DateTime.now();
-      final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
-      final weekNum = _getWeekNumber(today);
-      final weekStr = '${today.year}-W${weekNum.toString().padLeft(2, '0')}';
-      debugPrint('getUserActiveQuests: uid=$uid today=$todayStr week=$weekStr');
-      final response = await _supabase
+      // 1. Tüm quest tanımlarını çek
+      final questDefs = await _supabase
           .from('quest_definitions')
-          .select('*, user_quests!left(progress, is_completed, period)')
+          .select()
           .order('sort_order');
-      return List<Map<String, dynamic>>.from(response);
-    } catch (e) { return []; }
+
+      // 2. Bu kullanıcının ilerlemelerini çek
+      final userProgress = await _supabase
+          .from('user_quests')
+          .select()
+          .eq('user_id', uid);
+
+      // 3. Manuel birleştir
+      final progressMap = <String, Map<String, dynamic>>{};
+      for (final p in (userProgress as List)) {
+        final key = '${p['quest_id']}_${p['period'] ?? ''}';
+        progressMap[key] = Map<String, dynamic>.from(p as Map);
+      }
+
+      final now = DateTime.now();
+      return (questDefs as List).map((quest) {
+        final questId = quest['id'] as String;
+        String period = '';
+        if (quest['type'] == 'daily') {
+          period = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+        } else if (quest['type'] == 'weekly') {
+          final weekNum = _getWeekNumber(now);
+          period = '${now.year}-W${weekNum.toString().padLeft(2, '0')}';
+        }
+        final key = '${questId}_$period';
+        final progress = progressMap[key];
+        return {
+          ...Map<String, dynamic>.from(quest as Map),
+          'user_progress': progress,
+          'current_progress': (progress?['progress'] ?? 0) as int,
+          'is_completed': progress?['is_completed'] ?? false,
+        };
+      }).toList();
+    } catch (e) {
+      debugPrint('getUserActiveQuests hatası: $e');
+      return [];
+    }
   }
 
   // Neer Kimliği istatistikleri

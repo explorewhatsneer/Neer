@@ -46,7 +46,7 @@ class _MainLayoutState extends State<MainLayout> {
       const ChatListScreen(),
       const FeedScreen(),
       const CatchScreen(),
-      const ProfileScreen(),
+      ProfileScreen(externalScrollController: _scrollControllers[4]),
     ];
   }
 

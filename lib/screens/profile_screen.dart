@@ -29,7 +29,8 @@ import '../widgets/common/app_cached_image.dart';
 import '../widgets/common/heatmap_widget.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final ScrollController? externalScrollController;
+  const ProfileScreen({super.key, this.externalScrollController});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -40,7 +41,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   final String _uid = supabase.auth.currentUser!.id;
 
   late TabController _mainTabController;
-  final ScrollController _scrollController = ScrollController();
+  late ScrollController _scrollController;
 
   // Streams & Futures
   late Stream<List<Map<String, dynamic>>> _favoritesStream;
@@ -60,6 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
+    _scrollController = widget.externalScrollController ?? ScrollController();
     _mainTabController = TabController(length: 3, vsync: this);
     context.read<ProfileProvider>().loadProfile(_uid);
 
@@ -122,7 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               sliver: SliverAppBar(
                 expandedHeight: 300.0,
                 pinned: true,
-                backgroundColor: Colors.transparent,
+                backgroundColor: Colors.black.withValues(alpha: 0.40),
                 elevation: 0,
                 automaticallyImplyLeading: false,
 
@@ -177,17 +179,29 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
                 flexibleSpace: FlexibleSpaceBar(
                   stretchModes: const [StretchMode.zoomBackground],
-                  background: ProfileHeader(
-                    imageUrl: displayImage,
-                    name: user?.name ?? AppStrings.nameless,
-                    username: user?.username ?? "kullanici",
-                    bio: user?.bio ?? "",
-                    followersCount: (user?.followersCount ?? 0).toString(),
-                    followingCount: (user?.followingCount ?? 0).toString(),
-                    neerScore: (user?.trustScore ?? 5.0).toDouble(),
-                    checkInCount: user?.checkInCount ?? 0,
-                    activeDays: user?.activeDays ?? 0,
-                    neerScoreLabel: user?.neerScoreLabel ?? AppStrings.neerScoreStandard,
+                  background: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.35),
+                          Colors.black.withValues(alpha: 0.60),
+                        ],
+                      ),
+                    ),
+                    child: ProfileHeader(
+                      imageUrl: displayImage,
+                      name: user?.name ?? AppStrings.nameless,
+                      username: user?.username ?? "kullanici",
+                      bio: user?.bio ?? "",
+                      followersCount: (user?.followersCount ?? 0).toString(),
+                      followingCount: (user?.followingCount ?? 0).toString(),
+                      neerScore: (user?.neerScore ?? 5.0).toDouble(),
+                      checkInCount: user?.checkInCount ?? 0,
+                      activeDays: user?.activeDays ?? 0,
+                      neerScoreLabel: user?.neerScoreLabel ?? AppStrings.neerScoreStandard,
+                    ),
                   ),
                 ),
 
@@ -269,9 +283,16 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   FutureBuilder<List<dynamic>>(
                     future: Future.wait([_badgesFuture, _allBadgeDefsFuture]),
                     builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const SizedBox(height: 80);
+                      }
+                      if (snapshot.hasError) {
+                        debugPrint('Badge error: ${snapshot.error}');
+                        return const SizedBox.shrink();
+                      }
                       if (!snapshot.hasData) return const SizedBox.shrink();
-                      final earned = snapshot.data![0] as List<Map<String, dynamic>>;
-                      final all = snapshot.data![1] as List<Map<String, dynamic>>;
+                      final earned = (snapshot.data![0] as List).cast<Map<String, dynamic>>();
+                      final all = (snapshot.data![1] as List).cast<Map<String, dynamic>>();
                       if (all.isEmpty) return const SizedBox.shrink();
                       return _BadgeVitrin(
                         earnedBadges: earned,
@@ -306,7 +327,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: SectionHeader(
                       title: AppStrings.favoritesTitle,
-                      icon: Icons.favorite_rounded,
                       onActionTap: () => _showAllFavorites(context),
                     ),
                   ),
@@ -472,7 +492,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   @override
   void dispose() {
     _mainTabController.dispose();
-    _scrollController.dispose();
+    if (widget.externalScrollController == null) {
+      _scrollController.dispose();
+    }
     super.dispose();
   }
 
@@ -624,11 +646,11 @@ class _QuestPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final daily = quests.where((q) => q['type'] == 'daily').take(2).toList();
     final weeklyTop = quests.where((q) => q['type'] == 'weekly').toList()
-      ..sort((a, b) => ((b['user_quests']?.first?['progress'] ?? 0) as int)
-          .compareTo((a['user_quests']?.first?['progress'] ?? 0) as int));
+      ..sort((a, b) => ((b['current_progress'] ?? 0) as int)
+          .compareTo((a['current_progress'] ?? 0) as int));
     final epicActive = quests.where((q) =>
         q['type'] == 'epic' &&
-        (q['user_quests']?.first?['is_completed'] != true)).take(1).toList();
+        (q['is_completed'] != true)).take(1).toList();
     return GlassPanel.card(
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -655,11 +677,9 @@ class _QuestRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final userQuests = quest['user_quests'];
-    final first = (userQuests is List && userQuests.isNotEmpty) ? userQuests.first : null;
-    final progress = (first?['progress'] ?? 0) as int;
+    final progress = (quest['current_progress'] ?? 0) as int;
     final target = (quest['target_count'] ?? 1) as int;
-    final isCompleted = first?['is_completed'] == true;
+    final isCompleted = quest['is_completed'] == true;
     final ratio = target > 0 ? progress / target : 0.0;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -723,9 +743,7 @@ class _EpicQuestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final userQuests = quest['user_quests'];
-    final first = (userQuests is List && userQuests.isNotEmpty) ? userQuests.first : null;
-    final progress = (first?['progress'] ?? 0) as int;
+    final progress = (quest['current_progress'] ?? 0) as int;
     final target = (quest['target_count'] ?? 1) as int;
     final ratio = target > 0 ? progress / target : 0.0;
     return Container(
