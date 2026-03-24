@@ -148,6 +148,8 @@ class AppStrings {
   static String get placesTab => lang == 'tr' ? "Mekanlar" : "Places";
   
   static String get noMessages => lang == 'tr' ? "Henüz mesajın yok." : "No messages yet.";
+  static String get sendFirstMessage => lang == 'tr' ? "İlk mesajı gönder!" : "Send the first message!";
+  static String get messageSendFailed => lang == 'tr' ? "Mesaj gönderilemedi" : "Message could not be sent";
   static String get noChatFound => lang == 'tr' ? "Sohbet bulunamadı." : "No chat found.";
   static String get noCheckins => lang == 'tr' ? "Hiçbir mekanda check-in yapmadın." : "You haven't checked in anywhere.";
   
@@ -282,8 +284,51 @@ class AppStrings {
   static String get deleteAccountConfirm => lang == 'tr' ? "DİKKAT: Hesabın ve tüm verilerin kalıcı olarak silinecek!" : "WARNING: Your account and all data will be permanently deleted!";
   static String get confirm => lang == 'tr' ? "Onayla" : "Confirm";
   
+  static String get privateAccount => lang == 'tr' ? "Gizli Hesap" : "Private Account";
+  static String get freePlan => lang == 'tr' ? "Ücretsiz" : "Free";
+  static String get defaultUser => lang == 'tr' ? "Kullanıcı" : "User";
+  static String get noPhotosYet => lang == 'tr' ? "Henüz fotoğraf yok" : "No photos yet";
   static String get dataPreparing => lang == 'tr' ? "Verileriniz hazırlanıyor. E-posta alacaksınız." : "Preparing your data. You will receive an email.";
   static String get backingUp => lang == 'tr' ? "Sohbet geçmişi buluta yedekleniyor..." : "Backing up chat history to cloud...";
+
+  // --- FRIEND PROFILE ---
+  static String get shareProfile => lang == 'tr' ? "Profili Paylaş" : "Share Profile";
+  static String get reportUser => lang == 'tr' ? "Şikayet Et" : "Report";
+  static String get blockUser => lang == 'tr' ? "Engelle" : "Block";
+  static String get noMutualMemories => lang == 'tr' ? "Henüz Ortak Anı Yok" : "No Mutual Memories Yet";
+  static String get noMutualMemoriesDesc => lang == 'tr' ? "Birlikte keşfettiğiniz mekanlar burada listelenecek." : "Places you've explored together will appear here.";
+  static String get noPlacesYet => lang == 'tr' ? "Henüz Mekan Yok" : "No Places Yet";
+  static String get noPlacesYetDesc => lang == 'tr' ? "Sık ziyaret ettiği mekanlar oluştuğunda burada görünecek." : "Frequently visited places will appear here.";
+  static String get favoritesEmpty => lang == 'tr' ? "Favori Listesi Boş" : "Favorites Empty";
+  static String get favoritesEmptyDesc => lang == 'tr' ? "Henüz favorilerine eklediği bir mekan bulunmuyor." : "No favorite places added yet.";
+  static String get noNotesShared => lang == 'tr' ? "Not Paylaşılmamış" : "No Notes Shared";
+  static String get noNotesSharedDesc => lang == 'tr' ? "Henüz herhangi bir mekana not bırakmamış." : "No notes left at any venue yet.";
+  static String get noReviews => lang == 'tr' ? "Değerlendirme Yapılmamış" : "No Reviews Yet";
+  static String get noReviewsDesc => lang == 'tr' ? "Henüz hiçbir mekana puan veya yorum bırakmamış." : "No ratings or reviews left at any venue yet.";
+  static String visitsCount(int count) => lang == 'tr' ? "$count ziyaret" : "$count visits";
+  static String followRequestFrom(String name) => lang == 'tr' ? "$name seni takip etmek istiyor." : "$name wants to follow you.";
+  static String get place => lang == 'tr' ? "Mekan" : "Place";
+
+  // --- FEED SCREEN ---
+  static String get followedPeople => lang == 'tr' ? "Takip Edilenler" : "Following";
+  static String get friendsOnly => lang == 'tr' ? "Sadece Arkadaşlar" : "Friends Only";
+  static String get noMutualFriendsYet => lang == 'tr' ? "Henüz karşılıklı takipleştiğin arkadaşın yok" : "You don't have any mutual friends yet";
+  static String get feedQuiet => lang == 'tr' ? "Akışın çok sessiz!" : "Your feed is quiet!";
+  static String get friendsNoActivity => lang == 'tr' ? "Arkadaşların paylaşım yapmamışlar." : "Your friends haven't posted anything.";
+  static String get startFollowing => lang == 'tr' ? "Arkadaşlarını takip ederek başla." : "Start by following your friends.";
+
+  // --- NOTIFICATIONS ---
+  static String get markAllAsRead => lang == 'tr' ? "Tümünü okundu işaretle" : "Mark all as read";
+  static String get noNotificationsYet => lang == 'tr' ? "Henüz bildirim yok" : "No notifications yet";
+  static String get newInteractionsHere => lang == 'tr' ? "Yeni etkileşimler burada görünecek." : "New interactions will appear here.";
+
+  // --- COMMON (yeni eklenenler) ---
+  static String get viewProfile => lang == 'tr' ? "Profili Gör" : "View Profile";
+  static String get nearby => lang == 'tr' ? "Yakınlarda" : "Nearby";
+  static String get noCheckInYet => lang == 'tr' ? "Henüz bir check-in yapmamış." : "No check-ins yet.";
+  static String get unfollowConfirm => lang == 'tr' ? "Takipten çıkmak istediğine emin misin?" : "Are you sure you want to unfollow?";
+  static String get placeName => lang == 'tr' ? "Mekan İsmi" : "Place Name";
+  static String get unfollow => lang == 'tr' ? "Çıkar" : "Unfollow";
 
 // --- PROFİL EKRANI ---
   static String get profileTab => lang == 'tr' ? "Profil" : "Profile";

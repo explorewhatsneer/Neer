@@ -10,6 +10,7 @@ import '../services/supabase_service.dart';
 import '../widgets/chat/chat_input.dart';
 import '../widgets/chat/message_bubble.dart';
 import '../widgets/common/app_cached_image.dart';
+import '../widgets/common/glass_button.dart';
 import '../widgets/common/shimmer_loading.dart';
 import '../widgets/common/empty_state.dart';
 import '../models/user_model.dart';
@@ -96,7 +97,7 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     if (result.isFailure && mounted) {
-      AppSnackBar.error(context, "Mesaj gönderilemedi: ${result.error.message}");
+      AppSnackBar.error(context, "${AppStrings.messageSendFailed}: ${result.error.message}");
     }
   }
 
@@ -125,9 +126,11 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.iconTheme.color, size: 20),
-          onPressed: () => Navigator.pop(context),
+        leading: Center(
+          child: GlassButton.medium(
+            icon: Icons.arrow_back_ios_new_rounded,
+            onTap: () => Navigator.pop(context),
+          ),
         ),
         titleSpacing: 0,
         title: Row(
@@ -187,7 +190,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   return EmptyState(
                     icon: Icons.chat_bubble_outline_rounded,
                     title: AppStrings.noMessages,
-                    description: 'İlk mesajı gönder!',
+                    description: AppStrings.sendFirstMessage,
                   );
                 }
 

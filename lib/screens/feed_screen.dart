@@ -36,6 +36,7 @@ class _FeedScreenState extends State<FeedScreen> {
   static const int _pageSize = 20;
 
   String _selectedFilter = 'all';
+  int _currentPage = 0;
 
   @override
   void initState() {
@@ -59,12 +60,11 @@ class _FeedScreenState extends State<FeedScreen> {
 
   Future<void> _fetchFeed() async {
     try {
-      final uid = _service.client.auth.currentUser?.id ?? '';
+      _currentPage = 0;
       final response = await _service.getFeedPosts(
-        userId: uid,
         filterMode: _selectedFilter,
-        limit: _pageSize,
-        offset: 0,
+        pageSize: _pageSize,
+        pageNumber: _currentPage,
       );
       if (mounted) {
         setState(() {
@@ -85,12 +85,11 @@ class _FeedScreenState extends State<FeedScreen> {
     _isLoadingMore = true;
 
     try {
-      final uid = _service.client.auth.currentUser?.id ?? '';
+      _currentPage++;
       final response = await _service.getFeedPosts(
-        userId: uid,
         filterMode: _selectedFilter,
-        limit: _pageSize,
-        offset: _posts.length,
+        pageSize: _pageSize,
+        pageNumber: _currentPage,
       );
       if (mounted) {
         setState(() {
@@ -140,11 +139,11 @@ class _FeedScreenState extends State<FeedScreen> {
       items: [
         PopupMenuItem(
           value: 'all',
-          child: _buildMenuItem(theme, "Takip Edilenler", Icons.people_outline_rounded, _selectedFilter == 'all'),
+          child: _buildMenuItem(theme, AppStrings.followedPeople, Icons.people_outline_rounded, _selectedFilter == 'all'),
         ),
         PopupMenuItem(
           value: 'friends',
-          child: _buildMenuItem(theme, "Sadece Arkadaşlar", Icons.star_border_rounded, _selectedFilter == 'friends'),
+          child: _buildMenuItem(theme, AppStrings.friendsOnly, Icons.star_border_rounded, _selectedFilter == 'friends'),
         ),
       ],
     ).then((value) {
@@ -233,11 +232,11 @@ class _FeedScreenState extends State<FeedScreen> {
                       EmptyState(
                         icon: _selectedFilter == 'friends' ? Icons.star_border_rounded : Icons.diversity_1_rounded,
                         title: _selectedFilter == 'friends'
-                            ? "Henüz karşılıklı takipleştiğin arkadaşın yok"
-                            : "Akışın çok sessiz!",
+                            ? AppStrings.noMutualFriendsYet
+                            : AppStrings.feedQuiet,
                         description: _selectedFilter == 'friends'
-                            ? "Arkadaşların paylaşım yapmamışlar."
-                            : "Arkadaşlarını takip ederek başla.",
+                            ? AppStrings.friendsNoActivity
+                            : AppStrings.startFollowing,
                       ),
                     ],
                   ),

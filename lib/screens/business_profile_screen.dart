@@ -429,7 +429,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
                                 Icon(Icons.location_on_rounded, color: theme.primaryColor, size: 20),
                                 const SizedBox(height: 6),
                                 Text(
-                                  "Check-in",
+                                  AppStrings.checkInShort,
                                   style: NeerTypography.bodySmall.copyWith(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 14,
@@ -570,10 +570,10 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
 
   Widget _buildPhotoGrid({required List<String> photos}) {
     if (photos.isEmpty) {
-      return const Center(
+      return Center(
         child: EmptyState(
           icon: Icons.photo_library_outlined,
-          title: "Henüz fotoğraf yok",
+          title: AppStrings.noPhotosYet,
         ),
       );
     }

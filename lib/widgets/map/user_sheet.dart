@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 // CORE IMPORTLARI
 import '../../core/neer_design_system.dart';
+import '../../core/app_strings.dart';
 import '../../core/app_router.dart';
 
 // WIDGETS
@@ -24,9 +25,9 @@ class UserSheet {
     final String profileImage = userData['avatar_url'] ?? userData['profile_image'] ?? "https://i.pravatar.cc/300?u=$targetUid";
     final String coverImage = "https://picsum.photos/800/400?random=$targetUid"; 
     
-    final String displayName = userData['full_name'] ?? userData['name'] ?? userData['username'] ?? "Kullanıcı";
+    final String displayName = userData['full_name'] ?? userData['name'] ?? userData['username'] ?? AppStrings.defaultUser;
     final String username = userData['username'] ?? "user";
-    final String bio = userData['bio'] ?? "Merhaba, ben Neer kullanıyorum! 👋";
+    final String bio = userData['bio'] ?? AppStrings.defaultBio;
     
     final String trustScore = (userData['trust_score'] ?? 5.0).toString();
     final String followers = (userData['followers_count'] ?? 126).toString();
@@ -148,7 +149,7 @@ class UserSheet {
                                   Icon(Icons.location_on_rounded, size: 16, color: NeerColors.primary),
                                   const SizedBox(width: 4),
                                   Text(
-                                    "Yakınlarda", 
+                                    AppStrings.nearby, 
                                     style: NeerTypography.bodySmall.copyWith(
                                       color: theme.disabledColor, 
                                       fontWeight: FontWeight.w600
@@ -181,9 +182,9 @@ class UserSheet {
                         // İstatistikler
                         Row(
                           children: [
-                            _buildStatCard(trustScore, "Güven Skoru", Icons.shield_rounded, const Color(0xFF34C759), theme),
+                            _buildStatCard(trustScore, AppStrings.trustScore, Icons.shield_rounded, const Color(0xFF34C759), theme),
                             const SizedBox(width: 10),
-                            _buildStatCard(followers, "Takipçi", Icons.group_rounded, NeerColors.accent, theme),
+                            _buildStatCard(followers, AppStrings.followers, Icons.group_rounded, NeerColors.accent, theme),
                             const SizedBox(width: 10),
                             _buildStatCard("5. Lv", "Seviye", Icons.star_rounded, Colors.blue, theme),
                           ],
@@ -192,7 +193,7 @@ class UserSheet {
                         const SizedBox(height: 30),
 
                         // Hakkında
-                        Text("Hakkında", style: NeerTypography.h3.copyWith(fontSize: 18)),
+                        Text(AppStrings.about, style: NeerTypography.h3.copyWith(fontSize: 18)),
                         const SizedBox(height: 8),
                         Text(
                           bio,
@@ -205,7 +206,7 @@ class UserSheet {
                         const SizedBox(height: 30),
 
                         // Ortak Bağlantılar
-                        Text("Ortak Bağlantılar", style: NeerTypography.h3.copyWith(fontSize: 18)),
+                        Text(AppStrings.mutualConnections, style: NeerTypography.h3.copyWith(fontSize: 18)),
                         const SizedBox(height: 12),
                         Row(
                           children: [
@@ -243,11 +244,11 @@ class UserSheet {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Son Gittiği Yerler", 
+                              AppStrings.recentPlaces, 
                               style: NeerTypography.h3.copyWith(fontSize: 18)
                             ),
                             Text(
-                              "Tümünü Gör", 
+                              AppStrings.seeAll, 
                               style: NeerTypography.caption.copyWith(
                                 color: NeerColors.primary, 
                                 fontWeight: FontWeight.bold
@@ -347,7 +348,7 @@ class UserSheet {
                                   context.push(AppRoutes.chat, extra: {'userId': targetUid, 'userName': displayName, 'userImage': null});
                                 },
                                 icon: const Icon(Icons.chat_bubble_rounded, size: 22),
-                                label: Text("Mesaj Gönder", style: NeerTypography.button),
+                                label: Text(AppStrings.sendMessage, style: NeerTypography.button),
                               ),
                             ),
                             const SizedBox(width: 15),
@@ -367,7 +368,7 @@ class UserSheet {
                                   Navigator.pop(context);
                                   context.push('/profile/$targetUid');
                                 }, 
-                                child: Text("Profili Gör", style: NeerTypography.button.copyWith(color: theme.textTheme.bodyLarge?.color)),
+                                child: Text(AppStrings.viewProfile, style: NeerTypography.button.copyWith(color: theme.textTheme.bodyLarge?.color)),
                               ),
                             ),
                           ],

@@ -89,7 +89,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
       if (mounted) {
         setState(() {
           _isTargetPrivate = profileData['is_private'] ?? false;
-          _targetUserName = profileData['full_name'] ?? "Kullanıcı";
+          _targetUserName = profileData['full_name'] ?? AppStrings.defaultUser;
         });
       }
 
@@ -180,17 +180,30 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
       backgroundColor: Colors.transparent,
       builder: (context) {
         final theme = Theme.of(context);
-        return Container(
-          decoration: BoxDecoration(color: theme.cardColor, borderRadius: const BorderRadius.vertical(top: Radius.circular(24))),
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(width: 40, height: 4, margin: const EdgeInsets.symmetric(vertical: 12), decoration: BoxDecoration(color: theme.dividerColor, borderRadius: BorderRadius.circular(2))),
-              _buildOptionItem(context, Icons.ios_share_rounded, "Profili Paylaş", () {}),
-              _buildOptionItem(context, Icons.flag_rounded, "Şikayet Et", () {}, isDestructive: true),
-              _buildOptionItem(context, Icons.block_rounded, "Engelle", () {}, isDestructive: true),
-            ],
+        final sheetDark = theme.brightness == Brightness.dark;
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+            child: Container(
+              decoration: BoxDecoration(
+                color: sheetDark
+                    ? NeerColors.darkSurface.withValues(alpha: 0.80)
+                    : Colors.white.withValues(alpha: 0.85),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                border: Border.all(color: sheetDark ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.60)),
+              ),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(width: 40, height: 4, margin: const EdgeInsets.symmetric(vertical: 12), decoration: BoxDecoration(color: theme.dividerColor, borderRadius: BorderRadius.circular(2))),
+                  _buildOptionItem(context, Icons.ios_share_rounded, AppStrings.shareProfile, () {}),
+                  _buildOptionItem(context, Icons.flag_rounded, AppStrings.reportUser, () {}, isDestructive: true),
+                  _buildOptionItem(context, Icons.block_rounded, AppStrings.blockUser, () {}, isDestructive: true),
+                ],
+              ),
+            ),
           ),
         );
       }
@@ -261,7 +274,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                       ),
                       FutureBuilder<List<Map<String, dynamic>>>(future: _mutualHistoryFuture, builder: (context, snapshot) {
                           if (snapshot.hasData && snapshot.data!.isNotEmpty) return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: MutualHistoryList(items: snapshot.data!.take(2).toList()));
-                          return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(icon: Icons.timeline_rounded, title: "Henüz Ortak Anı Yok", subtitle: "Birlikte keşfettiğiniz mekanlar burada listelenecek."));
+                          return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(icon: Icons.timeline_rounded, title: AppStrings.noMutualMemories, subtitle: AppStrings.noMutualMemoriesDesc));
                       }),
                       const SizedBox(height: 30),
 
@@ -271,7 +284,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                         child: SectionHeader(title: AppStrings.theirFrequentPlaces, icon: Icons.place_rounded, onActionTap: () => _showAllFrequentPlaces(context)),
                       ),
                       FutureBuilder<List<Map<String, dynamic>>>(future: _frequentPlacesFuture, builder: (context, snapshot) {
-                          if (!snapshot.hasData || snapshot.data!.isEmpty) return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(icon: Icons.explore_off_rounded, title: "Henüz Mekan Yok", subtitle: "Sık ziyaret ettiği mekanlar oluştuğunda burada görünecek."));
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(icon: Icons.explore_off_rounded, title: AppStrings.noPlacesYet, subtitle: AppStrings.noPlacesYetDesc));
                           
                           final places = snapshot.data!;
 
@@ -308,7 +321,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                                           child: Text(name, style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w600),
                                             maxLines: 1, overflow: TextOverflow.ellipsis),
                                         ),
-                                        Text('$visits ziyaret', style: NeerTypography.caption.copyWith(color: Theme.of(context).disabledColor)),
+                                        Text(AppStrings.visitsCount(visits), style: NeerTypography.caption.copyWith(color: Theme.of(context).disabledColor)),
                                       ],
                                     ),
                                   ),
@@ -325,7 +338,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                         child: SectionHeader(title: AppStrings.theirFavorites, icon: Icons.favorite_rounded, onActionTap: () => _showAllFavorites(context)),
                       ),
                       StreamBuilder<List<Map<String, dynamic>>>(stream: _favoritesStream, builder: (context, snapshot) {
-                          if (!snapshot.hasData || snapshot.data!.isEmpty) return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(icon: Icons.favorite_border_rounded, title: "Favori Listesi Boş", subtitle: "Henüz favorilerine eklediği bir mekan bulunmuyor."));
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(icon: Icons.favorite_border_rounded, title: AppStrings.favoritesEmpty, subtitle: AppStrings.favoritesEmptyDesc));
                           
                           return StackedCardCarousel(
                             itemCount: snapshot.data!.length,
@@ -333,10 +346,10 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                             itemBuilder: (context, index) {
                               var fav = snapshot.data![index];
                               return VerticalPlaceCard(
-                                name: fav['name'] ?? 'Mekan',
+                                name: fav['name'] ?? AppStrings.place,
                                 rating: (fav['rating'] is num) ? (fav['rating'] as num).toStringAsFixed(1) : "0.0",
                                 imgUrl: fav['image'] ?? "https://picsum.photos/400",
-                                onTap: () => context.push('/venue/${_findPlaceId(fav)}', extra: {'venueName': fav['name'] ?? 'Mekan', 'imageUrl': fav['image'] ?? "https://picsum.photos/400"})
+                                onTap: () => context.push('/venue/${_findPlaceId(fav)}', extra: {'venueName': fav['name'] ?? AppStrings.place, 'imageUrl': fav['image'] ?? "https://picsum.photos/400"})
                               );
                             },
                           );
@@ -349,7 +362,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                         child: SectionHeader(title: AppStrings.theirNotes, icon: Icons.edit_note_rounded, onActionTap: () => _showAllNotes(context)),
                       ),
                       StreamBuilder<List<Map<String, dynamic>>>(stream: _notesStream, builder: (context, snapshot) {
-                          if (!snapshot.hasData || snapshot.data!.isEmpty) return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(icon: Icons.note_alt_rounded, title: "Not Paylaşılmamış", subtitle: "Henüz herhangi bir mekana not bırakmamış."));
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(icon: Icons.note_alt_rounded, title: AppStrings.noNotesShared, subtitle: AppStrings.noNotesSharedDesc));
                           
                           return StackedCardCarousel(
                             itemCount: snapshot.data!.length,
@@ -357,11 +370,11 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                             itemBuilder: (context, index) {
                               var note = snapshot.data![index];
                               return VerticalNoteCard(
-                                placeName: note['place_name'] ?? "Mekan",
+                                placeName: note['place_name'] ?? AppStrings.place,
                                 note: note['content'] ?? "",
                                 date: _formatDate(note['date']),
                                 profileImg: userData['avatar_url'] ?? _defaultProfileUrl,
-                                onTap: () => context.push('/venue/${_findPlaceId(note)}', extra: {'venueName': note['place_name'] ?? "Mekan", 'imageUrl': "https://picsum.photos/200"})
+                                onTap: () => context.push('/venue/${_findPlaceId(note)}', extra: {'venueName': note['place_name'] ?? AppStrings.place, 'imageUrl': "https://picsum.photos/200"})
                               );
                             },
                           );
@@ -374,7 +387,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                         child: SectionHeader(title: AppStrings.theirSurveys, icon: Icons.star_rate_rounded, onActionTap: () => _showAllSurveys(context)),
                       ),
                       FutureBuilder<List<Map<String, dynamic>>>(future: _surveyHistoryFuture, builder: (context, snapshot) {
-                          if (!snapshot.hasData || snapshot.data!.isEmpty) return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(icon: Icons.rate_review_outlined, title: "Değerlendirme Yapılmamış", subtitle: "Henüz hiçbir mekana puan veya yorum bırakmamış."));
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) return Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: FriendEmptyCard(icon: Icons.rate_review_outlined, title: AppStrings.noReviews, subtitle: AppStrings.noReviewsDesc));
                           
                           return StackedCardCarousel(
                             itemCount: snapshot.data!.length,
@@ -382,10 +395,10 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                             itemBuilder: (context, index) {
                               var rev = snapshot.data![index];
                               return PlaceReviewCard(
-                                placeName: rev['location_name'] ?? "Mekan", 
+                                placeName: rev['location_name'] ?? AppStrings.place, 
                                 score: (rev['rating'] is num) ? (rev['rating'] as num).toDouble() : 0.0, 
                                 date: _formatDate(rev['created_at']), 
-                                onTap: () => context.push('/venue/${_findPlaceId(rev)}', extra: {'venueName': rev['location_name'] ?? "Mekan", 'imageUrl': "https://picsum.photos/200"})
+                                onTap: () => context.push('/venue/${_findPlaceId(rev)}', extra: {'venueName': rev['location_name'] ?? AppStrings.place, 'imageUrl': "https://picsum.photos/200"})
                               );
                             },
                           );
@@ -478,7 +491,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                 return const ShimmerList(itemCount: 5);
               }
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text("Kullanıcı bulunamadı"));
+                return Center(child: Text(AppStrings.userNotFound));
               }
 
               var userData = snapshot.data!.first;
@@ -552,7 +565,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text("$_incomingRequestName seni takip etmek istiyor.", style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w700), textAlign: TextAlign.center),
+                        Text(AppStrings.followRequestFrom(_incomingRequestName), style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w700), textAlign: TextAlign.center),
                         const SizedBox(height: 12),
                         Row(children: [
                             Expanded(child: SizedBox(height: 40, child: ElevatedButton(onPressed: () => _handleIncomingRequest(true), style: ElevatedButton.styleFrom(backgroundColor: theme.primaryColor, foregroundColor: Colors.white, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text(AppStrings.accept, style: const TextStyle(fontWeight: FontWeight.bold))))),

@@ -152,7 +152,11 @@ class SupabaseService {
   // ════════════════════════════════════════════
   Future<List<Map<String, dynamic>>> getUserQuests(String uid) async {
     try {
-      final response = await _supabase.from('quests').select().eq('user_id', uid);
+      final response = await _supabase
+          .from('user_quests')
+          .select('*, quest_definitions(*)')
+          .eq('user_id', uid)
+          .order('created_at', ascending: false);
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
       return [];
@@ -452,17 +456,15 @@ class SupabaseService {
   // 19. FEED (RPC)
   // ════════════════════════════════════════════
   Future<List<Map<String, dynamic>>> getFeedPosts({
-    required String userId,
     required String filterMode,
-    int limit = 20,
-    int offset = 0,
+    int pageSize = 20,
+    int pageNumber = 0,
   }) async {
     try {
       final response = await _supabase.rpc('get_feed_posts', params: {
-        'p_user_id': userId,
-        'p_filter': filterMode,
-        'p_limit': limit,
-        'p_offset': offset,
+        'page_number': pageNumber,
+        'page_size': pageSize,
+        'filter_mode': filterMode,
       });
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {

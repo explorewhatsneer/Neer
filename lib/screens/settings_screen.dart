@@ -15,6 +15,7 @@ import '../widgets/common/app_confirm_dialog.dart';
 import '../services/supabase_service.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/common/app_cached_image.dart';
+import '../widgets/common/glass_button.dart';
 
 // WIDGETLAR
 import '../widgets/settings/settings_widgets.dart';
@@ -88,26 +89,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         final theme = Theme.of(context);
-        return Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: theme.cardColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppStrings.themeSelection, 
-                style: NeerTypography.h3.copyWith(fontWeight: FontWeight.bold)
+        final sheetDark = theme.brightness == Brightness.dark;
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: sheetDark
+                    ? NeerColors.darkSurface.withValues(alpha: 0.80)
+                    : Colors.white.withValues(alpha: 0.85),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                border: Border.all(
+                  color: sheetDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.white.withValues(alpha: 0.60),
+                ),
               ),
-              const SizedBox(height: 20),
-              
-              _buildThemeOption(context, AppStrings.systemTheme, ThemeMode.system, Icons.smartphone_rounded),
-              _buildThemeOption(context, AppStrings.lightMode, ThemeMode.light, Icons.light_mode_rounded),
-              _buildThemeOption(context, AppStrings.darkMode, ThemeMode.dark, Icons.dark_mode_rounded),
-            ],
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppStrings.themeSelection,
+                    style: NeerTypography.h3.copyWith(fontWeight: FontWeight.bold)
+                  ),
+                  const SizedBox(height: 20),
+
+                  _buildThemeOption(context, AppStrings.systemTheme, ThemeMode.system, Icons.smartphone_rounded),
+                  _buildThemeOption(context, AppStrings.lightMode, ThemeMode.light, Icons.light_mode_rounded),
+                  _buildThemeOption(context, AppStrings.darkMode, ThemeMode.dark, Icons.dark_mode_rounded),
+                ],
+              ),
+            ),
           ),
         );
       }
@@ -150,25 +165,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         final theme = Theme.of(context);
-        return Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: theme.cardColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppStrings.languageSelection, 
-                style: NeerTypography.h3.copyWith(fontWeight: FontWeight.bold)
+        final sheetDark = theme.brightness == Brightness.dark;
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: sheetDark
+                    ? NeerColors.darkSurface.withValues(alpha: 0.80)
+                    : Colors.white.withValues(alpha: 0.85),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                border: Border.all(
+                  color: sheetDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.white.withValues(alpha: 0.60),
+                ),
               ),
-              const SizedBox(height: 20),
-              
-              _buildLanguageOption(context, "Türkçe", const Locale('tr'), "🇹🇷"),
-              _buildLanguageOption(context, "English", const Locale('en'), "🇺🇸"),
-            ],
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppStrings.languageSelection,
+                    style: NeerTypography.h3.copyWith(fontWeight: FontWeight.bold)
+                  ),
+                  const SizedBox(height: 20),
+
+                  _buildLanguageOption(context, "Türkçe", const Locale('tr'), "🇹🇷"),
+                  _buildLanguageOption(context, "English", const Locale('en'), "🇺🇸"),
+                ],
+              ),
+            ),
           ),
         );
       }
@@ -230,7 +259,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       }
     } catch (e) {
-      if (mounted) AppSnackBar.error(context, "Hata: $e");
+      if (mounted) AppSnackBar.error(context, "${AppStrings.error}: $e");
     }
   }
 
@@ -257,11 +286,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     final user = _service.client.auth.currentUser;
     final userImage = user?.userMetadata?['avatar_url'] ?? "https://i.pravatar.cc/150?img=60";
-    final userName = user?.userMetadata?['full_name'] ?? "Kullanıcı";
+    final userName = user?.userMetadata?['full_name'] ?? AppStrings.defaultUser;
 
     // Şu anki tema adını al
     String currentThemeName;
@@ -287,29 +315,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           AppStrings.settingsTitle,
           style: NeerTypography.h3.copyWith(fontSize: 20, fontWeight: FontWeight.w700),
         ),
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 12),
-          child: Center(
-            child: GestureDetector(
-              onTap: () {
-                HapticFeedback.lightImpact();
-                Navigator.pop(context);
-              },
-              child: Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: theme.cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.08)
-                        : Colors.black.withValues(alpha: 0.05),
-                  ),
-                ),
-                child: Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: theme.iconTheme.color),
-              ),
-            ),
+        leading: Center(
+          child: GlassButton.medium(
+            icon: Icons.arrow_back_ios_new_rounded,
+            onTap: () => Navigator.pop(context),
           ),
         ),
       ),
@@ -380,7 +389,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 0.5),
                             ),
                             child: Text(
-                              "Free",
+                              AppStrings.freePlan,
                               style: NeerTypography.caption.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,
@@ -533,7 +542,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SettingsSwitch(
                 icon: Icons.lock_person_rounded, 
                 color: Colors.indigo, 
-                title: "Gizli Hesap", // AppStrings.privateAccount olmalı (core'a eklediysen)
+                title: AppStrings.privateAccount,
                 value: _isPrivateAccount,
                 onChanged: _isLoading ? (v){} : _togglePrivateAccount, // Yüklenirken tıklamayı engelle
               ),
