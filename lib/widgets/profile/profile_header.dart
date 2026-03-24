@@ -144,7 +144,7 @@ class ProfileHeader extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 44),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,7 +194,7 @@ class ProfileHeader extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 7),
 
             // Satır 2: Bio (sol, esnek) | NeerScore (sağ, sabit)
             Row(
@@ -224,7 +224,7 @@ class ProfileHeader extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 7),
 
             // Satır 3: Stats — tıklanabilir
             Row(
@@ -348,12 +348,12 @@ class _NeerScoreRingHeader extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             CircularProgressIndicator(
-              value: 1.0, strokeWidth: 2.5,
+              value: 1.0, strokeWidth: 4.5,
               valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.12)),
             ),
             CircularProgressIndicator(
               value: (score / 10.0).clamp(0.0, 1.0),
-              strokeWidth: 2.5,
+              strokeWidth: 4.5,
               valueColor: AlwaysStoppedAnimation(color),
               strokeCap: StrokeCap.round,
             ),

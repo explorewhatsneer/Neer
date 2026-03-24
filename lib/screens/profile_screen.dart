@@ -188,13 +188,13 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                           followingCount: (user?.followingCount ?? 0).toString(),
                           neerScore: (user?.neerScore ?? 5.0).toDouble(),
                           neerScoreLabel: user?.neerScoreLabel ?? AppStrings.neerScoreStandard,
-                          onEditTap: () async {
+                          onEditTap: () {
                             HapticFeedback.lightImpact();
-                            await context.push(AppRoutes.editProfile);
+                            appRouter.push(AppRoutes.editProfile);
                           },
                           onSettingsTap: () {
                             HapticFeedback.lightImpact();
-                            context.push(AppRoutes.settings);
+                            appRouter.push(AppRoutes.settings);
                           },
                           onFollowersTap: () => _showFollowersList(context, 'followers', user?.name ?? ''),
                           onFollowingTap: () => _showFollowersList(context, 'following', user?.name ?? ''),
