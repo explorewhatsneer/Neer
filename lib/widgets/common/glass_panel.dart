@@ -36,8 +36,8 @@ class GlassPanel extends StatelessWidget {
     this.boxShadow,
     this.border,
     this.backgroundColor,
-    this.darkAlpha = 0.08,
-    this.lightAlpha = 0.55,
+    this.darkAlpha = 0.13,
+    this.lightAlpha = 0.72,
   });
 
   /// Bottom sheet style — top corners rounded.
@@ -86,7 +86,7 @@ class GlassPanel extends StatelessWidget {
     this.boxShadow,
     this.border,
     this.backgroundColor,
-    this.darkAlpha = 0.08,
+    this.darkAlpha = 0.13,
     this.lightAlpha = 0.55,
   })  : borderRadius = const BorderRadius.all(Radius.circular(22)),
         blurSigma = 40;
@@ -103,7 +103,7 @@ class GlassPanel extends StatelessWidget {
     this.boxShadow,
     this.border,
     this.backgroundColor,
-    this.darkAlpha = 0.07,
+    this.darkAlpha = 0.11,
     this.lightAlpha = 0.50,
   })  : borderRadius = const BorderRadius.all(Radius.circular(20)),
         blurSigma = 36;

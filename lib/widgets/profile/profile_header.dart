@@ -187,7 +187,7 @@ class ProfileHeader extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _HeaderIconButton(icon: Icons.edit_rounded, onTap: onEditTap ?? () {}),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 7),
                     _HeaderIconButton(icon: Icons.settings_rounded, onTap: onSettingsTap ?? () {}),
                   ],
                 ),
@@ -218,7 +218,7 @@ class ProfileHeader extends StatelessWidget {
                 const SizedBox(width: 12),
                 _NeerScoreRingHeader(
                   score: neerScore,                  
-                  size: 80,
+                  size: 48,
                 ),
               ],
             ),
@@ -235,12 +235,12 @@ class ProfileHeader extends StatelessWidget {
                 _StatSep(),
                 GestureDetector(
                   onTap: () { HapticFeedback.lightImpact(); onFollowingTap?.call(); },
-                  child: _StatChip(value: followingCount, label: 'takip'),
+                  child: _StatChip(value: followingCount, label: AppStrings.following),
                 ),
                 _StatSep(),
                 GestureDetector(
                   onTap: () { HapticFeedback.lightImpact(); onFriendsTap?.call(); },
-                  child: const _StatChip(value: '—', label: 'arkadaş'),
+                  child: const _StatChip(value: '—', label: 'Arkadaş'),
                 ),
               ],
             ),
@@ -341,14 +341,14 @@ class _NeerScoreRingHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _color();
     return SizedBox(
-        width: size, height: size,
+        width: 48, height: 48,
         child: Stack(
           alignment: Alignment.center,
           children: [
             SizedBox(
               width: size, height: size,
               child: CircularProgressIndicator(
-                value: 1.0, strokeWidth: 3.5,
+                value: 1.0, strokeWidth: 2.5,
                 valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.12)),
               ),
             ),
@@ -356,14 +356,13 @@ class _NeerScoreRingHeader extends StatelessWidget {
               width: size, height: size,
               child: CircularProgressIndicator(
                 value: (score / 10.0).clamp(0.0, 1.0),
-                strokeWidth: 3.5,
+                strokeWidth: 2.5,
                 valueColor: AlwaysStoppedAnimation(color),
                 strokeCap: StrokeCap.round,
               ),
             ),
             Text(score.toStringAsFixed(1), style: TextStyle(
-              color: Colors.white, fontSize: size * 0.22, fontWeight: FontWeight.w700, height: 1.0,
-              shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 4)],
+              color: Colors.white, fontSize: 48 * 0.26, fontWeight: FontWeight.w600, height: 1.0,
             )),
           ],
         ),
