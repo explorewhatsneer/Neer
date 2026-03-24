@@ -344,6 +344,35 @@ class NeerShadows {
       spreadRadius: 0,
     ),
   ];
+
+  // Buzlu cam gölgesi — ClipRRect DIŞINDA kullanılmalı
+  static List<BoxShadow> glass({bool isDark = true}) => isDark
+      ? [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+            spreadRadius: -6,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.20),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ]
+      : [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.10),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+            spreadRadius: -4,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ];
 }
 
 // ─── 8. TEMA OLUŞTURUCU ─────────────────────────────────────────

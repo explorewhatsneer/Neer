@@ -112,11 +112,11 @@ class GlassPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Buzlu cam: her iki modda da white tint — dark modda şeffaf beyaz, light modda opak beyaz
+    // Buzlu cam tonu — dark: şeffaf beyaz, light: opak beyaz
     final bgColor = backgroundColor ??
         Colors.white.withValues(alpha: isDark ? darkAlpha : lightAlpha);
 
-    // Buzlu cam border — ince beyaz kenar her modda
+    // Frosted kenar — ince beyaz
     final resolvedBorder = border ??
         Border.all(
           color: isDark
@@ -125,29 +125,34 @@ class GlassPanel extends StatelessWidget {
           width: 1.0,
         );
 
-    final resolvedShadow = boxShadow ??
-        NeerShadows.soft();
+    // Gölge — ClipRRect DIŞINDA uygulanır, cliplanmaz
+    final resolvedShadow = boxShadow ?? NeerShadows.glass(isDark: isDark);
 
-    Widget container = Container(
+    // Dış kapsayıcı: boyut + margin + GÖLGE (clip dışı)
+    return Container(
       width: width,
       height: height,
       constraints: constraints,
       margin: margin,
-      padding: padding,
       decoration: BoxDecoration(
-        color: bgColor,
         borderRadius: borderRadius,
-        border: resolvedBorder,
         boxShadow: resolvedShadow,
       ),
-      child: child,
-    );
-
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
-        child: container,
+      // ClipRRect sadece blur + renk katmanlarını kırpar; gölge bunun dışında kalır
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+          child: Container(
+            padding: padding,
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: borderRadius,
+              border: resolvedBorder,
+            ),
+            child: child,
+          ),
+        ),
       ),
     );
   }
