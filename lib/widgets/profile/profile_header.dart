@@ -144,7 +144,7 @@ class ProfileHeader extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+        padding: const EdgeInsets.fromLTRB(16, 28, 16, 28),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,9 +217,8 @@ class ProfileHeader extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 _NeerScoreRingHeader(
-                  score: neerScore,
-                  label: neerScoreLabel,
-                  size: 64,
+                  score: neerScore,                  
+                  size: 56,
                 ),
               ],
             ),
@@ -329,9 +328,8 @@ class _StatSep extends StatelessWidget {
 
 class _NeerScoreRingHeader extends StatelessWidget {
   final double score;
-  final String label;
   final double size;
-  const _NeerScoreRingHeader({required this.score, required this.label, required this.size});
+  const _NeerScoreRingHeader({required this.score, required this.size});
 
   Color _color() {
     if (score >= 8.0) return const Color(0xFF30D158);
@@ -357,16 +355,10 @@ class _NeerScoreRingHeader extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation(color),
               strokeCap: StrokeCap.round,
             ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(score.toStringAsFixed(1), style: TextStyle(
-                  color: Colors.white, fontSize: size * 0.20, fontWeight: FontWeight.w800, height: 1.1,
-                  shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 4)],
-                )),
-                Text(label, style: TextStyle(color: color, fontSize: size * 0.11, fontWeight: FontWeight.w600)),
-              ],
-            ),
+            Text(score.toStringAsFixed(1), style: TextStyle(
+              color: Colors.white, fontSize: size * 0.22, fontWeight: FontWeight.w700, height: 1.0,
+              shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 4)],
+            )),
           ],
         ),
     );
