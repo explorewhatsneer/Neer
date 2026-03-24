@@ -47,8 +47,6 @@ class _CustomNavBarState extends State<CustomNavBar>
     Icons.person_rounded,
   ];
 
-  // Emoji for dot mode (active tab)
-  static const List<String> _emojis = ['🗺️', '💬', '⚡', '🎯', '👤'];
 
   @override
   void initState() {
@@ -139,26 +137,38 @@ class _CustomNavBarState extends State<CustomNavBar>
                     decoration: BoxDecoration(
                       color: _isDot
                           ? (isDark
-                              ? NeerColors.darkSurface.withValues(alpha: 0.80)
+                              ? NeerColors.darkSurface.withValues(alpha: 0.75)
                               : Colors.white.withValues(alpha: 0.80))
                           : (isDark
                               ? NeerColors.darkSurface.withValues(alpha: 0.35)
                               : Colors.white.withValues(alpha: 0.35)),
                       borderRadius: BorderRadius.circular(radius),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: _isDot ? 0.15 : 0.12),
+                        color: _isDot
+                            ? (isDark
+                                ? Colors.white.withValues(alpha: 0.18)
+                                : Colors.black.withValues(alpha: 0.10))
+                            : Colors.white.withValues(alpha: 0.12),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: _isDot ? 0.28 : 0.40),
-                          blurRadius: _isDot ? 14 : 28,
-                          offset: Offset(0, _isDot ? 5 : 6),
+                          color: Colors.black.withValues(alpha: _isDot ? 0.25 : 0.40),
+                          blurRadius: _isDot ? 12 : 28,
+                          offset: _isDot ? const Offset(0, 4) : Offset(0, 6),
                         ),
                       ],
                     ),
                     child: _isDot
-                        ? const SizedBox.shrink()
+                        ? Center(
+                            child: Icon(
+                              _icons[widget.activeIndex],
+                              size: 18,
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.75)
+                                  : Colors.black.withValues(alpha: 0.60),
+                            ),
+                          )
                         : Opacity(
                             opacity: t,
                             child: Row(

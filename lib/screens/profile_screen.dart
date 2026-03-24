@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -54,7 +55,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   late Future<List<Map<String, dynamic>>> _badgesFuture;
   late Future<List<Map<String, dynamic>>> _allBadgeDefsFuture;
-  late Future<List<Map<String, dynamic>>> _activeQuestsFuture;
   late Future<Map<String, dynamic>> _identityStatsFuture;
 
   @override
@@ -75,7 +75,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
     _badgesFuture = _supabaseService.getUserBadges(_uid);
     _allBadgeDefsFuture = _supabaseService.getAllBadgeDefinitions();
-    _activeQuestsFuture = _supabaseService.getUserActiveQuests(_uid);
     _identityStatsFuture = _supabaseService.getUserIdentityStats(_uid);
   }
 
@@ -126,12 +125,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
               sliver: SliverAppBar(
-                expandedHeight: 220,
+                expandedHeight: 260,
                 pinned: true,
                 floating: false,
                 backgroundColor: isDark
-                    ? const Color(0xFF1A0F1A).withValues(alpha: 0.92)
-                    : const Color(0xFFFDFBFF).withValues(alpha: 0.92),
+                    ? const Color(0xFF1A0F1A)
+                    : const Color(0xFFFDFBFF),
                 elevation: 0,
                 automaticallyImplyLeading: false,
 
@@ -139,51 +138,63 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 title: AnimatedOpacity(
                   opacity: innerBoxIsScrolled ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 200),
-                  child: Row(
-                    children: [
-                      _AvatarRingSmall(imageUrl: displayImage),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(user?.name ?? '',
-                          style: NeerTypography.bodySmall.copyWith(
-                            color: Colors.white, fontWeight: FontWeight.w600,
+                  child: ClipRect(
+                    child: BackdropFilter(
+                      filter: innerBoxIsScrolled
+                          ? ImageFilter.blur(sigmaX: 20, sigmaY: 20)
+                          : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+                      child: Row(
+                        children: [
+                          _AvatarRingSmall(imageUrl: displayImage),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(user?.name ?? '',
+                              style: NeerTypography.bodySmall.copyWith(
+                                color: Colors.white, fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                          _NeerScoreRingSmall(
+                            score: user?.neerScore ?? 5.0,
+                            label: user?.neerScoreLabel ?? 'Standart',
+                          ),
+                        ],
                       ),
-                      _NeerScoreRingSmall(
-                        score: user?.neerScore ?? 5.0,
-                        label: user?.neerScoreLabel ?? 'Standart',
-                      ),
-                    ],
+                    ),
                   ),
                 ),
 
-                flexibleSpace: FlexibleSpaceBar(
-                  stretchModes: const [StretchMode.zoomBackground],
-                  background: ProfileHeaderBackground(
-                    imageUrl: displayImage,
-                    isDark: isDark,
-                    child: ProfileHeader(
-                      imageUrl: displayImage,
-                      name: user?.name ?? AppStrings.nameless,
-                      username: user?.username ?? '',
-                      bio: user?.bio ?? '',
-                      followersCount: (user?.followersCount ?? 0).toString(),
-                      followingCount: (user?.followingCount ?? 0).toString(),
-                      neerScore: (user?.neerScore ?? 5.0).toDouble(),
-                      neerScoreLabel: user?.neerScoreLabel ?? AppStrings.neerScoreStandard,
-                      onEditTap: () async {
-                        HapticFeedback.lightImpact();
-                        await context.push(AppRoutes.editProfile);
-                      },
-                      onSettingsTap: () {
-                        HapticFeedback.lightImpact();
-                        context.push(AppRoutes.settings);
-                      },
-                      onFollowersTap: () => _showFollowersList(context, 'followers'),
-                      onFollowingTap: () => _showFollowersList(context, 'following'),
-                      onFriendsTap: () => _showFollowersList(context, 'friends'),
+                flexibleSpace: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+                    child: FlexibleSpaceBar(
+                      stretchModes: const [StretchMode.zoomBackground],
+                      background: ProfileHeaderBackground(
+                        imageUrl: displayImage,
+                        isDark: isDark,
+                        child: ProfileHeader(
+                          imageUrl: displayImage,
+                          name: user?.name ?? AppStrings.nameless,
+                          username: user?.username ?? '',
+                          bio: user?.bio ?? '',
+                          followersCount: (user?.followersCount ?? 0).toString(),
+                          followingCount: (user?.followingCount ?? 0).toString(),
+                          neerScore: (user?.neerScore ?? 5.0).toDouble(),
+                          neerScoreLabel: user?.neerScoreLabel ?? AppStrings.neerScoreStandard,
+                          onEditTap: () async {
+                            HapticFeedback.lightImpact();
+                            await context.push(AppRoutes.editProfile);
+                          },
+                          onSettingsTap: () {
+                            HapticFeedback.lightImpact();
+                            context.push(AppRoutes.settings);
+                          },
+                          onFollowersTap: () => _showFollowersList(context, 'followers'),
+                          onFollowingTap: () => _showFollowersList(context, 'following'),
+                          onFriendsTap: () => _showFollowersList(context, 'friends'),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -285,26 +296,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     },
                   ),
 
-                  const SizedBox(height: 16),
-
-                  // ==========================================
-                  // D. GÖREVLER PREVİEW
-                  // ==========================================
-                  FutureBuilder<List<Map<String, dynamic>>>(
-                    future: _activeQuestsFuture,
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox.shrink();
-                      return _QuestPreview(
-                        quests: snapshot.data!,
-                        onSeeAll: () => context.push(AppRoutes.quests),
-                      );
-                    },
-                  ),
-
                   const SizedBox(height: 28),
 
                   // ==========================================
-                  // E. SPOTLIGHT — Single Carousel (Favorites Only)
+                  // D. SPOTLIGHT — Single Carousel (Favorites Only)
                   // ==========================================
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -504,11 +499,7 @@ class _NeerIdentityCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(AppStrings.neerIdentityTitle,
-                  style: NeerTypography.caption.copyWith(
-                    color: Theme.of(context).disabledColor, letterSpacing: 0.8,
-                  ),
-                ),
+                SectionHeader(title: AppStrings.neerIdentityTitle),
                 const SizedBox(height: 10),
                 Row(
                   children: [
@@ -532,12 +523,18 @@ class _IdentityStat extends StatelessWidget {
   const _IdentityStat({required this.value, required this.label});
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Expanded(
       child: Column(
         children: [
-          Text(value, style: NeerTypography.h2.copyWith(fontSize: 20, fontWeight: FontWeight.w700)),
+          Text(value, style: NeerTypography.h2.copyWith(
+            fontSize: 20, fontWeight: FontWeight.w700,
+            color: cs.onSurface,
+          )),
           const SizedBox(height: 2),
-          Text(label, style: NeerTypography.caption.copyWith(color: Theme.of(context).disabledColor, fontSize: 10)),
+          Text(label, style: NeerTypography.caption.copyWith(
+            color: cs.onSurface.withValues(alpha: 0.45), fontSize: 10,
+          )),
         ],
       ),
     );
@@ -620,168 +617,6 @@ class _BadgeVitrin extends StatelessWidget {
             ],
           ),
         );
-  }
-}
-
-// ==========================================
-// GÖREVLER PREVİEW
-// ==========================================
-class _QuestPreview extends StatelessWidget {
-  final List<Map<String, dynamic>> quests;
-  final VoidCallback onSeeAll;
-  const _QuestPreview({required this.quests, required this.onSeeAll});
-
-  @override
-  Widget build(BuildContext context) {
-    final daily = quests.where((q) => q['type'] == 'daily').take(2).toList();
-    final weeklyTop = quests.where((q) => q['type'] == 'weekly').toList()
-      ..sort((a, b) => ((b['current_progress'] ?? 0) as int)
-          .compareTo((a['current_progress'] ?? 0) as int));
-    final epicActive = quests.where((q) =>
-        q['type'] == 'epic' &&
-        (q['is_completed'] != true)).take(1).toList();
-    return GlassPanel.card(
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SectionHeader(title: AppStrings.questsTitle, onActionTap: onSeeAll),
-          const SizedBox(height: 8),
-          ...daily.map((q) => _QuestRow(quest: q, type: 'daily')),
-          if (weeklyTop.isNotEmpty) _QuestRow(quest: weeklyTop.first, type: 'weekly'),
-          if (epicActive.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            _EpicQuestCard(quest: epicActive.first),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _QuestRow extends StatelessWidget {
-  final Map<String, dynamic> quest;
-  final String type;
-  const _QuestRow({required this.quest, required this.type});
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final progress = (quest['current_progress'] ?? 0) as int;
-    final target = (quest['target_count'] ?? 1) as int;
-    final isCompleted = quest['is_completed'] == true;
-    final ratio = target > 0 ? progress / target : 0.0;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: 18, height: 18,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isCompleted ? theme.primaryColor.withValues(alpha: 0.25) : Colors.transparent,
-              border: Border.all(
-                color: isCompleted ? theme.primaryColor : Colors.white.withValues(alpha: 0.25),
-                width: 1.5,
-              ),
-            ),
-            child: isCompleted ? Icon(Icons.check, size: 10, color: theme.primaryColor) : null,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  quest['title_tr'] ?? quest['title_en'] ?? '',
-                  style: NeerTypography.bodySmall.copyWith(
-                    fontWeight: FontWeight.w500,
-                    decoration: isCompleted ? TextDecoration.lineThrough : null,
-                    color: isCompleted ? theme.disabledColor : null,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(2),
-                  child: LinearProgressIndicator(
-                    value: ratio.clamp(0.0, 1.0), minHeight: 2,
-                    backgroundColor: Colors.white.withValues(alpha: 0.07),
-                    valueColor: AlwaysStoppedAnimation(isCompleted ? NeerColors.success : theme.primaryColor),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            isCompleted ? '+${quest['ts_reward']} ✓' : '+${quest['ts_reward']}',
-            style: NeerTypography.caption.copyWith(
-              color: NeerColors.success.withValues(alpha: isCompleted ? 1.0 : 0.65),
-              fontWeight: FontWeight.w600, fontSize: 10,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _EpicQuestCard extends StatelessWidget {
-  final Map<String, dynamic> quest;
-  const _EpicQuestCard({required this.quest});
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final progress = (quest['current_progress'] ?? 0) as int;
-    final target = (quest['target_count'] ?? 1) as int;
-    final ratio = target > 0 ? progress / target : 0.0;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.primaryColor.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: theme.primaryColor.withValues(alpha: 0.22)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: theme.primaryColor.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text('EPİK', style: NeerTypography.caption.copyWith(
-                  color: theme.primaryColor, fontSize: 9, letterSpacing: 0.8,
-                )),
-              ),
-              const Spacer(),
-              Text('+${quest['ts_reward']} TS',
-                style: NeerTypography.caption.copyWith(
-                  color: NeerColors.success.withValues(alpha: 0.8), fontWeight: FontWeight.w600,
-                )),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(quest['title_tr'] ?? quest['title_en'] ?? '',
-            style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: LinearProgressIndicator(
-              value: ratio.clamp(0.0, 1.0), minHeight: 3,
-              backgroundColor: Colors.white.withValues(alpha: 0.07),
-              valueColor: AlwaysStoppedAnimation(theme.primaryColor),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text('$progress / $target',
-            style: NeerTypography.caption.copyWith(color: theme.disabledColor, fontSize: 10)),
-        ],
-      ),
-    );
   }
 }
 
@@ -978,21 +813,40 @@ class _BentoDashboard extends StatelessWidget {
                 final progress = quest != null && quest['progress'] is num
                     ? (quest['progress'] as num).toDouble() / 100
                     : 0.0;
-                final title = quest?['title'] ?? AppStrings.comingSoon;
+                final title = quest?['title_tr'] ?? quest?['title'] ?? AppStrings.comingSoon;
 
-                return AnimatedPress(
-                  onTap: () {},
-                  useHeavyHaptic: true,
+                return GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    context.push(AppRoutes.quests);
+                  },
                   child: GlassPanel.bento(
                     height: 170,
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(14),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Başlık + ok
+                        Row(
+                          children: [
+                            Text(
+                              AppStrings.questsTitle,
+                              style: NeerTypography.overline.copyWith(
+                                color: theme.primaryColor,
+                                fontSize: 10,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                            const Spacer(),
+                            Icon(Icons.chevron_right_rounded, size: 16,
+                              color: theme.primaryColor.withValues(alpha: 0.6)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
                         // Circular progress
                         SizedBox(
-                          width: 52,
-                          height: 52,
+                          width: 46,
+                          height: 46,
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
@@ -1016,19 +870,32 @@ class _BentoDashboard extends StatelessWidget {
                                     ? Icons.emoji_events_rounded
                                     : Icons.flag_rounded,
                                 color: theme.primaryColor,
-                                size: 22,
+                                size: 20,
                               ),
                             ],
                           ),
                         ),
                         const Spacer(),
+                        // Görev adı
                         Text(
                           title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: NeerTypography.bodySmall.copyWith(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        // İlerleme barı
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(3),
+                          child: LinearProgressIndicator(
+                            value: progress.clamp(0.0, 1.0),
+                            minHeight: 3,
+                            backgroundColor: Colors.white.withValues(alpha: 0.08),
+                            valueColor: AlwaysStoppedAnimation(theme.primaryColor),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -1036,7 +903,8 @@ class _BentoDashboard extends StatelessWidget {
                           "${(progress * 100).toInt()}%",
                           style: NeerTypography.caption.copyWith(
                             color: theme.primaryColor,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10,
                           ),
                         ),
                       ],
@@ -1070,42 +938,42 @@ class _BentoDashboard extends StatelessWidget {
                         onTap: () => context.push(AppRoutes.myReviews),
                         child: GlassPanel.bento(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(14),
+                          padding: const EdgeInsets.all(12),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.star_rounded,
-                                    size: 16,
+                              // Başlık + ok
+                              Row(children: [
+                                Icon(Icons.star_rounded, size: 13, color: NeerColors.warning),
+                                const SizedBox(width: 4),
+                                Text(AppStrings.myReviewsTitle,
+                                  style: NeerTypography.overline.copyWith(
+                                    color: NeerColors.warning, fontSize: 9, letterSpacing: 0.6)),
+                                const Spacer(),
+                                Icon(Icons.chevron_right_rounded, size: 13,
+                                  color: NeerColors.warning.withValues(alpha: 0.6)),
+                              ]),
+                              const SizedBox(height: 5),
+                              Row(children: [
+                                Icon(Icons.star_rounded, size: 14, color: NeerColors.warning),
+                                const SizedBox(width: 4),
+                                Text(
+                                  score > 0 ? score.toStringAsFixed(1) : "-",
+                                  style: NeerTypography.h3.copyWith(
+                                    fontSize: 15, fontWeight: FontWeight.w800,
                                     color: NeerColors.warning,
                                   ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    score > 0
-                                        ? score.toStringAsFixed(1)
-                                        : "-",
-                                    style: NeerTypography.h3.copyWith(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800,
-                                      color: NeerColors.warning,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                placeName,
+                                ),
+                              ]),
+                              const SizedBox(height: 4),
+                              Text(placeName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: NeerTypography.caption.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
-                                  color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
-                                ),
-                              ),
+                                  fontWeight: FontWeight.w500, fontSize: 11,
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                                )),
                             ],
                           ),
                         ),
@@ -1130,28 +998,31 @@ class _BentoDashboard extends StatelessWidget {
                         onTap: () => context.push(AppRoutes.myNotes),
                         child: GlassPanel.bento(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(14),
+                          padding: const EdgeInsets.all(12),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.edit_note_rounded,
-                                size: 16,
-                                color: theme.primaryColor.withValues(alpha: 0.75),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                noteText,
+                              // Başlık + ok
+                              Row(children: [
+                                Icon(Icons.edit_note_rounded, size: 13,
+                                  color: theme.primaryColor),
+                                const SizedBox(width: 4),
+                                Text(AppStrings.myNotes,
+                                  style: NeerTypography.overline.copyWith(
+                                    color: theme.primaryColor, fontSize: 9, letterSpacing: 0.6)),
+                                const Spacer(),
+                                Icon(Icons.chevron_right_rounded, size: 13,
+                                  color: theme.primaryColor.withValues(alpha: 0.6)),
+                              ]),
+                              const SizedBox(height: 5),
+                              Text(noteText,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: NeerTypography.caption.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 11,
-                                  color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.65),
-                                  height: 1.4,
-                                ),
-                              ),
+                                  fontStyle: FontStyle.italic, fontSize: 11, height: 1.3,
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.70),
+                                )),
                             ],
                           ),
                         ),

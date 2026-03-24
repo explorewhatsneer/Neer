@@ -95,9 +95,12 @@ class _NotesScreenState extends State<NotesScreen> {
                               ],
                             ),
                             const SizedBox(height: 6),
-                            Text(content,
-                              maxLines: 2, overflow: TextOverflow.ellipsis,
-                              style: NeerTypography.bodySmall.copyWith(color: Colors.white.withValues(alpha: 0.85))),
+                            Flexible(
+                              child: Text(content,
+                                maxLines: 2, overflow: TextOverflow.ellipsis,
+                                style: NeerTypography.bodySmall.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.82))),
+                            ),
                           ],
                         ),
                       ),
@@ -116,32 +119,73 @@ class _NotesScreenState extends State<NotesScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => GlassPanel.sheet(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(child: Container(width: 40, height: 4,
-              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)))),
-            const SizedBox(height: 16),
-            Builder(builder: (ctx) {
-              final pn = (note['places'] as Map?)?['name'] as String? ??
-                  note['place_name'] as String? ?? '';
-              if (pn.isEmpty) return const SizedBox.shrink();
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(children: [
-                  const Icon(Icons.location_on_rounded, size: 14, color: Colors.white54),
-                  const SizedBox(width: 4),
-                  Text(pn, style: NeerTypography.caption.copyWith(color: Colors.white.withValues(alpha: 0.6))),
-                ]),
-              );
-            }),
-            Text(note['content'] as String? ?? note['note'] as String? ?? '',
-              style: NeerTypography.bodySmall.copyWith(color: Colors.white.withValues(alpha: 0.9), height: 1.5)),
-            const SizedBox(height: 32),
-          ],
+      isScrollControlled: true,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.5,
+        minChildSize: 0.3,
+        maxChildSize: 0.85,
+        expand: false,
+        builder: (_, scrollController) => GlassPanel.sheet(
+          padding: const EdgeInsets.all(0),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 8),
+                child: Center(
+                  child: Container(
+                    width: 40, height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 40),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Builder(builder: (ctx) {
+                        final pn = (note['places'] as Map?)?['name'] as String?
+                            ?? note['place_name'] as String? ?? '';
+                        if (pn.isEmpty) return const SizedBox.shrink();
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Row(children: [
+                            Icon(Icons.location_on_rounded, size: 14,
+                              color: Colors.white.withValues(alpha: 0.55)),
+                            const SizedBox(width: 4),
+                            Text(pn, style: NeerTypography.caption.copyWith(
+                              color: Colors.white.withValues(alpha: 0.6))),
+                          ]),
+                        );
+                      }),
+                      Text(
+                        note['content'] as String? ?? note['note'] as String? ?? '',
+                        style: NeerTypography.bodySmall.copyWith(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          height: 1.6,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        note['created_at'] != null
+                            ? _formatDate(note['created_at'].toString())
+                            : '',
+                        style: NeerTypography.caption.copyWith(
+                          color: Colors.white.withValues(alpha: 0.35),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

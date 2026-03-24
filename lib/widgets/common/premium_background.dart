@@ -139,22 +139,22 @@ List<Widget> _buildOrbs(bool isDark, double t) {
       : [0.13, 0.12, 0.08, 0.10, 0.07];
 
   final basePositions = [
-    const Alignment(-2.1, -1.5),  // sol üst köşe dışı
-    const Alignment(1.6, -1.9),   // sağ üst köşe dışı
-    const Alignment(-2.0, 1.5),   // sol alt köşe dışı
-    const Alignment(1.4, 2.0),    // sağ alt köşe dışı
-    const Alignment(0.0, 0.1),    // merkez (sabit)
+    const Alignment(-1.4, -1.3),  // sol üst — daha dışarıda
+    const Alignment(1.4, -1.2),   // sağ üst
+    const Alignment(-1.3, 1.3),   // sol alt
+    const Alignment(1.3, 1.2),    // sağ alt
+    const Alignment(0.0, 0.1),    // merkez
   ];
 
-  // LARGE orb sizes — must fill significant screen area
-  final sizes = [0.90, 0.75, 0.80, 0.70, 0.65];
+  // Smaller orb sizes — köşelerde kalıyor
+  final sizes = [0.65, 0.55, 0.60, 0.52, 0.48];
 
   final phases = [0.0, 0.20, 0.40, 0.60, 0.80];
 
   return List.generate(orbCount, (i) {
     final phase = (t + phases[i]) % 1.0;
-    final dx = math.sin(phase * 2 * math.pi) * 0.35;
-    final dy = math.cos(phase * 2 * math.pi) * 0.30;
+    final dx = math.sin(phase * 2 * math.pi) * 0.25;
+    final dy = math.cos(phase * 2 * math.pi) * 0.22;
 
     final alignment = Alignment(
       (basePositions[i].x + dx).clamp(-1.3, 1.3),

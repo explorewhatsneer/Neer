@@ -381,7 +381,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                             height: 240, // Yatay kart olduğu için kısa
                             itemBuilder: (context, index) {
                               var rev = snapshot.data![index];
-                              return DetailedReviewCard(
+                              return PlaceReviewCard(
                                 placeName: rev['location_name'] ?? "Mekan", 
                                 score: (rev['rating'] is num) ? (rev['rating'] as num).toDouble() : 0.0, 
                                 date: _formatDate(rev['created_at']), 

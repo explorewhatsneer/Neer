@@ -2,16 +2,17 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:palette_generator/palette_generator.dart';
 
 import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
 
 // ==========================================
-// PP BLUR ARKA PLAN (D2)
+// DOMINANT RENK ARKA PLAN (D1)
 // ==========================================
 
-/// PP blur (D2): dominant renk + PP doku + aşağı fade
-class ProfileHeaderBackground extends StatelessWidget {
+/// D1: PP'den dominant renk çıkar — solid blok, fade yok
+class ProfileHeaderBackground extends StatefulWidget {
   final String imageUrl;
   final bool isDark;
   final Widget child;
@@ -24,60 +25,74 @@ class ProfileHeaderBackground extends StatelessWidget {
   });
 
   @override
+  State<ProfileHeaderBackground> createState() =>
+      _ProfileHeaderBackgroundState();
+}
+
+class _ProfileHeaderBackgroundState extends State<ProfileHeaderBackground> {
+  Color? _dominantColor;
+
+  @override
+  void initState() {
+    super.initState();
+    _extractColor();
+  }
+
+  @override
+  void didUpdateWidget(ProfileHeaderBackground old) {
+    super.didUpdateWidget(old);
+    if (old.imageUrl != widget.imageUrl) _extractColor();
+  }
+
+  Future<void> _extractColor() async {
+    if (widget.imageUrl.isEmpty) return;
+    try {
+      final generator = await PaletteGenerator.fromImageProvider(
+        NetworkImage(widget.imageUrl),
+        maximumColorCount: 5,
+      );
+      final color = generator.darkMutedColor?.color
+          ?? generator.mutedColor?.color
+          ?? generator.dominantColor?.color;
+      if (color != null && mounted) {
+        setState(() => _dominantColor = color);
+      }
+    } catch (_) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final bgColor = isDark ? const Color(0xFF1A0F1A) : const Color(0xFFFDFBFF);
+    final fallback = widget.isDark
+        ? const Color(0xFF1A0F1A)
+        : const Color(0xFFFDFBFF);
+
+    final bgColor = _dominantColor != null
+        ? (widget.isDark
+            ? Color.lerp(_dominantColor!, Colors.black, 0.45)!
+            : Color.lerp(_dominantColor!, Colors.white, 0.60)!)
+        : fallback;
 
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Katman 1: PP blur doku
-        if (imageUrl.isNotEmpty)
-          Positioned.fill(
-            child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
-              child: Transform.scale(
-                scale: 1.15,
-                child: CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => const SizedBox.shrink(),
-                ),
-              ),
-            ),
+        // Dominant renk — solid, fade yok
+        Positioned.fill(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeOut,
+            color: bgColor,
           ),
-
-        // Katman 2: Dominant renk tint
+        ),
+        // Hafif overlay — yazı okunabilirliği
         Positioned.fill(
           child: Container(
-            color: isDark
-                ? Colors.black.withValues(alpha: 0.28)
-                : Colors.white.withValues(alpha: 0.22),
+            color: widget.isDark
+                ? Colors.black.withValues(alpha: 0.22)
+                : Colors.white.withValues(alpha: 0.15),
           ),
         ),
-
-        // Katman 3: Aşağı fade — ekranla kaynaşıyor
-        Positioned(
-          bottom: 0, left: 0, right: 0,
-          child: Container(
-            height: 150,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  bgColor.withValues(alpha: 0.0),
-                  bgColor.withValues(alpha: 0.65),
-                  bgColor.withValues(alpha: 0.92),
-                  bgColor,
-                ],
-                stops: const [0.0, 0.40, 0.70, 1.0],
-              ),
-            ),
-          ),
-        ),
-
-        // Katman 4: Header içerik
-        child,
+        // İçerik
+        widget.child,
       ],
     );
   }
@@ -131,7 +146,7 @@ class ProfileHeader extends StatelessWidget {
     return Align(
       alignment: Alignment.bottomLeft,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 56),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

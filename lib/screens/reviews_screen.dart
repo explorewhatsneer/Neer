@@ -68,7 +68,7 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
                   itemCount: reviews.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 10),
-                  itemBuilder: (context, i) => FeedReviewCard(post: reviews[i]),
+                  itemBuilder: (context, i) => DetailedReviewCard(post: reviews[i]),
                 );
               },
             ),

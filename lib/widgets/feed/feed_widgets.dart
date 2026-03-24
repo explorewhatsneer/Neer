@@ -509,3 +509,180 @@ class _FeedReviewCardState extends State<FeedReviewCard> {
     );
   }
 }
+
+/// Profil sayfası için detaylı review kartı — kategori puanları gösterir
+class DetailedReviewCard extends StatelessWidget {
+  final PostModel post;
+  const DetailedReviewCard({super.key, required this.post});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final int starRating = (post.rating ?? 0).toInt();
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark
+                ? NeerColors.darkSurface.withValues(alpha: 0.42)
+                : Colors.white.withValues(alpha: 0.78),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.14)
+                  : Colors.black.withValues(alpha: 0.07),
+              width: 0.8,
+            ),
+          ),
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Mekan adı + tarih
+              Row(
+                children: [
+                  Icon(Icons.place_rounded, size: 14,
+                    color: theme.primaryColor.withValues(alpha: 0.8)),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      post.locationName.isNotEmpty ? post.locationName : 'Mekan',
+                      style: NeerTypography.bodySmall.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Text(
+                    _formatTimeAgo(post.createdAt),
+                    style: NeerTypography.caption.copyWith(
+                      color: theme.disabledColor, fontSize: 11),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              // Genel yıldız puanı
+              Row(
+                children: [
+                  ...List.generate(5, (i) => Padding(
+                    padding: const EdgeInsets.only(right: 2),
+                    child: Icon(
+                      Icons.star_rounded,
+                      size: 18,
+                      color: i < starRating
+                          ? NeerColors.warning
+                          : theme.disabledColor.withValues(alpha: 0.2),
+                    ),
+                  )),
+                  const SizedBox(width: 6),
+                  Text(
+                    (post.rating ?? 0).toStringAsFixed(1),
+                    style: NeerTypography.h3.copyWith(
+                      fontWeight: FontWeight.w700, fontSize: 15,
+                      color: NeerColors.warning,
+                    ),
+                  ),
+                ],
+              ),
+
+              // Kategori puanları (varsa)
+              if (_hasDetailedRatings(post)) ...[
+                const SizedBox(height: 10),
+                _DetailRatingBar(label: AppStrings.taste, value: post.ratingTaste, theme: theme),
+                _DetailRatingBar(label: AppStrings.service, value: post.ratingService, theme: theme),
+                _DetailRatingBar(label: AppStrings.atmosphere, value: post.ratingAmbiance, theme: theme),
+                _DetailRatingBar(label: AppStrings.pricePerf, value: post.ratingPrice, theme: theme),
+              ],
+
+              // Highlights (varsa)
+              if (post.highlights.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 5,
+                  runSpacing: 4,
+                  children: post.highlights.map((h) => Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: theme.primaryColor.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: theme.primaryColor.withValues(alpha: 0.20)),
+                    ),
+                    child: Text(h, style: NeerTypography.caption.copyWith(
+                      color: theme.primaryColor, fontSize: 10)),
+                  )).toList(),
+                ),
+              ],
+
+              // Yorum (varsa)
+              if (post.reviewComment != null && post.reviewComment!.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  post.reviewComment!,
+                  style: NeerTypography.bodySmall.copyWith(
+                    height: 1.5,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.78),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _hasDetailedRatings(PostModel p) =>
+      p.ratingTaste != null || p.ratingService != null ||
+      p.ratingAmbiance != null || p.ratingPrice != null;
+}
+
+class _DetailRatingBar extends StatelessWidget {
+  final String label;
+  final double? value;
+  final ThemeData theme;
+  const _DetailRatingBar({required this.label, required this.value, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    if (value == null || value == 0) return const SizedBox.shrink();
+    final ratio = (value! / 5.0).clamp(0.0, 1.0);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 70,
+            child: Text(label, style: NeerTypography.caption.copyWith(
+              fontSize: 11,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+            )),
+          ),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: LinearProgressIndicator(
+                value: ratio,
+                minHeight: 4,
+                backgroundColor: Colors.white.withValues(alpha: 0.08),
+                valueColor: AlwaysStoppedAnimation(NeerColors.warning),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(value!.toStringAsFixed(1),
+            style: NeerTypography.caption.copyWith(
+              fontSize: 11, fontWeight: FontWeight.w600,
+              color: NeerColors.warning,
+            )),
+        ],
+      ),
+    );
+  }
+}

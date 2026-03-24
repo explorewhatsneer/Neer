@@ -179,7 +179,12 @@ class SupabaseService {
     try {
       final response = await _supabase
           .from('posts')
-          .select()
+          .select(
+            'id, user_id, user_name, user_image, content, image_url, type, '
+            'location_name, location_id, rating, review_comment, '
+            'rating_taste, rating_service, rating_ambiance, rating_price, '
+            'highlights, like_count, comment_count, likes, created_at, place_id'
+          )
           .eq('user_id', uid)
           .eq('type', 'review')
           .order('created_at', ascending: false);

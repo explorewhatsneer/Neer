@@ -14,6 +14,11 @@ class PostModel {
   final int commentCount;
   final DateTime createdAt;
   final List<String> likes;   // Supabase'de text[] array sütunu veya join ile gelir
+  final double? ratingTaste;
+  final double? ratingService;
+  final double? ratingAmbiance;
+  final double? ratingPrice;
+  final List<String> highlights;
 
   PostModel({
     required this.id,
@@ -26,11 +31,16 @@ class PostModel {
     this.rating,
     required this.locationName,
     required this.locationId,
-    this.imageUrl, 
+    this.imageUrl,
     this.likeCount = 0,
     this.commentCount = 0,
     required this.createdAt,
     this.likes = const [],
+    this.ratingTaste,
+    this.ratingService,
+    this.ratingAmbiance,
+    this.ratingPrice,
+    this.highlights = const [],
   });
 
   // Supabase'e veri gönderirken (snake_case)
@@ -50,7 +60,12 @@ class PostModel {
       'like_count': likeCount,
       'comment_count': commentCount,
       'created_at': createdAt.toIso8601String(), // DateTime -> String
-      'likes': likes, // Postgres array
+      'likes': likes,
+      'rating_taste': ratingTaste,
+      'rating_service': ratingService,
+      'rating_ambiance': ratingAmbiance,
+      'rating_price': ratingPrice,
+      'highlights': highlights,
     };
   }
 
@@ -77,8 +92,16 @@ class PostModel {
           ? DateTime.parse(map['created_at'].toString()) 
           : DateTime.now(),
           
-      // Postgres array'i List<String>'e çevirme
       likes: List<String>.from(map['likes'] ?? []),
+      ratingTaste: map['rating_taste'] != null
+          ? (map['rating_taste'] as num).toDouble() : null,
+      ratingService: map['rating_service'] != null
+          ? (map['rating_service'] as num).toDouble() : null,
+      ratingAmbiance: map['rating_ambiance'] != null
+          ? (map['rating_ambiance'] as num).toDouble() : null,
+      ratingPrice: map['rating_price'] != null
+          ? (map['rating_price'] as num).toDouble() : null,
+      highlights: List<String>.from(map['highlights'] ?? []),
     );
   }
 }

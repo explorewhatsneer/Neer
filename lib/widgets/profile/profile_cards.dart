@@ -145,13 +145,13 @@ class HorizontalNoteCard extends VerticalNoteCard { const HorizontalNoteCard({su
 // ==========================================
 // ⭐ 3. DEĞERLENDİRME KARTI (Ultra Premium iOS Style)
 // ==========================================
-class DetailedReviewCard extends StatefulWidget {
+class PlaceReviewCard extends StatefulWidget {
   final String placeName;
   final double score;
   final String date;
   final VoidCallback? onTap;
 
-  const DetailedReviewCard({
+  const PlaceReviewCard({
     super.key, 
     required this.placeName, 
     required this.score, 
@@ -160,10 +160,10 @@ class DetailedReviewCard extends StatefulWidget {
   });
 
   @override
-  State<DetailedReviewCard> createState() => _DetailedReviewCardState();
+  State<PlaceReviewCard> createState() => _PlaceReviewCardState();
 }
 
-class _DetailedReviewCardState extends State<DetailedReviewCard> {
+class _PlaceReviewCardState extends State<PlaceReviewCard> {
   bool _isExpanded = false;
 
   void _toggleExpand() {
