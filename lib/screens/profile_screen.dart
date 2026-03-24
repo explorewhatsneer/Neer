@@ -97,8 +97,15 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   void _showAllFavorites(BuildContext context) {}
 
+  Color? _extractedBgColor;
+
   void _showFollowersList(BuildContext context, String tab) {
-    // TODO: followers/following/friends sheet
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _FollowersSheet(uid: _uid, initialTab: tab),
+    );
   }
 
   @override
@@ -128,9 +135,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 expandedHeight: 260,
                 pinned: true,
                 floating: false,
-                backgroundColor: isDark
-                    ? const Color(0xFF1A0F1A)
-                    : const Color(0xFFFDFBFF),
+                backgroundColor: _extractedBgColor
+                    ?? (isDark ? const Color(0xFF1A0F1A) : const Color(0xFFFDFBFF)),
                 elevation: 0,
                 automaticallyImplyLeading: false,
 
@@ -173,6 +179,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       background: ProfileHeaderBackground(
                         imageUrl: displayImage,
                         isDark: isDark,
+                        onColorExtracted: (c) {
+                          if (mounted) setState(() => _extractedBgColor = c);
+                        },
                         child: ProfileHeader(
                           imageUrl: displayImage,
                           name: user?.name ?? AppStrings.nameless,
@@ -528,7 +537,7 @@ class _IdentityStat extends StatelessWidget {
       child: Column(
         children: [
           Text(value, style: NeerTypography.h2.copyWith(
-            fontSize: 20, fontWeight: FontWeight.w700,
+            fontSize: 17, fontWeight: FontWeight.w700,
             color: cs.onSurface,
           )),
           const SizedBox(height: 2),
@@ -571,7 +580,7 @@ class _BadgeVitrin extends StatelessWidget {
                       child: Column(
                         children: [
                           Container(
-                            width: 44, height: 44,
+                            width: 38, height: 38,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: isEarned
@@ -586,7 +595,7 @@ class _BadgeVitrin extends StatelessWidget {
                             ),
                             child: Center(
                               child: isEarned
-                                  ? Text(badge['icon'] ?? '🏅', style: const TextStyle(fontSize: 20))
+                                  ? Text(badge['icon'] ?? '🏅', style: const TextStyle(fontSize: 17))
                                   : ColorFiltered(
                                       colorFilter: const ColorFilter.matrix([
                                         0.2126, 0.7152, 0.0722, 0, 0,
@@ -594,7 +603,7 @@ class _BadgeVitrin extends StatelessWidget {
                                         0.2126, 0.7152, 0.0722, 0, 0,
                                         0, 0, 0, 0.30, 0,
                                       ]),
-                                      child: Text(badge['icon'] ?? '🏅', style: const TextStyle(fontSize: 20)),
+                                      child: Text(badge['icon'] ?? '🏅', style: const TextStyle(fontSize: 17)),
                                     ),
                             ),
                           ),
@@ -779,6 +788,183 @@ class _FrequentCard extends StatelessWidget {
 }
 
 // ==========================================
+// TAKİPÇİ / TAKİP / ARKADAŞ SHEET
+// ==========================================
+class _FollowersSheet extends StatefulWidget {
+  final String uid;
+  final String initialTab;
+  const _FollowersSheet({required this.uid, required this.initialTab});
+
+  @override
+  State<_FollowersSheet> createState() => _FollowersSheetState();
+}
+
+class _FollowersSheetState extends State<_FollowersSheet>
+    with SingleTickerProviderStateMixin {
+  late TabController _tc;
+  late final Map<String, Future<List<Map<String, dynamic>>>> _futures;
+
+  @override
+  void initState() {
+    super.initState();
+    final idx = widget.initialTab == 'following'
+        ? 1
+        : widget.initialTab == 'friends'
+            ? 2
+            : 0;
+    _tc = TabController(length: 3, vsync: this, initialIndex: idx);
+    _futures = {
+      'followers': _fetch('followers'),
+      'following': _fetch('following'),
+      'friends': _fetch('friends'),
+    };
+  }
+
+  Future<List<Map<String, dynamic>>> _fetch(String type) async {
+    try {
+      if (type == 'followers') {
+        final data = await supabase
+            .from('followers')
+            .select('profiles!followers_follower_id_fkey(id, full_name, username, avatar_url)')
+            .eq('following_id', widget.uid);
+        return (data as List)
+            .map((e) => (e['profiles'] ?? <String, dynamic>{}) as Map<String, dynamic>)
+            .where((p) => p.isNotEmpty)
+            .toList();
+      } else if (type == 'following') {
+        final data = await supabase
+            .from('followers')
+            .select('profiles!followers_following_id_fkey(id, full_name, username, avatar_url)')
+            .eq('follower_id', widget.uid);
+        return (data as List)
+            .map((e) => (e['profiles'] ?? <String, dynamic>{}) as Map<String, dynamic>)
+            .where((p) => p.isNotEmpty)
+            .toList();
+      } else {
+        // Mutual friends via RPC (if available)
+        final data = await supabase
+            .rpc('get_mutual_friends', params: {'uid': widget.uid})
+            .catchError((_) => <dynamic>[]);
+        return (data as List).cast<Map<String, dynamic>>();
+      }
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
+  void dispose() {
+    _tc.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.72,
+      decoration: BoxDecoration(
+        color: isDark
+            ? NeerColors.darkSurface.withValues(alpha: 0.97)
+            : Colors.white.withValues(alpha: 0.98),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          // Handle bar
+          Container(
+            width: 36, height: 4,
+            margin: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withValues(alpha: 0.18) : Colors.black.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          // TabBar
+          TabBar(
+            controller: _tc,
+            tabs: [
+              Tab(text: AppStrings.followers),
+              const Tab(text: 'Takip'),
+              const Tab(text: 'Arkadaş'),
+            ],
+            labelStyle: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w600, fontSize: 14),
+            unselectedLabelStyle: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w400, fontSize: 14),
+            labelColor: isDark ? Colors.white : Colors.black,
+            unselectedLabelColor: isDark ? Colors.white.withValues(alpha: 0.40) : Colors.black.withValues(alpha: 0.38),
+            indicatorColor: NeerColors.primary,
+            dividerColor: Colors.transparent,
+          ),
+          const SizedBox(height: 4),
+          Expanded(
+            child: TabBarView(
+              controller: _tc,
+              children: [
+                _UserList(future: _futures['followers']!),
+                _UserList(future: _futures['following']!),
+                _UserList(future: _futures['friends']!),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UserList extends StatelessWidget {
+  final Future<List<Map<String, dynamic>>> future;
+  const _UserList({required this.future});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: future,
+      builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final users = snap.data ?? [];
+        if (users.isEmpty) {
+          return Center(
+            child: Text('Henüz kimse yok',
+              style: NeerTypography.bodySmall.copyWith(color: theme.disabledColor)),
+          );
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          itemCount: users.length,
+          itemBuilder: (context, i) {
+            final u = users[i];
+            final avatarUrl = u['avatar_url'] as String?;
+            return ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: CircleAvatar(
+                radius: 22,
+                backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+                backgroundColor: NeerColors.primary.withValues(alpha: 0.15),
+                child: avatarUrl == null
+                    ? Icon(Icons.person, size: 18, color: NeerColors.primary)
+                    : null,
+              ),
+              title: Text(
+                u['full_name'] as String? ?? '',
+                style: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                '@${u['username'] as String? ?? ''}',
+                style: NeerTypography.caption.copyWith(color: theme.disabledColor),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+// ==========================================
 // BENTO DASHBOARD — Asymmetric Glass Grid
 // ==========================================
 class _BentoDashboard extends StatelessWidget {
@@ -958,13 +1144,14 @@ class _BentoDashboard extends StatelessWidget {
                               Row(children: [
                                 Icon(Icons.star_rounded, size: 14, color: NeerColors.warning),
                                 const SizedBox(width: 4),
-                                Text(
+                                Flexible(child: Text(
                                   score > 0 ? score.toStringAsFixed(1) : "-",
                                   style: NeerTypography.h3.copyWith(
                                     fontSize: 15, fontWeight: FontWeight.w800,
                                     color: NeerColors.warning,
                                   ),
-                                ),
+                                  overflow: TextOverflow.ellipsis,
+                                )),
                               ]),
                               const SizedBox(height: 4),
                               Text(placeName,

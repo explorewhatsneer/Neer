@@ -540,6 +540,7 @@ class DetailedReviewCard extends StatelessWidget {
           ),
           padding: const EdgeInsets.all(14),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Mekan adı + tarih

@@ -16,12 +16,14 @@ class ProfileHeaderBackground extends StatefulWidget {
   final String imageUrl;
   final bool isDark;
   final Widget child;
+  final ValueChanged<Color>? onColorExtracted;
 
   const ProfileHeaderBackground({
     super.key,
     required this.imageUrl,
     required this.isDark,
     required this.child,
+    this.onColorExtracted,
   });
 
   @override
@@ -30,68 +32,94 @@ class ProfileHeaderBackground extends StatefulWidget {
 }
 
 class _ProfileHeaderBackgroundState extends State<ProfileHeaderBackground> {
-  Color? _dominantColor;
+  List<Color>? _palette;
 
   @override
   void initState() {
     super.initState();
-    _extractColor();
+    _extractColors();
   }
 
   @override
   void didUpdateWidget(ProfileHeaderBackground old) {
     super.didUpdateWidget(old);
-    if (old.imageUrl != widget.imageUrl) _extractColor();
+    if (old.imageUrl != widget.imageUrl) _extractColors();
   }
 
-  Future<void> _extractColor() async {
+  Future<void> _extractColors() async {
     if (widget.imageUrl.isEmpty) return;
     try {
       final generator = await PaletteGenerator.fromImageProvider(
         NetworkImage(widget.imageUrl),
-        maximumColorCount: 5,
+        maximumColorCount: 8,
       );
-      final color = generator.darkMutedColor?.color
-          ?? generator.mutedColor?.color
-          ?? generator.dominantColor?.color;
-      if (color != null && mounted) {
-        setState(() => _dominantColor = color);
+      final c1 = generator.darkVibrantColor?.color ?? generator.vibrantColor?.color;
+      final c2 = generator.darkMutedColor?.color ?? generator.mutedColor?.color;
+      final c3 = generator.dominantColor?.color;
+      final raw = [c1, c2, c3].whereType<Color>().toList();
+      if (raw.isNotEmpty && mounted) {
+        setState(() => _palette = raw);
+        // Notify parent with blended dominant color for collapsed header
+        final dominant = raw.first;
+        final blended = widget.isDark
+            ? Color.lerp(dominant, Colors.black, 0.55)!
+            : Color.lerp(dominant, Colors.white, 0.60)!;
+        widget.onColorExtracted?.call(blended);
       }
     } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
-    final fallback = widget.isDark
-        ? const Color(0xFF1A0F1A)
-        : const Color(0xFFFDFBFF);
+    final fallback1 = widget.isDark ? const Color(0xFF1A0F1A) : const Color(0xFFEDE8FF);
+    final fallback2 = widget.isDark ? const Color(0xFF120914) : const Color(0xFFF5F0FF);
 
-    final bgColor = _dominantColor != null
-        ? (widget.isDark
-            ? Color.lerp(_dominantColor!, Colors.black, 0.45)!
-            : Color.lerp(_dominantColor!, Colors.white, 0.60)!)
-        : fallback;
+    final List<Color> gradColors;
+    if (_palette != null && _palette!.isNotEmpty) {
+      final blended = _palette!.map((c) => widget.isDark
+          ? Color.lerp(c, Colors.black, 0.50)!
+          : Color.lerp(c, Colors.white, 0.58)!
+      ).toList();
+      if (blended.length == 1) {
+        final c = blended[0];
+        gradColors = [
+          c,
+          widget.isDark
+              ? Color.lerp(c, const Color(0xFF050505), 0.45)!
+              : Color.lerp(c, Colors.white, 0.35)!,
+        ];
+      } else {
+        gradColors = [blended[0], blended[blended.length > 2 ? 2 : 1]];
+      }
+    } else {
+      gradColors = [fallback1, fallback2];
+    }
 
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Dominant renk — solid, fade yok
+        // PP renklerinden diyagonal gradient
         Positioned.fill(
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 400),
+            duration: const Duration(milliseconds: 600),
             curve: Curves.easeOut,
-            color: bgColor,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: gradColors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
           ),
         ),
-        // Hafif overlay — yazı okunabilirliği
+        // Hafif overlay
         Positioned.fill(
           child: Container(
             color: widget.isDark
-                ? Colors.black.withValues(alpha: 0.22)
-                : Colors.white.withValues(alpha: 0.15),
+                ? Colors.black.withValues(alpha: 0.18)
+                : Colors.black.withValues(alpha: 0.04),
           ),
         ),
-        // İçerik
         widget.child,
       ],
     );
@@ -134,19 +162,24 @@ class ProfileHeader extends StatelessWidget {
     this.onFriendsTap,
   });
 
-  static final List<Shadow> _shadows = [
-    Shadow(color: Colors.black.withValues(alpha: 0.55), blurRadius: 8, offset: const Offset(0, 2)),
-  ];
-  static final List<Shadow> _shadowsLight = [
-    Shadow(color: Colors.black.withValues(alpha: 0.35), blurRadius: 6, offset: const Offset(0, 1)),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black.withValues(alpha: 0.87);
+    final subTextColor = isDark
+        ? Colors.white.withValues(alpha: 0.55)
+        : Colors.black.withValues(alpha: 0.50);
+    final textShadows = isDark
+        ? [Shadow(color: Colors.black.withValues(alpha: 0.55), blurRadius: 8, offset: const Offset(0, 2))]
+        : <Shadow>[];
+    final subShadows = isDark
+        ? [Shadow(color: Colors.black.withValues(alpha: 0.35), blurRadius: 6, offset: const Offset(0, 1))]
+        : <Shadow>[];
+
     return Align(
       alignment: Alignment.bottomLeft,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 56),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 48),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,51 +191,54 @@ class ProfileHeader extends StatelessWidget {
                 _ProfileAvatar(imageUrl: imageUrl.isNotEmpty ? imageUrl : 'https://i.pravatar.cc/300'),
                 const SizedBox(width: 12),
 
-                // İsim + username + butonlar
+                // İsim + username
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              name,
-                              style: NeerTypography.h2.copyWith(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                shadows: _shadows,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          _HeaderIconButton(icon: Icons.edit_rounded, onTap: onEditTap ?? () {}),
-                          const SizedBox(width: 5),
-                          _HeaderIconButton(icon: Icons.settings_rounded, onTap: onSettingsTap ?? () {}),
-                        ],
+                      Text(
+                        name,
+                        style: NeerTypography.h2.copyWith(
+                          color: textColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          shadows: textShadows,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 3),
                       Text(
                         '@$username',
                         style: NeerTypography.caption.copyWith(
-                          color: Colors.white.withValues(alpha: 0.55),
-                          shadows: _shadowsLight,
+                          color: subTextColor,
+                          shadows: subShadows,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
 
-                // NeerScore — edit buton satırıyla hizalı
-                _NeerScoreRingHeader(
-                  score: neerScore,
-                  label: neerScoreLabel,
-                  size: 44,
-                  topOffset: 28,
+                // Butonlar + NeerScore (butonların altında ortalı)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _HeaderIconButton(icon: Icons.edit_rounded, onTap: onEditTap ?? () {}),
+                        const SizedBox(width: 5),
+                        _HeaderIconButton(icon: Icons.settings_rounded, onTap: onSettingsTap ?? () {}),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    _NeerScoreRingHeader(
+                      score: neerScore,
+                      label: neerScoreLabel,
+                      size: 52,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -215,8 +251,10 @@ class ProfileHeader extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: NeerTypography.bodySmall.copyWith(
-                  color: Colors.white.withValues(alpha: 0.75),
-                  shadows: _shadowsLight,
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.75)
+                      : Colors.black.withValues(alpha: 0.65),
+                  shadows: subShadows,
                 ),
               ),
             ],
@@ -255,16 +293,30 @@ class _HeaderIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () { HapticFeedback.lightImpact(); onTap(); },
       child: Container(
         width: 28, height: 28,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.12),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.12)
+              : Colors.black.withValues(alpha: 0.07),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.20), width: 1),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.20)
+                : Colors.black.withValues(alpha: 0.12),
+            width: 1,
+          ),
         ),
-        child: Icon(icon, color: Colors.white.withValues(alpha: 0.85), size: 14),
+        child: Icon(
+          icon,
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.85)
+              : Colors.black.withValues(alpha: 0.70),
+          size: 14,
+        ),
       ),
     );
   }
@@ -276,17 +328,20 @@ class _StatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final valueColor = isDark ? Colors.white.withValues(alpha: 0.92) : Colors.black.withValues(alpha: 0.87);
+    final labelColor = isDark ? Colors.white.withValues(alpha: 0.45) : Colors.black.withValues(alpha: 0.45);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(value, style: NeerTypography.caption.copyWith(
-          color: Colors.white.withValues(alpha: 0.90),
-          fontWeight: FontWeight.w700, fontSize: 13,
-          shadows: [Shadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 6)],
+          color: valueColor,
+          fontWeight: FontWeight.w700, fontSize: 15,
+          shadows: isDark ? [Shadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 6)] : [],
         )),
         const SizedBox(width: 3),
         Text(label, style: NeerTypography.caption.copyWith(
-          color: Colors.white.withValues(alpha: 0.45), fontSize: 11,
+          color: labelColor, fontSize: 13,
         )),
       ],
     );
@@ -296,10 +351,11 @@ class _StatChip extends StatelessWidget {
 class _StatSep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: 1, height: 10,
       margin: const EdgeInsets.symmetric(horizontal: 8),
-      color: Colors.white.withValues(alpha: 0.22),
+      color: isDark ? Colors.white.withValues(alpha: 0.22) : Colors.black.withValues(alpha: 0.18),
     );
   }
 }
@@ -308,8 +364,7 @@ class _NeerScoreRingHeader extends StatelessWidget {
   final double score;
   final String label;
   final double size;
-  final double topOffset;
-  const _NeerScoreRingHeader({required this.score, required this.label, required this.size, this.topOffset = 0});
+  const _NeerScoreRingHeader({required this.score, required this.label, required this.size});
 
   Color _color() {
     if (score >= 8.0) return const Color(0xFF30D158);
@@ -320,9 +375,7 @@ class _NeerScoreRingHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = _color();
-    return Padding(
-      padding: EdgeInsets.only(top: topOffset),
-      child: SizedBox(
+    return SizedBox(
         width: size, height: size,
         child: Stack(
           alignment: Alignment.center,
@@ -349,7 +402,6 @@ class _NeerScoreRingHeader extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }
@@ -435,20 +487,23 @@ class _AvatarFullScreen extends StatelessWidget {
 class GradientTabIndicator extends Decoration {
   final double height;
   final BorderRadius borderRadius;
+  final Color? color;
   const GradientTabIndicator({
     this.height = 2.5,
     this.borderRadius = const BorderRadius.all(Radius.circular(2)),
+    this.color,
   });
 
   @override
   BoxPainter createBoxPainter([VoidCallback? onChange]) =>
-      _GradientTabPainter(height: height, borderRadius: borderRadius);
+      _SolidTabPainter(height: height, borderRadius: borderRadius, color: color ?? Colors.white);
 }
 
-class _GradientTabPainter extends BoxPainter {
+class _SolidTabPainter extends BoxPainter {
   final double height;
   final BorderRadius borderRadius;
-  _GradientTabPainter({required this.height, required this.borderRadius});
+  final Color color;
+  _SolidTabPainter({required this.height, required this.borderRadius, required this.color});
 
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
@@ -456,10 +511,7 @@ class _GradientTabPainter extends BoxPainter {
       offset.dx, offset.dy + (configuration.size?.height ?? 0) - height,
       configuration.size?.width ?? 0, height,
     );
-    final paint = Paint()
-      ..shader = const LinearGradient(
-        colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
-      ).createShader(rect);
+    final paint = Paint()..color = color;
     canvas.drawRRect(borderRadius.toRRect(rect), paint);
   }
 }
@@ -498,7 +550,9 @@ class ProfileTabBar extends StatelessWidget {
         tabAlignment: TabAlignment.start,
         padding: const EdgeInsets.only(left: 16),
         labelPadding: const EdgeInsets.only(right: 20),
-        indicator: const GradientTabIndicator(),
+        indicator: GradientTabIndicator(
+          color: isDark ? Colors.white : NeerColors.primary,
+        ),
         indicatorColor: Colors.transparent,
         dividerColor: Colors.transparent,
         labelColor: Colors.white,
