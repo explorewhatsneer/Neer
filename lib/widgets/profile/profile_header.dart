@@ -345,24 +345,26 @@ class _NeerScoreRingHeader extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            CircularProgressIndicator(
-              value: 1.0, strokeWidth: 2.5,
-              valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.12)),
+            SizedBox(
+              width: size, height: size,
+              child: CircularProgressIndicator(
+                value: 1.0, strokeWidth: 3.5,
+                valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.12)),
+              ),
             ),
-            CircularProgressIndicator(
-              value: (score / 10.0).clamp(0.0, 1.0),
-              strokeWidth: 2.5,
-              valueColor: AlwaysStoppedAnimation(color),
-              strokeCap: StrokeCap.round,
+            SizedBox(
+              width: size, height: size,
+              child: CircularProgressIndicator(
+                value: (score / 10.0).clamp(0.0, 1.0),
+                strokeWidth: 3.5,
+                valueColor: AlwaysStoppedAnimation(color),
+                strokeCap: StrokeCap.round,
+              ),
             ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(score.toStringAsFixed(1), style: TextStyle(
-                  color: Colors.white, fontSize: size * 0.20, fontWeight: FontWeight.w600, height: 2.1,                  
-                )),              
-              ],
-            ),
+            Text(score.toStringAsFixed(1), style: TextStyle(
+              color: Colors.white, fontSize: size * 0.22, fontWeight: FontWeight.w700, height: 1.0,
+              shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 4)],
+            )),
           ],
         ),
     );
