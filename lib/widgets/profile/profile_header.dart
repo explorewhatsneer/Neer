@@ -32,35 +32,27 @@ class ProfileHeaderBackground extends StatefulWidget {
 }
 
 class _ProfileHeaderBackgroundState extends State<ProfileHeaderBackground> {
-  List<Color>? _palette;
-
   @override
   void initState() {
     super.initState();
-    _extractColors();
+    _extractColor();
   }
 
   @override
   void didUpdateWidget(ProfileHeaderBackground old) {
     super.didUpdateWidget(old);
-    if (old.imageUrl != widget.imageUrl) _extractColors();
+    if (old.imageUrl != widget.imageUrl) _extractColor();
   }
 
-  Future<void> _extractColors() async {
+  Future<void> _extractColor() async {
     if (widget.imageUrl.isEmpty) return;
     try {
       final generator = await PaletteGenerator.fromImageProvider(
         NetworkImage(widget.imageUrl),
         maximumColorCount: 8,
       );
-      final c1 = generator.darkVibrantColor?.color ?? generator.vibrantColor?.color;
-      final c2 = generator.darkMutedColor?.color ?? generator.mutedColor?.color;
-      final c3 = generator.dominantColor?.color;
-      final raw = [c1, c2, c3].whereType<Color>().toList();
-      if (raw.isNotEmpty && mounted) {
-        setState(() => _palette = raw);
-        // Notify parent with blended dominant color for collapsed header
-        final dominant = raw.first;
+      final dominant = generator.dominantColor?.color ?? generator.vibrantColor?.color;
+      if (dominant != null && mounted) {
         final blended = widget.isDark
             ? Color.lerp(dominant, Colors.black, 0.55)!
             : Color.lerp(dominant, Colors.white, 0.60)!;
@@ -71,53 +63,26 @@ class _ProfileHeaderBackgroundState extends State<ProfileHeaderBackground> {
 
   @override
   Widget build(BuildContext context) {
-    final fallback1 = widget.isDark ? const Color(0xFF1A0F1A) : const Color(0xFFEDE8FF);
-    final fallback2 = widget.isDark ? const Color(0xFF120914) : const Color(0xFFF5F0FF);
-
-    final List<Color> gradColors;
-    if (_palette != null && _palette!.isNotEmpty) {
-      final blended = _palette!.map((c) => widget.isDark
-          ? Color.lerp(c, Colors.black, 0.50)!
-          : Color.lerp(c, Colors.white, 0.58)!
-      ).toList();
-      if (blended.length == 1) {
-        final c = blended[0];
-        gradColors = [
-          c,
-          widget.isDark
-              ? Color.lerp(c, const Color(0xFF050505), 0.45)!
-              : Color.lerp(c, Colors.white, 0.35)!,
-        ];
-      } else {
-        gradColors = [blended[0], blended[blended.length > 2 ? 2 : 1]];
-      }
-    } else {
-      gradColors = [fallback1, fallback2];
-    }
-
     return Stack(
       fit: StackFit.expand,
       children: [
-        // PP renklerinden diyagonal gradient
+        // PP blurlu arka plan
         Positioned.fill(
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOut,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: gradColors,
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-          ),
+          child: widget.imageUrl.isNotEmpty
+              ? CachedNetworkImage(imageUrl: widget.imageUrl, fit: BoxFit.cover)
+              : Container(
+                  color: widget.isDark ? const Color(0xFF1A0F1A) : const Color(0xFFEDE8FF),
+                ),
         ),
-        // Hafif overlay
+        // Frosted blur katmanı
         Positioned.fill(
-          child: Container(
-            color: widget.isDark
-                ? Colors.black.withValues(alpha: 0.18)
-                : Colors.black.withValues(alpha: 0.04),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 32, sigmaY: 32),
+            child: Container(
+              color: widget.isDark
+                  ? Colors.black.withValues(alpha: 0.62)
+                  : Colors.white.withValues(alpha: 0.52),
+            ),
           ),
         ),
         widget.child,
@@ -177,21 +142,19 @@ class ProfileHeader extends StatelessWidget {
         : <Shadow>[];
 
     return Align(
-      alignment: Alignment.bottomLeft,
+      alignment: Alignment.centerLeft,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 48),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 44),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Satır 1: Avatar | İsim+Username | Edit+Settings
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Avatar
                 _ProfileAvatar(imageUrl: imageUrl.isNotEmpty ? imageUrl : 'https://i.pravatar.cc/300'),
                 const SizedBox(width: 12),
-
-                // İsim + username
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,7 +170,7 @@ class ProfileHeader extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 2),
                       Text(
                         '@$username',
                         style: NeerTypography.caption.copyWith(
@@ -219,48 +182,51 @@ class ProfileHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-
-                // Butonlar + NeerScore (butonların altında ortalı)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                // Edit + Settings butonları (sağ üst)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _HeaderIconButton(icon: Icons.edit_rounded, onTap: onEditTap ?? () {}),
-                        const SizedBox(width: 5),
-                        _HeaderIconButton(icon: Icons.settings_rounded, onTap: onSettingsTap ?? () {}),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    _NeerScoreRingHeader(
-                      score: neerScore,
-                      label: neerScoreLabel,
-                      size: 52,
-                    ),
+                    _HeaderIconButton(icon: Icons.edit_rounded, onTap: onEditTap ?? () {}),
+                    const SizedBox(width: 5),
+                    _HeaderIconButton(icon: Icons.settings_rounded, onTap: onSettingsTap ?? () {}),
                   ],
                 ),
               ],
             ),
 
-            // Bio
-            if (bio.isNotEmpty) ...[
-              const SizedBox(height: 7),
-              Text(
-                bio,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: NeerTypography.bodySmall.copyWith(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.75)
-                      : Colors.black.withValues(alpha: 0.65),
-                  shadows: subShadows,
-                ),
-              ),
-            ],
+            const SizedBox(height: 10),
 
-            // Stats — tıklanabilir
-            const SizedBox(height: 8),
+            // Satır 2: Bio (sol, esnek) | NeerScore (sağ, sabit)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: bio.isNotEmpty
+                      ? Text(
+                          bio,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: NeerTypography.bodySmall.copyWith(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.78)
+                                : Colors.black.withValues(alpha: 0.65),
+                            shadows: subShadows,
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+                const SizedBox(width: 12),
+                _NeerScoreRingHeader(
+                  score: neerScore,
+                  label: neerScoreLabel,
+                  size: 64,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
+            // Satır 3: Stats — tıklanabilir
             Row(
               children: [
                 GestureDetector(
@@ -296,8 +262,9 @@ class _HeaderIconButton extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () { HapticFeedback.lightImpact(); onTap(); },
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        width: 28, height: 28,
+        width: 30, height: 30,
         decoration: BoxDecoration(
           color: isDark
               ? Colors.white.withValues(alpha: 0.12)
@@ -394,10 +361,10 @@ class _NeerScoreRingHeader extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(score.toStringAsFixed(1), style: TextStyle(
-                  color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800, height: 1.0,
+                  color: Colors.white, fontSize: size * 0.20, fontWeight: FontWeight.w800, height: 1.1,
                   shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 4)],
                 )),
-                Text(label, style: TextStyle(color: color, fontSize: 6, fontWeight: FontWeight.w600)),
+                Text(label, style: TextStyle(color: color, fontSize: size * 0.11, fontWeight: FontWeight.w600)),
               ],
             ),
           ],
@@ -555,10 +522,10 @@ class ProfileTabBar extends StatelessWidget {
         ),
         indicatorColor: Colors.transparent,
         dividerColor: Colors.transparent,
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.white.withValues(alpha: 0.38),
-        labelStyle: NeerTypography.caption.copyWith(fontWeight: FontWeight.w500, fontSize: 13),
-        unselectedLabelStyle: NeerTypography.caption.copyWith(fontWeight: FontWeight.w400, fontSize: 13),
+        labelColor: isDark ? Colors.white : NeerColors.primary,
+        unselectedLabelColor: isDark ? Colors.white.withValues(alpha: 0.40) : Colors.black.withValues(alpha: 0.40),
+        labelStyle: NeerTypography.caption.copyWith(fontWeight: FontWeight.w700, fontSize: 14),
+        unselectedLabelStyle: NeerTypography.caption.copyWith(fontWeight: FontWeight.w500, fontSize: 14),
         tabs: tabs.map((t) => Tab(text: t)).toList(),
       ),
     );

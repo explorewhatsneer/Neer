@@ -130,7 +130,7 @@ class _CustomNavBarState extends State<CustomNavBar>
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(radius),
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 35, sigmaY: 35),
+                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                   child: Container(
                     width: width,
                     height: height,

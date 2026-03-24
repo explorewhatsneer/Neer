@@ -99,13 +99,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   Color? _extractedBgColor;
 
-  void _showFollowersList(BuildContext context, String tab) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _FollowersSheet(uid: _uid, initialTab: tab),
-    );
+  void _showFollowersList(BuildContext context, String tab, String userName) {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => FollowersScreen(uid: _uid, userName: userName, initialTab: tab),
+    ));
   }
 
   @override
@@ -132,7 +129,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
               sliver: SliverAppBar(
-                expandedHeight: 260,
+                expandedHeight: 235,
                 pinned: true,
                 floating: false,
                 backgroundColor: _extractedBgColor
@@ -199,9 +196,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                             HapticFeedback.lightImpact();
                             context.push(AppRoutes.settings);
                           },
-                          onFollowersTap: () => _showFollowersList(context, 'followers'),
-                          onFollowingTap: () => _showFollowersList(context, 'following'),
-                          onFriendsTap: () => _showFollowersList(context, 'friends'),
+                          onFollowersTap: () => _showFollowersList(context, 'followers', user?.name ?? ''),
+                          onFollowingTap: () => _showFollowersList(context, 'following', user?.name ?? ''),
+                          onFriendsTap: () => _showFollowersList(context, 'friends', user?.name ?? ''),
                         ),
                       ),
                     ),
@@ -788,18 +785,24 @@ class _FrequentCard extends StatelessWidget {
 }
 
 // ==========================================
-// TAKİPÇİ / TAKİP / ARKADAŞ SHEET
+// TAKİPÇİ / TAKİP / ARKADAŞ TAM EKRAN
 // ==========================================
-class _FollowersSheet extends StatefulWidget {
+class FollowersScreen extends StatefulWidget {
   final String uid;
+  final String userName;
   final String initialTab;
-  const _FollowersSheet({required this.uid, required this.initialTab});
+  const FollowersScreen({
+    super.key,
+    required this.uid,
+    required this.userName,
+    required this.initialTab,
+  });
 
   @override
-  State<_FollowersSheet> createState() => _FollowersSheetState();
+  State<FollowersScreen> createState() => _FollowersScreenState();
 }
 
-class _FollowersSheetState extends State<_FollowersSheet>
+class _FollowersScreenState extends State<FollowersScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tc;
   late final Map<String, Future<List<Map<String, dynamic>>>> _futures;
@@ -841,7 +844,6 @@ class _FollowersSheetState extends State<_FollowersSheet>
             .where((p) => p.isNotEmpty)
             .toList();
       } else {
-        // Mutual friends via RPC (if available)
         final data = await supabase
             .rpc('get_mutual_friends', params: {'uid': widget.uid})
             .catchError((_) => <dynamic>[]);
@@ -861,41 +863,115 @@ class _FollowersSheetState extends State<_FollowersSheet>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.72,
-      decoration: BoxDecoration(
-        color: isDark
-            ? NeerColors.darkSurface.withValues(alpha: 0.97)
-            : Colors.white.withValues(alpha: 0.98),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
+    final textColor = isDark ? Colors.white : Colors.black.withValues(alpha: 0.87);
+    final subColor = isDark ? Colors.white.withValues(alpha: 0.45) : Colors.black.withValues(alpha: 0.40);
+
+    return GradientScaffold(
+      body: Column(
         children: [
-          // Handle bar
-          Container(
-            width: 36, height: 4,
-            margin: const EdgeInsets.symmetric(vertical: 12),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.18) : Colors.black.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(2),
+          // ── Üst başlık ──
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+              child: Row(
+                children: [
+                  // Geri butonu
+                  GestureDetector(
+                    onTap: () { HapticFeedback.lightImpact(); Navigator.of(context).pop(); },
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      width: 36, height: 36,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.10)
+                            : Colors.black.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.16)
+                              : Colors.black.withValues(alpha: 0.10),
+                        ),
+                      ),
+                      child: Icon(Icons.arrow_back_ios_new_rounded, size: 15,
+                        color: isDark ? Colors.white.withValues(alpha: 0.85) : Colors.black.withValues(alpha: 0.75)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Başlık = kullanıcı adı
+                  Expanded(
+                    child: Text(
+                      widget.userName,
+                      style: NeerTypography.h3.copyWith(
+                        color: textColor,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  // Arkadaş Bul butonu
+                  GestureDetector(
+                    onTap: () { HapticFeedback.lightImpact(); },
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+                      decoration: BoxDecoration(
+                        gradient: NeerGradients.purplePink,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: NeerColors.primary.withValues(alpha: 0.30),
+                            blurRadius: 12, offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.person_add_rounded, size: 13, color: Colors.white),
+                          const SizedBox(width: 5),
+                          Text('Arkadaş Bul',
+                            style: NeerTypography.caption.copyWith(
+                              color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12,
+                            )),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          // TabBar
-          TabBar(
-            controller: _tc,
-            tabs: [
-              Tab(text: AppStrings.followers),
-              const Tab(text: 'Takip'),
-              const Tab(text: 'Arkadaş'),
-            ],
-            labelStyle: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w600, fontSize: 14),
-            unselectedLabelStyle: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w400, fontSize: 14),
-            labelColor: isDark ? Colors.white : Colors.black,
-            unselectedLabelColor: isDark ? Colors.white.withValues(alpha: 0.40) : Colors.black.withValues(alpha: 0.38),
-            indicatorColor: NeerColors.primary,
-            dividerColor: Colors.transparent,
+          const SizedBox(height: 10),
+          // ── TabBar ──
+          Container(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.10)
+                      : Colors.black.withValues(alpha: 0.08),
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: TabBar(
+              controller: _tc,
+              tabs: [
+                Tab(text: AppStrings.followers),
+                const Tab(text: 'Takip'),
+                const Tab(text: 'Arkadaş'),
+              ],
+              labelStyle: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w700, fontSize: 14),
+              unselectedLabelStyle: NeerTypography.bodySmall.copyWith(fontWeight: FontWeight.w500, fontSize: 14),
+              labelColor: isDark ? Colors.white : NeerColors.primary,
+              unselectedLabelColor: subColor,
+              indicatorColor: NeerColors.primary,
+              dividerColor: Colors.transparent,
+            ),
           ),
-          const SizedBox(height: 4),
+          // ── İçerik ──
           Expanded(
             child: TabBarView(
               controller: _tc,
@@ -985,7 +1061,7 @@ class _BentoDashboard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return SizedBox(
-      height: 170,
+      height: 192,
       child: Row(
         children: [
           // LEFT SQUARE — Quest / Badge

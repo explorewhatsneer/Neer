@@ -27,7 +27,7 @@ class GlassPanel extends StatelessWidget {
     super.key,
     required this.child,
     this.borderRadius = const BorderRadius.all(Radius.circular(24)),
-    this.blurSigma = 35,
+    this.blurSigma = 40,
     this.padding,
     this.margin,
     this.width,
@@ -36,8 +36,8 @@ class GlassPanel extends StatelessWidget {
     this.boxShadow,
     this.border,
     this.backgroundColor,
-    this.darkAlpha = 0.42,
-    this.lightAlpha = 0.78,
+    this.darkAlpha = 0.13,
+    this.lightAlpha = 0.72,
   });
 
   /// Bottom sheet style — top corners rounded.
@@ -86,10 +86,10 @@ class GlassPanel extends StatelessWidget {
     this.boxShadow,
     this.border,
     this.backgroundColor,
-    this.darkAlpha = 0.42,
-    this.lightAlpha = 0.78,
+    this.darkAlpha = 0.13,
+    this.lightAlpha = 0.72,
   })  : borderRadius = const BorderRadius.all(Radius.circular(22)),
-        blurSigma = 30;
+        blurSigma = 40;
 
   /// Bento cell — tighter radius, used inside Bento Dashboard grids.
   const GlassPanel.bento({
@@ -103,27 +103,26 @@ class GlassPanel extends StatelessWidget {
     this.boxShadow,
     this.border,
     this.backgroundColor,
-    this.darkAlpha = 0.38,
-    this.lightAlpha = 0.72,
+    this.darkAlpha = 0.11,
+    this.lightAlpha = 0.68,
   })  : borderRadius = const BorderRadius.all(Radius.circular(20)),
-        blurSigma = 26;
+        blurSigma = 36;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // Buzlu cam: her iki modda da white tint — dark modda şeffaf beyaz, light modda opak beyaz
     final bgColor = backgroundColor ??
-        (isDark
-            ? NeerColors.darkSurface.withValues(alpha: darkAlpha)
-            : Colors.white.withValues(alpha: lightAlpha));
+        Colors.white.withValues(alpha: isDark ? darkAlpha : lightAlpha);
 
-    // Tema-aware border — dark: beyaz, light: siyah
+    // Buzlu cam border — ince beyaz kenar her modda
     final resolvedBorder = border ??
         Border.all(
           color: isDark
-              ? Colors.white.withValues(alpha: 0.14)
-              : Colors.black.withValues(alpha: 0.07),
-          width: 0.8,
+              ? Colors.white.withValues(alpha: 0.18)
+              : Colors.white.withValues(alpha: 0.90),
+          width: 1.0,
         );
 
     final resolvedShadow = boxShadow ??
