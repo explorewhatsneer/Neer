@@ -307,8 +307,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return GradientScaffold(
       animate: true,
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         title: Text(

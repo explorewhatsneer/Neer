@@ -69,7 +69,11 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
     if (myUid == null) return const SizedBox();
 
     return GradientScaffold(
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
         title: Text(
           AppStrings.blockedUsersTitle,
           style: NeerTypography.h3.copyWith(fontSize: 20)

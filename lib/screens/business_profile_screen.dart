@@ -121,6 +121,159 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
     return null;
   }
 
+  // ═══════════════════════════════════════════
+  // VENUE HEADER — ProfileHeaderBackground style
+  // ═══════════════════════════════════════════
+
+  Widget _buildVenueHeader(bool isDark) {
+    final textColor = isDark ? Colors.white : Colors.black.withValues(alpha: 0.87);
+    final subTextColor = isDark
+        ? Colors.white.withValues(alpha: 0.55)
+        : Colors.black.withValues(alpha: 0.50);
+    final textShadows = isDark
+        ? [Shadow(color: Colors.black.withValues(alpha: 0.55), blurRadius: 8, offset: const Offset(0, 2))]
+        : <Shadow>[];
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Blurred venue image
+        AppCachedImage.cover(imageUrl: widget.imageUrl, height: 235),
+        ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 32, sigmaY: 32),
+            child: Container(
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.62)
+                  : Colors.white.withValues(alpha: 0.52),
+            ),
+          ),
+        ),
+        // Content
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 28, 16, 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Row 1: Venue image (circle) | Name + Category | Rating
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Venue avatar
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.35),
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: AppCachedImage.cover(
+                          imageUrl: widget.imageUrl,
+                          height: 56,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+
+                    // Name + Category
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.venueName,
+                            style: NeerTypography.h2.copyWith(
+                              color: textColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              shadows: textShadows,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (_category.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              _category,
+                              style: NeerTypography.caption.copyWith(
+                                color: subTextColor,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(width: 8),
+
+                    // Rating ring
+                    if (_rating > 0)
+                      _VenueRatingRing(rating: _rating),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                // Row 2: Stats chips
+                Row(
+                  children: [
+                    if (_liveUserCount > 0) ...[
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF30D158),
+                          shape: BoxShape.circle,
+                          boxShadow: [BoxShadow(color: const Color(0xFF30D158).withValues(alpha: 0.5), blurRadius: 6)],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        "$_liveUserCount ${AppStrings.peopleCount}",
+                        style: NeerTypography.caption.copyWith(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.80)
+                              : Colors.black.withValues(alpha: 0.70),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          shadows: textShadows,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    if (_reviews.isNotEmpty)
+                      Text(
+                        '${_reviews.length} ${AppStrings.reviews}',
+                        style: NeerTypography.caption.copyWith(
+                          color: subTextColor,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -174,7 +327,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              expandedHeight: 300.0,
+              expandedHeight: 235.0,
               pinned: true,
               stretch: true,
               backgroundColor: Colors.transparent,
@@ -213,102 +366,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
               ],
               flexibleSpace: FlexibleSpaceBar(
                 stretchModes: const [StretchMode.zoomBackground],
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Ambient background — blurred venue image
-                    AppCachedImage.cover(imageUrl: widget.imageUrl, height: 300),
-                    ClipRect(
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                        child: Container(color: Colors.transparent),
-                      ),
-                    ),
-                    // Sharp overlay image (smaller, centered)
-                    Positioned.fill(
-                      child: AppCachedImage.cover(imageUrl: widget.imageUrl, height: 300),
-                    ),
-                    // Gradient shield
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.05),
-                            Colors.black.withValues(alpha: 0.10),
-                            Colors.black.withValues(alpha: 0.55),
-                            Colors.black.withValues(alpha: 0.85),
-                          ],
-                          stops: const [0.0, 0.35, 0.65, 1.0],
-                        ),
-                      ),
-                    ),
-                    // Venue info (boxless)
-                    Positioned(
-                      bottom: 70,
-                      left: 20, right: 20,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (_category.isNotEmpty)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.18),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
-                              ),
-                              child: Text(
-                                _category,
-                                style: NeerTypography.caption.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                          const SizedBox(height: 8),
-                          Text(
-                            widget.venueName,
-                            style: NeerTypography.h1.copyWith(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                              height: 1.1,
-                              shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 8)],
-                            ),
-                          ),
-                          if (_liveUserCount > 0) ...[
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF30D158),
-                                    shape: BoxShape.circle,
-                                    boxShadow: [BoxShadow(color: const Color(0xFF30D158).withValues(alpha: 0.5), blurRadius: 6)],
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  "$_liveUserCount ${AppStrings.peopleCount}",
-                                  style: NeerTypography.caption.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.80),
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                background: _buildVenueHeader(isDark),
               ),
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(60),
@@ -581,6 +639,70 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> with Tick
     return MasonryGallery(
       photos: photos,
       padding: const EdgeInsets.all(12),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// VENUE RATING RING — matches NeerScore ring style
+// ═══════════════════════════════════════════════════════
+
+class _VenueRatingRing extends StatelessWidget {
+  final double rating;
+  const _VenueRatingRing({required this.rating});
+
+  Color _color() {
+    if (rating >= 4.0) return const Color(0xFF30D158);
+    if (rating >= 2.5) return const Color(0xFFFF9F0A);
+    return const Color(0xFFFF453A);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _color();
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: 48,
+            height: 48,
+            child: CircularProgressIndicator(
+              value: 1.0,
+              strokeWidth: 2.5,
+              valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.12)),
+            ),
+          ),
+          SizedBox(
+            width: 48,
+            height: 48,
+            child: CircularProgressIndicator(
+              value: (rating / 5.0).clamp(0.0, 1.0),
+              strokeWidth: 2.5,
+              valueColor: AlwaysStoppedAnimation(color),
+              strokeCap: StrokeCap.round,
+            ),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.star_rounded, size: 10, color: color),
+              Text(
+                rating.toStringAsFixed(1),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  height: 1.0,
+                  shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 4)],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

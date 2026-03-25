@@ -1,19 +1,20 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Haptic Feedback
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
-// CORE & MODELLER
 import '../core/neer_design_system.dart';
 import '../core/app_strings.dart';
 import '../core/snackbar_helper.dart';
 
-// SERVİSLER
 import '../services/supabase_service.dart';
 import '../services/storage_service.dart';
 
-// WIDGETLAR
-import '../widgets/profile/edit_profile_widgets.dart'; 
+import '../widgets/profile/edit_profile_widgets.dart';
+import '../widgets/common/glass_button.dart';
+
+import '../widgets/common/animated_press.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -30,20 +31,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _nameController;
   late TextEditingController _usernameController;
   late TextEditingController _bioController;
-  
+
   bool _isLoading = false;
-  String? _currentPhotoUrl; 
-  File? _selectedImage; 
+  String? _currentPhotoUrl;
+  File? _selectedImage;
 
   @override
   void initState() {
     super.initState();
     _uid = _service.client.auth.currentUser?.id ?? "";
-    
+
     _nameController = TextEditingController();
     _usernameController = TextEditingController();
     _bioController = TextEditingController();
-    
+
     if (_uid.isNotEmpty) {
       _loadUserData();
     }
@@ -57,7 +58,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
-  // --- 1. VERİLERİ ÇEK ---
   Future<void> _loadUserData() async {
     setState(() => _isLoading = true);
 
@@ -79,51 +79,66 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  // --- 2. RESİM SEÇME ---
   Future<void> _pickImage(ImageSource source) async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: source, imageQuality: 70);
-    
+
     if (image != null) {
-      setState(() {
-        _selectedImage = File(image.path);
-      });
+      setState(() => _selectedImage = File(image.path));
     }
   }
 
   void _showImageSourcePicker() {
-    HapticFeedback.lightImpact(); 
+    HapticFeedback.lightImpact();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent, 
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        final theme = Theme.of(context);
-        return Container(
-          decoration: BoxDecoration(
-            color: theme.cardColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-          ),
-          child: SafeArea(
-            child: Wrap(
-              children: [
-                ListTile(
-                  leading: Icon(Icons.photo_library_rounded, color: theme.primaryColor),
-                  title: Text(
-                    AppStrings.pickFromGallery, 
-                    style: NeerTypography.bodyLarge
-                  ),
-                  onTap: () { Navigator.pop(context); _pickImage(ImageSource.gallery); },
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? NeerColors.darkSurface.withValues(alpha: 0.85)
+                    : Colors.white.withValues(alpha: 0.90),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.white.withValues(alpha: 0.60),
                 ),
-                ListTile(
-                  leading: Icon(Icons.camera_alt_rounded, color: theme.primaryColor),
-                  title: Text(
-                    AppStrings.takePhoto, 
-                    style: NeerTypography.bodyLarge
-                  ),
-                  onTap: () { Navigator.pop(context); _pickImage(ImageSource.camera); },
+              ),
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(AppStrings.changePhoto, style: NeerTypography.h3),
+                    const SizedBox(height: 20),
+                    _SheetOption(
+                      icon: Icons.photo_library_rounded,
+                      label: AppStrings.pickFromGallery,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _pickImage(ImageSource.gallery);
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    _SheetOption(
+                      icon: Icons.camera_alt_rounded,
+                      label: AppStrings.takePhoto,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _pickImage(ImageSource.camera);
+                      },
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 10),
-              ],
+              ),
             ),
           ),
         );
@@ -131,7 +146,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  // --- 3. KAYDETME ---
   Future<void> _saveProfile() async {
     FocusScope.of(context).unfocus();
     HapticFeedback.mediumImpact();
@@ -146,7 +160,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     try {
       String finalPhotoUrl = _currentPhotoUrl ?? "";
 
-      // Yeni resim varsa yükle (Storage Service zaten Supabase uyumlu)
       if (_selectedImage != null) {
         String? uploadedUrl = await _storageService.uploadProfileImage(_selectedImage!, _uid);
         if (uploadedUrl != null) {
@@ -154,7 +167,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         }
       }
 
-      // Veritabanını güncelle
       final updateResult = await _service.updateProfile(_uid, {
         'full_name': _nameController.text.trim(),
         'username': _usernameController.text.trim(),
@@ -164,7 +176,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       if (updateResult.isFailure) {
         if (mounted) {
-          AppSnackBar.error(context, "Hata: ${updateResult.error.message}");
+          AppSnackBar.error(context, "${AppStrings.error}: ${updateResult.error.message}");
         }
       } else if (mounted) {
         AppSnackBar.success(context, AppStrings.profileUpdated);
@@ -172,7 +184,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
-        AppSnackBar.error(context, "Hata: $e");
+        AppSnackBar.error(context, "${AppStrings.error}: $e");
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -182,6 +194,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return GradientScaffold(
       body: _isLoading && _nameController.text.isEmpty
@@ -189,37 +202,37 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           : CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: [
-                // 1. HEADER (Resim ve Blur)
+                // Header with avatar
                 SliverAppBar(
-                  expandedHeight: 280.0,
+                  expandedHeight: 235.0,
                   pinned: true,
                   stretch: true,
                   backgroundColor: Colors.transparent,
                   elevation: 0,
-                  
-                  // Geri Butonu (Yuvarlak)
                   leading: Center(
-                    child: Container(
-                      width: 40, height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.3), 
-                        shape: BoxShape.circle
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
-                        onPressed: () => Navigator.pop(context),
-                      ),
+                    child: GlassButton.appBar(
+                      icon: Icons.arrow_back_ios_new_rounded,
+                      onTap: () => Navigator.pop(context),
                     ),
                   ),
-                  
+                  actions: [
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: GlassButton.appBar(
+                          icon: Icons.check_rounded,
+                          onTap: _isLoading ? () {} : _saveProfile,
+                        ),
+                      ),
+                    ),
+                  ],
                   title: Text(
                     AppStrings.editProfileTitle,
                     style: NeerTypography.h3.copyWith(
-                      color: theme.textTheme.bodyLarge?.color,
-                    )
+                      color: isDark ? Colors.white : Colors.black.withValues(alpha: 0.87),
+                    ),
                   ),
                   centerTitle: true,
-                  
                   flexibleSpace: FlexibleSpaceBar(
                     background: EditAvatarArea(
                       selectedImage: _selectedImage,
@@ -229,77 +242,148 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                 ),
 
-                // 2. FORM ALANI
+                // Form
                 SliverToBoxAdapter(
-                  child: Container(
-                    transform: Matrix4.translationValues(0, -20, 0), // Hafif yukarı taşıma
-                    decoration: BoxDecoration(
-                      color: theme.scaffoldBackgroundColor,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          EditSectionTitle(title: AppStrings.personalInfo),
-                          const SizedBox(height: 20),
-                          
-                          NeerTextField(
-                            label: AppStrings.fullName, 
-                            icon: Icons.person_outline_rounded, 
-                            controller: _nameController,
-                          ),
-                          const SizedBox(height: 20),
-                          
-                          NeerTextField(
-                            label: AppStrings.username, 
-                            icon: Icons.alternate_email_rounded, 
-                            controller: _usernameController,
-                          ),
-                          const SizedBox(height: 30),
-                          
-                          EditSectionTitle(title: AppStrings.about),
-                          const SizedBox(height: 20),
-                          
-                          NeerTextField(
-                            label: AppStrings.bio, 
-                            icon: Icons.edit_note_rounded, 
-                            controller: _bioController, 
-                            maxLines: 4,
-                          ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Personal info section
+                        EditSectionTitle(
+                          title: AppStrings.personalInfo,
+                          icon: Icons.person_outline_rounded,
+                        ),
+                        NeerTextField(
+                          label: AppStrings.fullName,
+                          icon: Icons.badge_outlined,
+                          controller: _nameController,
+                        ),
+                        const SizedBox(height: 14),
+                        NeerTextField(
+                          label: AppStrings.username,
+                          icon: Icons.alternate_email_rounded,
+                          controller: _usernameController,
+                        ),
 
-                          const SizedBox(height: 50),
+                        const SizedBox(height: 28),
 
-                          // KAYDET BUTONU
-                          SizedBox(
+                        // Bio section
+                        EditSectionTitle(
+                          title: AppStrings.about,
+                          icon: Icons.edit_note_rounded,
+                        ),
+                        NeerTextField(
+                          label: AppStrings.bio,
+                          icon: Icons.short_text_rounded,
+                          controller: _bioController,
+                          maxLines: 4,
+                        ),
+
+                        const SizedBox(height: 36),
+
+                        // Save button
+                        AnimatedPress(
+                          onTap: _isLoading ? () {} : _saveProfile,
+                          useHeavyHaptic: true,
+                          child: Container(
                             width: double.infinity,
-                            height: 60,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: theme.primaryColor,
-                                foregroundColor: Colors.white,
-                                elevation: 8,
-                                shadowColor: theme.primaryColor.withValues(alpha: 0.4),
-                                shape: RoundedRectangleBorder(borderRadius: NeerRadius.cardRadius),
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  NeerColors.primary,
+                                  NeerColors.primaryDark,
+                                ],
                               ),
-                              onPressed: _isLoading ? null : _saveProfile,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: NeerColors.primary.withValues(alpha: 0.35),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Center(
                               child: _isLoading
-                                  ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                                  ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2.5,
+                                      ),
+                                    )
                                   : Text(
-                                      AppStrings.saveChanges, 
-                                      style: NeerTypography.button.copyWith(fontSize: 18)
+                                      AppStrings.saveChanges,
+                                      style: NeerTypography.button.copyWith(
+                                        fontSize: 17,
+                                        color: Colors.white,
+                                      ),
                                     ),
                             ),
                           ),
-                          const SizedBox(height: 40),
-                        ],
-                      ),
+                        ),
+
+                        const SizedBox(height: 40),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// SHEET OPTION — glass bottom sheet item
+// ═══════════════════════════════════════════════════════
+
+class _SheetOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _SheetOption({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return AnimatedPress(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.06)
+              : Colors.black.withValues(alpha: 0.03),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.05),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: theme.primaryColor, size: 22),
+            const SizedBox(width: 14),
+            Text(
+              label,
+              style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

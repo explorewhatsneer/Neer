@@ -108,8 +108,11 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return GradientScaffold(
-
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
         title: Text(
           AppStrings.accountInfoTitle, 
           style: NeerTypography.h3.copyWith(fontSize: 20) 

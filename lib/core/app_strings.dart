@@ -562,6 +562,7 @@ class AppStrings {
   // --- CATCH ---
   static String get navCatch => lang == 'tr' ? "Catch" : "Catch";
   static String get catchTitle => lang == 'tr' ? "Catch" : "Catch";
+  static String get all => lang == 'tr' ? "Tümü" : "All";
   static String get available => lang == 'tr' ? "Müsait" : "Available";
   static String get busy => lang == 'tr' ? "Meşgul" : "Busy";
   static String get pendingStatus => lang == 'tr' ? "Bekliyor" : "Pending";

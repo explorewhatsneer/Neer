@@ -80,9 +80,10 @@ class _PollsScreenState extends State<PollsScreen> with SingleTickerProviderStat
     final isDark = theme.brightness == Brightness.dark;
 
     return GradientScaffold(
-
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         title: Text(

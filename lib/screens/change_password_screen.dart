@@ -95,9 +95,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return GradientScaffold(
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
         title: Text(
-          AppStrings.changePasswordTitle, 
+          AppStrings.changePasswordTitle,
           style: NeerTypography.h3.copyWith(fontSize: 20)
         ),
         centerTitle: true,

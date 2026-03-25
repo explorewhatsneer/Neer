@@ -45,10 +45,11 @@ class _FriendsScreenState extends State<FriendsScreen> {
     String myUid = _service.client.auth.currentUser?.id ?? "";
 
     return GradientScaffold(
+      extendBodyBehindAppBar: false,
 
       // --- FLOATING ACTION BUTTON ---
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 90), 
+        padding: const EdgeInsets.only(bottom: 90),
         child: FloatingActionButton.extended(
           onPressed: () {
             HapticFeedback.mediumImpact();
@@ -58,7 +59,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
           elevation: 4,
           icon: const Icon(Icons.person_add_alt_1_rounded, color: Colors.white),
           label: Text(
-            AppStrings.findOnMap, 
+            AppStrings.findOnMap,
             style: NeerTypography.button.copyWith(fontSize: 14)
           ),
         ),
@@ -66,17 +67,14 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: Text(
-            AppStrings.friendsTitle, 
-            style: NeerTypography.h1.copyWith(fontSize: 32) 
-          ),
+        title: Text(
+          AppStrings.friendsTitle,
+          style: NeerTypography.h1.copyWith(fontSize: 32)
         ),
         centerTitle: false,
         automaticallyImplyLeading: false,
-        toolbarHeight: 50,
         
         // --- ARAMA ÇUBUĞU ---
         bottom: PreferredSize(

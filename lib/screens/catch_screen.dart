@@ -31,6 +31,7 @@ class _CatchScreenState extends State<CatchScreen> {
   final _supabase = Supabase.instance.client;
   StreamSubscription? _incomingCatchSub;
   bool _initialized = false;
+  String _statusFilter = 'all'; // 'all', 'available', 'pending', 'busy'
 
   @override
   void initState() {
@@ -258,46 +259,58 @@ class _CatchScreenState extends State<CatchScreen> {
     final provider = context.watch<CatchProvider>();
 
     return GradientScaffold(
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: Text(AppStrings.catchTitle, style: NeerTypography.h1.copyWith(fontSize: 32)),
-        ),
+        title: Text(AppStrings.catchTitle, style: NeerTypography.h1.copyWith(fontSize: 32)),
         centerTitle: false,
         automaticallyImplyLeading: false,
-        toolbarHeight: 50,
       ),
       body: provider.isLoading
           ? Column(
               children: [
-                _buildStatusCard(theme, isDark, provider),
+                _buildStatusPanel(theme, isDark, provider),
+                _buildFilterRow(theme, isDark, provider),
                 const Expanded(child: ShimmerGrid(itemCount: 4)),
               ],
             )
-          : Column(
-              children: [
-                _buildStatusCard(theme, isDark, provider),
-                Expanded(
-                  child: provider.friends.isEmpty
-                      ? _buildEmptyState(theme)
-                      : _buildFriendGrid(theme, isDark, provider),
+          : provider.friends.isEmpty
+              ? Column(
+                  children: [
+                    _buildStatusPanel(theme, isDark, provider),
+                    Expanded(
+                      child: EmptyState(
+                        icon: Icons.people_outline_rounded,
+                        title: AppStrings.noFriendsForCatch,
+                        description: AppStrings.noFriendsForCatchDesc,
+                      ),
+                    ),
+                  ],
+                )
+              : CustomScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  slivers: [
+                    SliverToBoxAdapter(child: _buildStatusPanel(theme, isDark, provider)),
+                    SliverToBoxAdapter(child: _buildFilterRow(theme, isDark, provider)),
+                    _buildFilteredGrid(isDark, provider),
+                    const SliverPadding(padding: EdgeInsets.only(bottom: 120)),
+                  ],
                 ),
-              ],
-            ),
     );
   }
 
   // ═══════════════════════════════════════════
-  // STATUS CARD
+  // STATUS PANEL — interactive, dynamic
   // ═══════════════════════════════════════════
 
-  Widget _buildStatusCard(ThemeData theme, bool isDark, CatchProvider provider) {
+  Widget _buildStatusPanel(ThemeData theme, bool isDark, CatchProvider provider) {
     final isAvailable = provider.myStatus == 'available';
     final statusColor = isAvailable ? const Color(0xFF22C55E) : const Color(0xFFEF4444);
 
     String remainingText = '';
+    double remainingRatio = 0;
     if (isAvailable && provider.availableUntil != null) {
       final diff = provider.availableUntil!.difference(DateTime.now());
       if (!diff.isNegative) {
@@ -306,119 +319,310 @@ class _CatchScreenState extends State<CatchScreen> {
         } else {
           remainingText = '${diff.inMinutes}dk';
         }
+        // Approximate ratio assuming max 4h availability
+        remainingRatio = (diff.inMinutes / 240).clamp(0.0, 1.0);
       }
     }
 
-    return GlassPanel(
-      margin: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: [
-          // Pulsing status dot
-          Container(
-            width: 14,
-            height: 14,
-            decoration: BoxDecoration(
-              color: statusColor,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(color: statusColor.withValues(alpha: 0.5), blurRadius: 10),
-                BoxShadow(color: statusColor.withValues(alpha: 0.25), blurRadius: 20),
-              ],
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isAvailable ? AppStrings.youAreAvailable : AppStrings.youAreBusy,
-                  style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700, fontSize: 17),
-                ),
-                if (remainingText.isNotEmpty)
-                  Text(
-                    '${AppStrings.remainingTime}: $remainingText',
-                    style: NeerTypography.caption.copyWith(
-                      color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.45),
+    return AnimatedPress(
+      onTap: isAvailable ? _handleBusy : _showDurationPicker,
+      useHeavyHaptic: true,
+      child: GlassPanel(
+        margin: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+        padding: EdgeInsets.zero,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              child: Row(
+                children: [
+                  // Animated status ring
+                  SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: CircularProgressIndicator(
+                            value: 1.0,
+                            strokeWidth: 3,
+                            valueColor: AlwaysStoppedAnimation(
+                              isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: CircularProgressIndicator(
+                            value: isAvailable ? remainingRatio : 0,
+                            strokeWidth: 3,
+                            valueColor: AlwaysStoppedAnimation(statusColor),
+                            strokeCap: StrokeCap.round,
+                          ),
+                        ),
+                        Container(
+                          width: 16,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: statusColor,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(color: statusColor.withValues(alpha: 0.5), blurRadius: 10),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-              ],
-            ),
-          ),
-          AnimatedPress(
-            onTap: isAvailable ? _handleBusy : _showDurationPicker,
-            useHeavyHaptic: true,
-            child: Container(
-              height: 44,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: isAvailable
-                    ? const Color(0xFFEF4444).withValues(alpha: 0.85)
-                    : const Color(0xFF22C55E).withValues(alpha: 0.85),
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: (isAvailable ? const Color(0xFFEF4444) : const Color(0xFF22C55E))
-                        .withValues(alpha: 0.35),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isAvailable ? AppStrings.youAreAvailable : AppStrings.youAreBusy,
+                          style: NeerTypography.bodyLarge.copyWith(fontWeight: FontWeight.w700, fontSize: 17),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          isAvailable
+                              ? (remainingText.isNotEmpty
+                                  ? '${AppStrings.remainingTime}: $remainingText'
+                                  : AppStrings.youAreAvailable)
+                              : AppStrings.beAvailable,
+                          style: NeerTypography.caption.copyWith(
+                            color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.45),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Action icon
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: isAvailable
+                          ? const Color(0xFFEF4444).withValues(alpha: 0.15)
+                          : const Color(0xFF22C55E).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      isAvailable ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                      color: isAvailable ? const Color(0xFFEF4444) : const Color(0xFF22C55E),
+                      size: 24,
+                    ),
                   ),
                 ],
               ),
-              child: Center(
-                child: Text(
-                  isAvailable ? AppStrings.goBusy : AppStrings.beAvailable,
-                  style: NeerTypography.button.copyWith(fontSize: 14, color: Colors.white),
+            ),
+            // Progress bar at bottom
+            if (isAvailable && remainingRatio > 0)
+              Container(
+                height: 3,
+                margin: const EdgeInsets.symmetric(horizontal: 1),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+                  child: LinearProgressIndicator(
+                    value: remainingRatio,
+                    backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
+                    valueColor: AlwaysStoppedAnimation(statusColor.withValues(alpha: 0.70)),
+                  ),
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ═══════════════════════════════════════════
-  // FRIEND GRID
-  // ═══════════════════════════════════════════
-
-  Widget _buildFriendGrid(ThemeData theme, bool isDark, CatchProvider provider) {
-    final sorted = provider.sortedFriends;
-
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
-      physics: const BouncingScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 14,
-        crossAxisSpacing: 14,
-        childAspectRatio: 0.75,
-      ),
-      itemCount: sorted.length,
-      itemBuilder: (context, index) => AnimatedListItem(
-        index: index,
-        child: _CatchCapsule(
-          friend: sorted[index],
-          provider: provider,
-          isDark: isDark,
-          onSendCatch: _sendCatch,
-          onToggleWatch: _toggleWatch,
-          onCallFriend: _callFriend,
+          ],
         ),
       ),
     );
   }
 
   // ═══════════════════════════════════════════
-  // EMPTY STATE
+  // FILTER ROW — tappable chips
   // ═══════════════════════════════════════════
 
-  Widget _buildEmptyState(ThemeData theme) {
-    return EmptyState(
-      icon: Icons.people_outline_rounded,
-      title: AppStrings.noFriendsForCatch,
-      description: AppStrings.noFriendsForCatchDesc,
+  Widget _buildFilterRow(ThemeData theme, bool isDark, CatchProvider provider) {
+    final friends = provider.friends;
+    final availableCount = friends.where((f) => f['status'] == 'available').length;
+    final pendingCount = friends.where((f) => f['status'] == 'pending').length;
+    final busyCount = friends.where((f) => f['status'] != 'available' && f['status'] != 'pending').length;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      child: Row(
+        children: [
+          _FilterChip(
+            label: AppStrings.all,
+            count: friends.length,
+            isSelected: _statusFilter == 'all',
+            color: NeerColors.primary,
+            isDark: isDark,
+            onTap: () => _setFilter('all'),
+          ),
+          const SizedBox(width: 8),
+          _FilterChip(
+            label: AppStrings.available,
+            count: availableCount,
+            isSelected: _statusFilter == 'available',
+            color: const Color(0xFF22C55E),
+            isDark: isDark,
+            onTap: () => _setFilter('available'),
+          ),
+          const SizedBox(width: 8),
+          _FilterChip(
+            label: AppStrings.pendingStatus,
+            count: pendingCount,
+            isSelected: _statusFilter == 'pending',
+            color: const Color(0xFFFBBF24),
+            isDark: isDark,
+            onTap: () => _setFilter('pending'),
+          ),
+          const SizedBox(width: 8),
+          _FilterChip(
+            label: AppStrings.busy,
+            count: busyCount,
+            isSelected: _statusFilter == 'busy',
+            color: const Color(0xFFEF4444),
+            isDark: isDark,
+            onTap: () => _setFilter('busy'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _setFilter(String filter) {
+    if (_statusFilter == filter) return;
+    HapticFeedback.selectionClick();
+    setState(() => _statusFilter = filter);
+  }
+
+  // ═══════════════════════════════════════════
+  // FILTERED GRID
+  // ═══════════════════════════════════════════
+
+  Widget _buildFilteredGrid(bool isDark, CatchProvider provider) {
+    final sorted = provider.sortedFriends;
+    final filtered = _statusFilter == 'all'
+        ? sorted
+        : _statusFilter == 'busy'
+            ? sorted.where((f) => f['status'] != 'available' && f['status'] != 'pending').toList()
+            : sorted.where((f) => f['status'] == _statusFilter).toList();
+
+    if (filtered.isEmpty) {
+      return SliverFillRemaining(
+        child: EmptyState(
+          icon: Icons.filter_list_off_rounded,
+          title: AppStrings.noFriendsForCatch,
+        ),
+      );
+    }
+
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      sliver: SliverGrid(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => AnimatedListItem(
+            index: index,
+            child: _CatchCapsule(
+              friend: filtered[index],
+              provider: provider,
+              isDark: isDark,
+              onSendCatch: _sendCatch,
+              onToggleWatch: _toggleWatch,
+              onCallFriend: _callFriend,
+            ),
+          ),
+          childCount: filtered.length,
+        ),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 14,
+          crossAxisSpacing: 14,
+          childAspectRatio: 0.75,
+        ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// FILTER CHIP — tappable status filter
+// ═══════════════════════════════════════════════════════
+
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final int count;
+  final bool isSelected;
+  final Color color;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _FilterChip({
+    required this.label,
+    required this.count,
+    required this.isSelected,
+    required this.color,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedPress(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? color.withValues(alpha: 0.18)
+              : (isDark ? Colors.white.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.04)),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected
+                ? color.withValues(alpha: 0.45)
+                : (isDark ? Colors.white.withValues(alpha: 0.10) : Colors.black.withValues(alpha: 0.08)),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: NeerTypography.caption.copyWith(
+                color: isSelected ? color : (isDark ? Colors.white70 : Colors.black54),
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? color.withValues(alpha: 0.25)
+                    : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '$count',
+                style: NeerTypography.caption.copyWith(
+                  color: isSelected ? color : (isDark ? Colors.white54 : Colors.black45),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

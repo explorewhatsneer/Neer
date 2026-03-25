@@ -1,14 +1,18 @@
 import 'dart:io';
-import 'dart:ui'; // ImageFilter
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Haptic Feedback
+
 import 'package:cached_network_image/cached_network_image.dart';
 
-// CORE IMPORTLARI
 import '../../core/neer_design_system.dart';
 import '../../core/app_strings.dart';
+import '../common/glass_panel.dart';
+import '../common/animated_press.dart';
 
-// 1. NEER TEXT FIELD (Premium Giriş Alanı)
+// ═══════════════════════════════════════════════════════
+// GLASS TEXT FIELD — glassmorphism input
+// ═══════════════════════════════════════════════════════
+
 class NeerTextField extends StatelessWidget {
   final String label;
   final IconData icon;
@@ -30,32 +34,24 @@ class NeerTextField extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: NeerRadius.buttonRadius,
-        boxShadow: isDark ? [] : NeerShadows.soft(),
-        border: isDark ? Border.all(color: Colors.white12, width: 1) : null,
-      ),
+    return GlassPanel.card(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: TextField(
         controller: controller,
         maxLines: maxLines,
         keyboardType: inputType,
-        // 🔥 Core Style: BodyLarge (SF Pro Regular)
         style: NeerTypography.bodyLarge.copyWith(
-          color: theme.textTheme.bodyLarge?.color
+          color: isDark ? Colors.white : Colors.black.withValues(alpha: 0.87),
         ),
         cursorColor: theme.primaryColor,
         decoration: InputDecoration(
           border: InputBorder.none,
           labelText: label,
-          // 🔥 Core Style: BodySmall (Label)
           labelStyle: NeerTypography.bodySmall.copyWith(
-            color: theme.disabledColor, 
-            fontWeight: FontWeight.bold
+            color: isDark ? Colors.white54 : Colors.black45,
+            fontWeight: FontWeight.w600,
           ),
-          icon: Icon(icon, color: theme.primaryColor.withValues(alpha: 0.8)),
+          icon: Icon(icon, color: theme.primaryColor.withValues(alpha: 0.8), size: 22),
           contentPadding: const EdgeInsets.symmetric(vertical: 10),
         ),
       ),
@@ -63,33 +59,53 @@ class NeerTextField extends StatelessWidget {
   }
 }
 
-// 2. BÖLÜM BAŞLIĞI
+// ═══════════════════════════════════════════════════════
+// SECTION TITLE
+// ═══════════════════════════════════════════════════════
+
 class EditSectionTitle extends StatelessWidget {
   final String title;
-  const EditSectionTitle({super.key, required this.title});
+  final IconData? icon;
+  const EditSectionTitle({super.key, required this.title, this.icon});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          title, 
-          // 🔥 Core Style: H3 (Semibold)
-          style: NeerTypography.h3.copyWith(
-            color: theme.textTheme.bodyLarge?.color,
-            fontSize: 18
-          )
-        ),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          if (icon != null) ...[
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: NeerColors.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: NeerColors.primary, size: 16),
+            ),
+            const SizedBox(width: 10),
+          ],
+          Text(
+            title,
+            style: NeerTypography.bodyLarge.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: 16,
+              color: isDark ? Colors.white.withValues(alpha: 0.85) : Colors.black.withValues(alpha: 0.80),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-// 3. AVATAR DÜZENLEME ALANI (Header İçin)
+// ═══════════════════════════════════════════════════════
+// AVATAR EDIT — ProfileHeaderBackground style
+// ═══════════════════════════════════════════════════════
+
 class EditAvatarArea extends StatelessWidget {
   final File? selectedImage;
   final String? currentUrl;
@@ -104,10 +120,8 @@ class EditAvatarArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Hangi resmin gösterileceğine karar ver
     ImageProvider<Object>? imageProvider;
     if (selectedImage != null) {
       imageProvider = FileImage(selectedImage!);
@@ -118,89 +132,115 @@ class EditAvatarArea extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // 1. Arkaplan (Blur)
+        // Blurred background
         if (imageProvider != null)
           Image(image: imageProvider, fit: BoxFit.cover)
         else
-          Container(color: theme.primaryColor.withValues(alpha: 0.3)),
-        BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-          child: Container(
-            color: isDark ? Colors.black.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.3),
+          Container(
+            color: isDark ? const Color(0xFF1A0F1A) : const Color(0xFFEDE8FF),
+          ),
+        ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 32, sigmaY: 32),
+            child: Container(
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.62)
+                  : Colors.white.withValues(alpha: 0.52),
+            ),
           ),
         ),
-        
-        // 2. Avatar ve Buton
+
+        // Avatar + edit button
         Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 40),
-              Stack(
-                children: [
-                  // Avatar Çerçevesi
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2), 
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1)
-                    ),
-                    child: CircleAvatar(
-                      radius: 60,
-                      backgroundColor: theme.cardColor,
-                      backgroundImage: imageProvider,
-                      child: imageProvider == null
-                          ? Icon(Icons.person_rounded, size: 50, color: theme.disabledColor)
-                          : null,
-                    ),
-                  ),
-                  
-                  // Düzenle Butonu
-                  Positioned(
-                    bottom: 0, right: 0,
-                    child: GestureDetector(
-                      onTap: () {
-                        HapticFeedback.mediumImpact(); // Titreşim
-                        onEditTap();
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: theme.primaryColor,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: theme.scaffoldBackgroundColor, width: 3),
-                          boxShadow: [
-                            BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))
-                          ]
+              const SizedBox(height: 30),
+              AnimatedPress(
+                onTap: onEditTap,
+                child: Stack(
+                  children: [
+                    // Avatar
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.35),
+                          width: 3,
                         ),
-                        child: const Icon(Icons.edit_rounded, color: Colors.white, size: 20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: imageProvider != null
+                            ? Image(image: imageProvider, fit: BoxFit.cover)
+                            : Container(
+                                color: isDark ? NeerColors.darkSurface : NeerColors.gray200,
+                                child: Icon(
+                                  Icons.person_rounded,
+                                  size: 44,
+                                  color: isDark ? Colors.white38 : Colors.black26,
+                                ),
+                              ),
                       ),
                     ),
-                  ),
-                ],
+                    // Edit badge
+                    Positioned(
+                      bottom: 2,
+                      right: 2,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: NeerColors.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isDark ? Colors.black : Colors.white,
+                            width: 2.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: NeerColors.primary.withValues(alpha: 0.4),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 16),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              
-              const SizedBox(height: 12),
-              
-              GestureDetector(
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  onEditTap();
-                },
+              const SizedBox(height: 10),
+              AnimatedPress(
+                onTap: onEditTap,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(20)
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.10)
+                        : Colors.black.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.15)
+                          : Colors.black.withValues(alpha: 0.08),
+                    ),
                   ),
                   child: Text(
-                    AppStrings.changePhoto, // 🔥 Core String
-                    // 🔥 Core Style: Caption (Bold White)
+                    AppStrings.changePhoto,
                     style: NeerTypography.caption.copyWith(
-                      color: Colors.white, 
-                      fontWeight: FontWeight.bold
-                    )
+                      color: isDark ? Colors.white70 : Colors.black54,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),

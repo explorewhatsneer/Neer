@@ -79,9 +79,10 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
     final theme = Theme.of(context);
 
     return GradientScaffold(
-
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
         title: Text(AppStrings.followRequestsTitle, style: NeerTypography.h2.copyWith(fontSize: 24)),

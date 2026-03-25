@@ -59,28 +59,26 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
     String myUid = _service.client.auth.currentUser?.id ?? "";
 
     return GradientScaffold(
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: Text(
-            AppStrings.messagesTitle, 
-            style: NeerTypography.h1.copyWith(fontSize: 32) 
-          ),
+        title: Text(
+          AppStrings.messagesTitle,
+          style: NeerTypography.h1.copyWith(fontSize: 32)
         ),
         centerTitle: false,
         automaticallyImplyLeading: false,
-        toolbarHeight: 50,
-        
+
         // --- HEADER (ARAMA + TAB BAR) ---
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(134), 
+          preferredSize: const Size.fromHeight(120),
           child: Column(
             children: [
               // 1. PREMIUM ARAMA BARI
               Container(
-                margin: const EdgeInsets.fromLTRB(20, 10, 20, 15),
+                margin: const EdgeInsets.fromLTRB(20, 4, 20, 10),
                 height: 50,
                 decoration: BoxDecoration(
                   color: theme.cardColor,
@@ -115,7 +113,7 @@ class _ChatListScreenState extends State<ChatListScreen> with SingleTickerProvid
 
               // 2. SEGMENTED TAB BAR (iOS STYLE)
               Container(
-                margin: const EdgeInsets.fromLTRB(20, 0, 20, 15),
+                margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),
                 height: 45,
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(

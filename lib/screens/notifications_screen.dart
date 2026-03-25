@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -123,23 +122,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return GradientScaffold(
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
-        backgroundColor: isDark
-            ? Colors.black.withValues(alpha: 0.30)
-            : Colors.white.withValues(alpha: 0.40),
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        flexibleSpace: ClipRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: theme.dividerColor.withValues(alpha: 0.1))),
-              ),
-            ),
-          ),
-        ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.iconTheme.color, size: 20),
           onPressed: () => Navigator.pop(context),

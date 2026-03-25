@@ -64,14 +64,15 @@ class _LoginMethodsScreenState extends State<LoginMethodsScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return GradientScaffold(
-
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
         title: Text(
-          AppStrings.loginMethodsTitle, 
+          AppStrings.loginMethodsTitle,
           style: NeerTypography.h3.copyWith(fontSize: 20)
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.iconTheme.color, size: 20),

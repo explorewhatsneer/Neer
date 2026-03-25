@@ -3,15 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../core/neer_design_system.dart';
+import '../core/app_strings.dart';
 
-/// Premium Floating Pill NavBar — Apple VisionOS style.
+/// Floating Pill NavBar — Active tab shows white pill with icon + label.
 ///
 /// Features:
-/// - Scroll-aware: scrolls down → shrinks to gradient dot, scrolls up → expands back
-/// - No labels — icon-only
-/// - Active indicator: gradient underline bar (2.5px)
+/// - Active tab: white pill with icon + label (expands with animation)
+/// - Inactive tabs: icon only on dark background
+/// - Scroll-aware: scrolls down → shrinks to gradient dot, scrolls up → expands
+/// - Spring expand/collapse animation
 /// - Notification dot for Chat (index 1) and Catch (index 3)
-/// - Spring expand/collapse animation (elasticOut)
 class CustomNavBar extends StatefulWidget {
   final int activeIndex;
   final Function(int) onTabChange;
@@ -33,11 +34,16 @@ class CustomNavBar extends StatefulWidget {
 }
 
 class _CustomNavBarState extends State<CustomNavBar>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animController;
-  late Animation<double> _expandAnim;
+    with TickerProviderStateMixin {
+  // Scroll collapse animation
+  late AnimationController _collapseController;
+  late Animation<double> _collapseAnim;
   bool _isDot = false;
   double _lastScrollOffset = 0;
+
+  // Tab switch animation
+  late AnimationController _tabController;
+  late Animation<double> _tabAnim;
 
   static const List<IconData> _icons = [
     Icons.map_rounded,
@@ -47,21 +53,41 @@ class _CustomNavBarState extends State<CustomNavBar>
     Icons.person_rounded,
   ];
 
+  static List<String> get _labels => [
+    AppStrings.navMap,
+    AppStrings.navChat,
+    AppStrings.navFeed,
+    AppStrings.navCatch,
+    AppStrings.navProfile,
+  ];
 
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(
+
+    // Collapse to dot
+    _collapseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 450),
       reverseDuration: const Duration(milliseconds: 300),
     );
-    _expandAnim = CurvedAnimation(
-      parent: _animController,
+    _collapseAnim = CurvedAnimation(
+      parent: _collapseController,
       curve: Curves.elasticOut,
       reverseCurve: Curves.easeInCubic,
     );
-    _animController.value = 1.0; // başlangıçta açık
+    _collapseController.value = 1.0;
+
+    // Tab switch
+    _tabController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
+    _tabAnim = CurvedAnimation(
+      parent: _tabController,
+      curve: Curves.easeOutCubic,
+    );
+    _tabController.value = 1.0;
 
     widget.scrollController?.addListener(_onScroll);
   }
@@ -69,16 +95,22 @@ class _CustomNavBarState extends State<CustomNavBar>
   @override
   void didUpdateWidget(CustomNavBar oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (oldWidget.scrollController != widget.scrollController) {
       oldWidget.scrollController?.removeListener(_onScroll);
       widget.scrollController?.addListener(_onScroll);
+    }
+
+    if (oldWidget.activeIndex != widget.activeIndex) {
+      _tabController.forward(from: 0.0);
     }
   }
 
   @override
   void dispose() {
     widget.scrollController?.removeListener(_onScroll);
-    _animController.dispose();
+    _collapseController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -99,13 +131,13 @@ class _CustomNavBarState extends State<CustomNavBar>
   void _collapseToDoc() {
     if (_isDot) return;
     setState(() => _isDot = true);
-    _animController.reverse();
+    _collapseController.reverse();
   }
 
   void _expandToBar() {
     if (!_isDot) return;
     setState(() => _isDot = false);
-    _animController.forward();
+    _collapseController.forward();
   }
 
   @override
@@ -114,15 +146,21 @@ class _CustomNavBarState extends State<CustomNavBar>
     final bottomPad = MediaQuery.of(context).padding.bottom;
 
     return Padding(
-      padding: EdgeInsets.only(left: 16, right: 16, bottom: bottomPad + 8),
+      padding: EdgeInsets.only(left: 24, right: 24, bottom: bottomPad + 10),
       child: AnimatedBuilder(
-        animation: _expandAnim,
+        animation: Listenable.merge([_collapseAnim, _tabAnim]),
         builder: (context, child) {
-          final screenW = MediaQuery.of(context).size.width - 32;
-          final t = _expandAnim.value.clamp(0.0, 1.0);
-          final width = 36.0 + (t * (screenW - 36));
-          final height = 36.0 + (t * (58.0 - 36.0));
-          final radius = 18.0 + (t * (28.0 - 18.0));
+          final t = _collapseAnim.value.clamp(0.0, 1.0);
+
+          // Collapsed dot dimensions
+          const dotSize = 44.0;
+          // Expanded bar dimensions
+          const barHeight = 64.0;
+          final screenW = MediaQuery.of(context).size.width - 48; // 24*2 padding
+
+          final width = dotSize + (t * (screenW - dotSize));
+          final height = dotSize + (t * (barHeight - dotSize));
+          final radius = height / 2; // perfect stadium shape
 
           return GestureDetector(
             onTap: _isDot ? _expandToBar : null,
@@ -130,32 +168,33 @@ class _CustomNavBarState extends State<CustomNavBar>
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(radius),
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                  filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
                   child: Container(
                     width: width,
                     height: height,
                     decoration: BoxDecoration(
-                      color: _isDot
-                          ? (isDark
-                              ? NeerColors.darkSurface.withValues(alpha: 0.75)
-                              : Colors.white.withValues(alpha: 0.80))
-                          : (isDark
-                              ? NeerColors.darkSurface.withValues(alpha: 0.35)
-                              : Colors.white.withValues(alpha: 0.35)),
+                      // Dark opaque background like reference
+                      color: isDark
+                          ? const Color(0xFF1C1024).withValues(alpha: 0.92)
+                          : const Color(0xFF1A1A2E).withValues(alpha: 0.88),
                       borderRadius: BorderRadius.circular(radius),
                       border: Border.all(
-                        color: _isDot
-                            ? (isDark
-                                ? Colors.white.withValues(alpha: 0.18)
-                                : Colors.black.withValues(alpha: 0.10))
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.08)
                             : Colors.white.withValues(alpha: 0.12),
-                        width: 1,
+                        width: 0.5,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: _isDot ? 0.25 : 0.40),
-                          blurRadius: _isDot ? 12 : 28,
-                          offset: _isDot ? const Offset(0, 4) : Offset(0, 6),
+                          color: Colors.black.withValues(alpha: 0.45),
+                          blurRadius: 32,
+                          offset: const Offset(0, 8),
+                          spreadRadius: -4,
+                        ),
+                        BoxShadow(
+                          color: NeerColors.primary.withValues(alpha: 0.08),
+                          blurRadius: 24,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
@@ -163,27 +202,32 @@ class _CustomNavBarState extends State<CustomNavBar>
                         ? Center(
                             child: Icon(
                               _icons[widget.activeIndex],
-                              size: 18,
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.75)
-                                  : Colors.black.withValues(alpha: 0.60),
+                              size: 20,
+                              color: Colors.white.withValues(alpha: 0.85),
                             ),
                           )
                         : Opacity(
                             opacity: t,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: List.generate(5, (i) => _NavItem(
-                                icon: _icons[i],
-                                isActive: i == widget.activeIndex,
-                                isDark: isDark,
-                                hasNotification: (i == 1 && widget.hasChat) ||
-                                    (i == 3 && widget.hasCatch),
-                                onTap: () {
-                                  HapticFeedback.lightImpact();
-                                  widget.onTabChange(i);
-                                },
-                              )),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 6),
+                              child: Row(
+                                children: List.generate(5, (i) {
+                                  final isActive = i == widget.activeIndex;
+                                  final hasNotif = (i == 1 && widget.hasChat) ||
+                                      (i == 3 && widget.hasCatch);
+                                  return _NavItem(
+                                    icon: _icons[i],
+                                    label: _labels[i],
+                                    isActive: isActive,
+                                    isDark: isDark,
+                                    hasNotification: hasNotif,
+                                    onTap: () {
+                                      HapticFeedback.lightImpact();
+                                      widget.onTabChange(i);
+                                    },
+                                  );
+                                }),
+                              ),
                             ),
                           ),
                   ),
@@ -197,9 +241,10 @@ class _CustomNavBarState extends State<CustomNavBar>
   }
 }
 
-/// Individual nav item — icon only with gradient underline indicator.
+/// Individual nav item — active: white pill with icon+label, inactive: icon only.
 class _NavItem extends StatefulWidget {
   final IconData icon;
+  final String label;
   final bool isActive;
   final bool isDark;
   final bool hasNotification;
@@ -207,6 +252,7 @@ class _NavItem extends StatefulWidget {
 
   const _NavItem({
     required this.icon,
+    required this.label,
     required this.isActive,
     required this.isDark,
     required this.hasNotification,
@@ -219,20 +265,20 @@ class _NavItem extends StatefulWidget {
 
 class _NavItemState extends State<_NavItem>
     with SingleTickerProviderStateMixin {
-  late AnimationController _scaleController;
-  late Animation<double> _scaleAnim;
+  late AnimationController _pressController;
+  late Animation<double> _pressAnim;
 
   @override
   void initState() {
     super.initState();
-    _scaleController = AnimationController(
+    _pressController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 100),
-      reverseDuration: const Duration(milliseconds: 180),
+      duration: const Duration(milliseconds: 80),
+      reverseDuration: const Duration(milliseconds: 200),
     );
-    _scaleAnim = Tween<double>(begin: 1.0, end: 0.85).animate(
+    _pressAnim = Tween<double>(begin: 1.0, end: 0.88).animate(
       CurvedAnimation(
-        parent: _scaleController,
+        parent: _pressController,
         curve: Curves.easeInOut,
         reverseCurve: Curves.elasticOut,
       ),
@@ -241,75 +287,113 @@ class _NavItemState extends State<_NavItem>
 
   @override
   void dispose() {
-    _scaleController.dispose();
+    _pressController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = widget.isDark ? Colors.white : NeerColors.primary;
-    final inactiveColor = widget.isDark
-        ? Colors.white.withValues(alpha: 0.40)
-        : Colors.black.withValues(alpha: 0.35);
-
+    // Active: expanded white pill. Inactive: compact icon.
     return GestureDetector(
-      onTapDown: (_) => _scaleController.forward(),
+      onTapDown: (_) => _pressController.forward(),
       onTapUp: (_) {
-        _scaleController.reverse();
+        _pressController.reverse();
         widget.onTap();
       },
-      onTapCancel: () => _scaleController.reverse(),
+      onTapCancel: () => _pressController.reverse(),
       behavior: HitTestBehavior.opaque,
       child: ScaleTransition(
-        scale: _scaleAnim,
-        child: SizedBox(
-          width: 52,
-          height: 58,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    widget.icon,
-                    color: widget.isActive ? activeColor : inactiveColor,
-                    size: 22,
-                  ),
-                  const SizedBox(height: 4),
-                  // Gradient underline indicator
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeOutCubic,
-                    width: widget.isActive ? 16 : 0,
-                    height: 2.5,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(2),
-                      gradient: widget.isActive ? NeerGradients.purplePink : null,
+        scale: _pressAnim,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutCubic,
+          height: 48,
+          padding: EdgeInsets.symmetric(
+            horizontal: widget.isActive ? 18 : 0,
+          ),
+          decoration: BoxDecoration(
+            color: widget.isActive
+                ? (widget.isDark ? Colors.white : Colors.white)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: widget.isActive
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.12),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                  ),
-                ],
-              ),
-              // Notification dot
-              if (widget.hasNotification)
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: NeerColors.secondary,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: widget.isDark
-                            ? NeerColors.darkSurface
-                            : Colors.white,
-                        width: 1.5,
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icon
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  SizedBox(
+                    width: widget.isActive ? 24 : 48,
+                    height: 48,
+                    child: Center(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 250),
+                        child: Icon(
+                          widget.icon,
+                          key: ValueKey('${widget.isActive}_${widget.icon}'),
+                          size: widget.isActive ? 22 : 24,
+                          color: widget.isActive
+                              ? NeerColors.primary
+                              : Colors.white.withValues(alpha: 0.55),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  // Notification dot
+                  if (widget.hasNotification)
+                    Positioned(
+                      top: 10,
+                      right: widget.isActive ? -2 : 8,
+                      child: Container(
+                        width: 7,
+                        height: 7,
+                        decoration: BoxDecoration(
+                          color: NeerColors.secondary,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: widget.isActive
+                                ? Colors.white
+                                : const Color(0xFF1A1A2E),
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              // Label (only when active)
+              AnimatedSize(
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeOutCubic,
+                child: widget.isActive
+                    ? Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Text(
+                          widget.label,
+                          style: const TextStyle(
+                            fontFamily: 'SF Pro',
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1A1A2E),
+                            letterSpacing: -0.3,
+                          ),
+                          overflow: TextOverflow.clip,
+                          maxLines: 1,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
             ],
           ),
         ),

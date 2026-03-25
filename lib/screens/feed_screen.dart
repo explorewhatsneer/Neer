@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -177,42 +176,33 @@ class _FeedScreenState extends State<FeedScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return GradientScaffold(
-      // --- GLASS HEADER ---
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60),
-        child: ClipRRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 45, sigmaY: 45),
-            child: AppBar(
-              backgroundColor: isDark
-                  ? Colors.black.withValues(alpha: 0.30)
-                  : Colors.white.withValues(alpha: 0.40),
-              surfaceTintColor: Colors.transparent,
-              elevation: 0,
-              centerTitle: false,
-              titleSpacing: 20,
-              title: GestureDetector(
-                onTapDown: (details) => _showFilterMenu(context, details.globalPosition),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      AppStrings.appName,
-                      style: TextStyle(
-                        fontFamily: 'Visby',
-                        color: theme.primaryColor,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 30,
-                        letterSpacing: -1.5,
-                        height: 1.0,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.keyboard_arrow_down_rounded, color: theme.primaryColor, size: 22),
-                  ],
+      extendBodyBehindAppBar: false,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: false,
+        titleSpacing: 20,
+        automaticallyImplyLeading: false,
+        title: GestureDetector(
+          onTapDown: (details) => _showFilterMenu(context, details.globalPosition),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                AppStrings.appName,
+                style: TextStyle(
+                  fontFamily: 'Visby',
+                  color: theme.primaryColor,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 30,
+                  letterSpacing: -1.5,
+                  height: 1.0,
                 ),
               ),
-            ),
+              const SizedBox(width: 4),
+              Icon(Icons.keyboard_arrow_down_rounded, color: theme.primaryColor, size: 22),
+            ],
           ),
         ),
       ),

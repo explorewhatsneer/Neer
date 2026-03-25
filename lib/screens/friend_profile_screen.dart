@@ -503,7 +503,7 @@ class _FriendProfileScreenState extends State<FriendProfileScreen> with SingleTi
                   SliverOverlapAbsorber(
                     handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                     sliver: SliverAppBar(
-                      expandedHeight: 300.0,
+                      expandedHeight: 235.0,
                       pinned: true,
                       backgroundColor: Colors.transparent,
                       automaticallyImplyLeading: false, 
