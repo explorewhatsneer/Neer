@@ -26,16 +26,10 @@ class _MainLayoutState extends State<MainLayout> {
   int _currentIndex = 2; // Feed (orta) başlangıç
   int _previousIndex = 2;
 
-  // Her tab için ayrı ScrollController — NavBar dot animasyonu için
-  final Map<int, ScrollController> _scrollControllers = {
-    0: ScrollController(), // Harita
-    1: ScrollController(), // Chat
-    2: ScrollController(), // Feed
-    3: ScrollController(), // Catch
-    4: ScrollController(), // Profil
-  };
+  // Scroll-aware collapse — tüm ekranlardan gelen scroll yönü
+  final ValueNotifier<bool> _navCollapsed = ValueNotifier(false);
+  double _lastScrollPixels = 0;
 
-  // YENİ SIRA: Map, Chat, Feed, Catch, Profile
   late final List<Widget> _screens;
 
   @override
@@ -46,26 +40,47 @@ class _MainLayoutState extends State<MainLayout> {
       const ChatListScreen(),
       const FeedScreen(),
       const CatchScreen(),
-      ProfileScreen(externalScrollController: _scrollControllers[4]),
+      const ProfileScreen(),
     ];
   }
 
   @override
   void dispose() {
-    for (final sc in _scrollControllers.values) {
-      sc.dispose();
-    }
+    _navCollapsed.dispose();
     super.dispose();
   }
 
   void _onTabChange(int index) {
     if (_currentIndex != index) {
       HapticFeedback.selectionClick();
+      // Tab değiştiğinde navbar'ı aç
+      _navCollapsed.value = false;
+      _lastScrollPixels = 0;
       setState(() {
         _previousIndex = _currentIndex;
         _currentIndex = index;
       });
     }
+  }
+
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollUpdateNotification) {
+      final pixels = notification.metrics.pixels;
+      final delta = pixels - _lastScrollPixels;
+      _lastScrollPixels = pixels;
+
+      // Post-frame to avoid setting ValueNotifier during build
+      if (delta > 6 && !_navCollapsed.value) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _navCollapsed.value = true;
+        });
+      } else if (delta < -4 && _navCollapsed.value) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _navCollapsed.value = false;
+        });
+      }
+    }
+    return false;
   }
 
   @override
@@ -76,31 +91,34 @@ class _MainLayoutState extends State<MainLayout> {
       body: OfflineAwareBody(
         child: Stack(
           children: [
-            // Animasyonlu sayfa geçişi
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              transitionBuilder: (child, animation) {
-                final slideOffset = Tween<Offset>(
-                  begin: Offset(slideRight ? 0.05 : -0.05, 0),
-                  end: Offset.zero,
-                );
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: slideOffset.animate(animation),
-                    child: child,
-                  ),
-                );
-              },
-              child: KeyedSubtree(
-                key: ValueKey<int>(_currentIndex),
-                child: _screens[_currentIndex],
+            // Animasyonlu sayfa geçişi + scroll dinleme
+            NotificationListener<ScrollNotification>(
+              onNotification: _handleScrollNotification,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) {
+                  final slideOffset = Tween<Offset>(
+                    begin: Offset(slideRight ? 0.05 : -0.05, 0),
+                    end: Offset.zero,
+                  );
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: slideOffset.animate(animation),
+                      child: child,
+                    ),
+                  );
+                },
+                child: KeyedSubtree(
+                  key: ValueKey<int>(_currentIndex),
+                  child: _screens[_currentIndex],
+                ),
               ),
             ),
 
-            // Navbar — scroll-aware dot animasyonu ile
+            // Navbar
             Positioned(
               left: 0,
               right: 0,
@@ -108,7 +126,7 @@ class _MainLayoutState extends State<MainLayout> {
               child: CustomNavBar(
                 activeIndex: _currentIndex,
                 onTabChange: _onTabChange,
-                scrollController: _scrollControllers[_currentIndex],
+                shouldCollapse: _navCollapsed,
               ),
             ),
           ],
